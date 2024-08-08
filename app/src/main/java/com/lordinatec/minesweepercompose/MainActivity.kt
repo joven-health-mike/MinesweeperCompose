@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldView
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 
@@ -32,7 +33,7 @@ class MainActivity : ComponentActivity() {
                             .background(Color.LightGray),
                         contentAlignment = Alignment.Center
                     ) {
-                        FieldView(5, 7)
+                        FieldView(FieldViewModel())
                     }
                 }
             }

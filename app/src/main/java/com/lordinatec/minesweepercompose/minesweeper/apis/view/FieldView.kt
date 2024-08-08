@@ -3,35 +3,31 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.view
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
+import com.lordinatec.minesweepercompose.minesweeper.apis.Config
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 
 @Composable
-fun FieldView(width: Int, height: Int) {
-    var tileStates by remember { mutableStateOf(List(width * height) { TileState.COVERED }) }
+fun FieldView(fieldViewModel: FieldViewModel) {
+    val gameUiState by fieldViewModel.uiState.collectAsState()
     Column {
-        for (j in 0..<height) {
+        for (j in 0..<Config.height) {
             Row {
-                for (i in 0..<width) {
-                    val index = j * width + i
-                    TileView(index, tileStates[j * width + i], object : TileViewListener {
-                        override fun onClick(index: Int) {
-                            tileStates = tileStates.toMutableList().apply {
-                                this[index] =
-                                    if (Math.random() < 0.5) TileState.CLEARED else TileState.EXPLODED
+                for (i in 0..<Config.width) {
+                    val index = j * Config.width + i
+                    TileView(
+                        index,
+                        gameUiState.tileStates[j * Config.width + i],
+                        object : TileViewListener {
+                            override fun onClick(index: Int) {
+                                fieldViewModel.clearIndex(index)
                             }
-                        }
 
-                        override fun onLongClick(index: Int) {
-                            tileStates = tileStates.toMutableList().apply {
-                                this[index] =
-                                    if (this[index] == TileState.FLAGGED) TileState.COVERED else TileState.FLAGGED
+                            override fun onLongClick(index: Int) {
+                                fieldViewModel.flagIndex(index)
                             }
-                        }
-                    })
+                        })
                 }
             }
         }

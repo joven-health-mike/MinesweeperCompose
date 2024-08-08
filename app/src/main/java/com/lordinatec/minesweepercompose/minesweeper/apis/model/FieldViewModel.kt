@@ -2,6 +2,7 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.model
 
 import androidx.lifecycle.ViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
+import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.Game
@@ -41,40 +42,32 @@ class FieldViewModel : ViewModel() {
         override fun gameLost() {}
         override fun timeUpdate(newTime: Long) {}
 
-        override fun positionUnflagged(x: Int, y: Int) {
+        private fun updatePosition(x: Int, y: Int, state: TileState, value: String) {
+            val index = xyToIndex(x, y)
             val stateValue = _uiState.value
-            val tileStates = stateValue.tileStates.toMutableList()
-            tileStates[y * Config.width + x] = TileState.COVERED
-            val tileValues = stateValue.tileValues.toMutableList()
-            tileValues[y * Config.width + x] = ""
+            val tileStates = stateValue.tileStates.toMutableList().also {
+                it[index] = state
+            }
+            val tileValues = stateValue.tileValues.toMutableList().also {
+                it[index] = value
+            }
             updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates, tileValues)
+        }
+
+        override fun positionUnflagged(x: Int, y: Int) {
+            updatePosition(x, y, TileState.COVERED, "")
         }
 
         override fun positionExploded(x: Int, y: Int) {
-            val stateValue = _uiState.value
-            val tileStates = stateValue.tileStates.toMutableList()
-            tileStates[y * Config.width + x] = TileState.EXPLODED
-            val tileValues = stateValue.tileValues.toMutableList()
-            tileValues[y * Config.width + x] = "*"
-            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates, tileValues)
+            updatePosition(x, y, TileState.EXPLODED, "*")
         }
 
         override fun positionCleared(x: Int, y: Int, numOfAdjacent: Int) {
-            val stateValue = _uiState.value
-            val tileStates = stateValue.tileStates.toMutableList()
-            tileStates[y * Config.width + x] = TileState.CLEARED
-            val tileValues = stateValue.tileValues.toMutableList()
-            tileValues[y * Config.width + x] = "$numOfAdjacent"
-            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates, tileValues)
+            updatePosition(x, y, TileState.CLEARED, "$numOfAdjacent")
         }
 
         override fun positionFlagged(x: Int, y: Int) {
-            val stateValue = _uiState.value
-            val tileStates = stateValue.tileStates.toMutableList()
-            tileStates[y * Config.width + x] = TileState.FLAGGED
-            val tileValues = stateValue.tileValues.toMutableList()
-            tileValues[y * Config.width + x] = "F"
-            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates, tileValues)
+            updatePosition(x, y, TileState.FLAGGED, "F")
         }
     }
 
@@ -128,7 +121,7 @@ class FieldViewModel : ViewModel() {
 
     private fun positionIsCovered(x: Int, y: Int): Boolean {
         val stateValue = _uiState.value
-        val tileState = stateValue.tileStates[y * Config.width + x]
+        val tileState = stateValue.tileStates[xyToIndex(x, y)]
         return tileState == TileState.COVERED
     }
 

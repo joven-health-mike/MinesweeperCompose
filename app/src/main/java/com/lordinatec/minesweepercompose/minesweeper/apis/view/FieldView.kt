@@ -6,27 +6,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
+import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 
 @Composable
 fun FieldView(fieldViewModel: FieldViewModel) {
     val gameUiState by fieldViewModel.uiState.collectAsState()
     Column {
-        for (j in 0..<Config.height) {
+        for (currHeight in 0..<Config.height) {
             Row {
-                for (i in 0..<Config.width) {
-                    val index = j * Config.width + i
+                for (currWidth in 0..<Config.width) {
+                    val currIndex = xyToIndex(currWidth, currHeight)
                     TileView(
-                        index,
-                        gameUiState.tileValues[j * Config.width + i],
-                        gameUiState.tileStates[j * Config.width + i],
+                        currIndex,
+                        gameUiState.tileValues[currIndex],
+                        gameUiState.tileStates[currIndex],
                         object : TileViewListener {
                             override fun onClick(index: Int) {
-                                fieldViewModel.clearIndex(index)
+                                if (gameUiState.tileStates[index] == TileState.COVERED) {
+                                    fieldViewModel.clearIndex(index)
+                                }
                             }
 
                             override fun onLongClick(index: Int) {
-                                fieldViewModel.flagIndex(index)
+                                if (gameUiState.tileStates[index] == TileState.COVERED
+                                    || gameUiState.tileStates[index] == TileState.FLAGGED
+                                ) {
+                                    fieldViewModel.flagIndex(index)
+                                }
                             }
                         })
                 }

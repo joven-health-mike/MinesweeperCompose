@@ -44,7 +44,7 @@ fun TileView(index: Int, value: String, state: TileState, listener: TileViewList
 }
 
 enum class TileState(val primaryColor: Color, val secondaryColor: Color) {
-    COVERED(Color.Blue, Color.Cyan),
+    COVERED(Color.Blue, Color.Gray),
     CLEARED(Color.Gray, Color.DarkGray),
     FLAGGED(Color.Green, Color.Blue),
     EXPLODED(Color.Red, Color.Magenta)

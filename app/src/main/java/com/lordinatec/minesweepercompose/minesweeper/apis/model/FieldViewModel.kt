@@ -45,28 +45,36 @@ class FieldViewModel : ViewModel() {
             val stateValue = _uiState.value
             val tileStates = stateValue.tileStates.toMutableList()
             tileStates[y * Config.width + x] = TileState.COVERED
-            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates)
+            val tileValues = stateValue.tileValues.toMutableList()
+            tileValues[y * Config.width + x] = ""
+            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates, tileValues)
         }
 
         override fun positionExploded(x: Int, y: Int) {
             val stateValue = _uiState.value
             val tileStates = stateValue.tileStates.toMutableList()
             tileStates[y * Config.width + x] = TileState.EXPLODED
-            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates)
+            val tileValues = stateValue.tileValues.toMutableList()
+            tileValues[y * Config.width + x] = "*"
+            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates, tileValues)
         }
 
         override fun positionCleared(x: Int, y: Int, numOfAdjacent: Int) {
             val stateValue = _uiState.value
             val tileStates = stateValue.tileStates.toMutableList()
             tileStates[y * Config.width + x] = TileState.CLEARED
-            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates)
+            val tileValues = stateValue.tileValues.toMutableList()
+            tileValues[y * Config.width + x] = "$numOfAdjacent"
+            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates, tileValues)
         }
 
         override fun positionFlagged(x: Int, y: Int) {
             val stateValue = _uiState.value
             val tileStates = stateValue.tileStates.toMutableList()
             tileStates[y * Config.width + x] = TileState.FLAGGED
-            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates)
+            val tileValues = stateValue.tileValues.toMutableList()
+            tileValues[y * Config.width + x] = "F"
+            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates, tileValues)
         }
     }
 
@@ -153,12 +161,18 @@ class FieldViewModel : ViewModel() {
         gameControlStrategy?.toggleFlag(index % Config.width, index / Config.width)
     }
 
-    private fun updateGameState(minesRemaining: Int, timeValue: Long, tileStates: List<TileState>) {
+    private fun updateGameState(
+        minesRemaining: Int,
+        timeValue: Long,
+        tileStates: List<TileState>,
+        tileValues: List<String>
+    ) {
         _uiState.update { currentState ->
             currentState.copy(
                 minesRemaining = minesRemaining,
                 timeValue = timeValue,
-                tileStates = tileStates
+                tileStates = tileStates,
+                tileValues = tileValues
             )
         }
     }

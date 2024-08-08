@@ -6,5 +6,6 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
 data class FieldViewState(
     val minesRemaining: Int = -1,
     val timeValue: Long = -1L,
-    val tileStates: List<TileState> = List<TileState>(Config.width * Config.height) { TileState.COVERED }
+    val tileStates: List<TileState> = List<TileState>(Config.width * Config.height) { TileState.COVERED },
+    val tileValues: List<String> = List<String>(Config.width * Config.height) { "" }
 )

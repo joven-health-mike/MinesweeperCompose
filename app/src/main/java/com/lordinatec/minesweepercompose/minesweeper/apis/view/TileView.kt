@@ -21,7 +21,7 @@ interface TileViewListener {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TileView(index: Int, state: TileState, listener: TileViewListener) {
+fun TileView(index: Int, value: String, state: TileState, listener: TileViewListener) {
     Box(
         modifier = Modifier
             .combinedClickable(onLongClick = {
@@ -39,7 +39,7 @@ fun TileView(index: Int, state: TileState, listener: TileViewListener) {
             ),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = "H", color = Color.White, textAlign = TextAlign.Center)
+        Text(text = value, color = Color.White, textAlign = TextAlign.Center)
     }
 }
 

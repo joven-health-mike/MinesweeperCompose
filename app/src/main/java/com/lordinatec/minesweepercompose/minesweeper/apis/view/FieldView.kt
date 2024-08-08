@@ -18,6 +18,7 @@ fun FieldView(fieldViewModel: FieldViewModel) {
                     val index = j * Config.width + i
                     TileView(
                         index,
+                        gameUiState.tileValues[j * Config.width + i],
                         gameUiState.tileStates[j * Config.width + i],
                         object : TileViewListener {
                             override fun onClick(index: Int) {

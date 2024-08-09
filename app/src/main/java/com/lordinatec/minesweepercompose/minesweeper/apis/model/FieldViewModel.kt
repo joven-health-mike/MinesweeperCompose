@@ -54,6 +54,11 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
 
         override fun positionUnflagged(x: Int, y: Int) {
             updatePosition(x, y, TileState.COVERED, "")
+            _uiState.update { currentState ->
+                currentState.copy(
+                    minesRemaining = currentState.minesRemaining + 1
+                )
+            }
         }
 
         override fun positionExploded(x: Int, y: Int) {
@@ -70,6 +75,11 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
 
         override fun positionFlagged(x: Int, y: Int) {
             updatePosition(x, y, TileState.FLAGGED, "F")
+            _uiState.update { currentState ->
+                currentState.copy(
+                    minesRemaining = currentState.minesRemaining - 1
+                )
+            }
         }
 
         private fun updatePosition(x: Int, y: Int, tileState: TileState, value: String) {

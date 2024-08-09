@@ -9,9 +9,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +24,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldView
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldViewListener
+import com.lordinatec.minesweepercompose.minesweeper.apis.view.RemainingMinesView
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.mikeburke106.mines.basic.model.BasicFieldFactory
 import com.mikeburke106.mines.basic.model.RandomPositionProvider
@@ -35,19 +39,30 @@ class GameActivity : ComponentActivity() {
         setContent {
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    val viewModel = FieldViewModel(fieldFactory)
                     Modifier.padding(innerPadding)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .width(50.dp)
-                            .background(Color.LightGray),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        FieldView(FieldViewModel(fieldFactory), object : FieldViewListener {
-                            override fun onExitClicked() {
-                                activity.finish()
+
+                    Column {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.LightGray),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column {
+                                Spacer(modifier = Modifier.height(75.dp))
+
+                                FieldView(viewModel, object : FieldViewListener {
+                                    override fun onExitClicked() {
+                                        activity.finish()
+                                    }
+                                })
                             }
-                        })
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        RemainingMinesView(viewModel = viewModel)
                     }
                 }
             }

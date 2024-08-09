@@ -22,9 +22,13 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldView
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldViewListener
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
+import com.mikeburke106.mines.basic.model.BasicFieldFactory
+import com.mikeburke106.mines.basic.model.RandomPositionProvider
 
 class GameActivity : ComponentActivity() {
-    val activity = this
+    private val activity = this
+    private val fieldFactory = BasicFieldFactory(RandomPositionProvider.Factory())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -39,7 +43,7 @@ class GameActivity : ComponentActivity() {
                             .background(Color.LightGray),
                         contentAlignment = Alignment.Center
                     ) {
-                        FieldView(FieldViewModel(), object : FieldViewListener {
+                        FieldView(FieldViewModel(fieldFactory), object : FieldViewListener {
                             override fun onExitClicked() {
                                 activity.finish()
                             }

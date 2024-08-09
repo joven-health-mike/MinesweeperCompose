@@ -19,7 +19,7 @@ fun FieldView(fieldViewModel: FieldViewModel, listener: FieldViewListener) {
 
     if (gameUiState.gameOver) {
         GameOverDialog(
-            title = "You " + if (gameUiState.winner) "Win!" else "Lose",
+            title = "You " + if (gameUiState.winner) "Win!" else "Lose.",
             object : GameOverDialogListener {
                 override fun onNewGameClicked() {
                     fieldViewModel.resetGame()
@@ -46,15 +46,8 @@ fun FieldView(fieldViewModel: FieldViewModel, listener: FieldViewListener) {
 
                                 if (gameUiState.tileStates[index] == TileState.COVERED) {
                                     fieldViewModel.clearIndex(index)
-                                } else if (gameUiState.tileStates[index] == TileState.CLEARED){
-                                    val adjacentFlags = fieldViewModel.getAdjacentFlags(index)
-                                    try {
-                                        if (adjacentFlags == gameUiState.tileValues[index].toInt()) {
-                                            fieldViewModel.clearAdjacentTiles(index)
-                                        }
-                                    } catch (e: NumberFormatException){
-                                        // value is nan - do nothing
-                                    }
+                                } else if (gameUiState.tileStates[index] == TileState.CLEARED) {
+                                    tryToClearAdjacentTiles(index)
                                 }
                             }
 
@@ -65,6 +58,17 @@ fun FieldView(fieldViewModel: FieldViewModel, listener: FieldViewListener) {
                                     || gameUiState.tileStates[index] == TileState.FLAGGED
                                 ) {
                                     fieldViewModel.flagIndex(index)
+                                }
+                            }
+
+                            private fun tryToClearAdjacentTiles(index: Int) {
+                                val adjacentFlags = fieldViewModel.getAdjacentFlags(index)
+                                try {
+                                    if (adjacentFlags == gameUiState.tileValues[index].toInt()) {
+                                        fieldViewModel.clearAdjacentTiles(index)
+                                    }
+                                } catch (e: NumberFormatException) {
+                                    // value is nan - do nothing
                                 }
                             }
                         })

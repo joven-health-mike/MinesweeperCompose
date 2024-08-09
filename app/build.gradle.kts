@@ -59,10 +59,17 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(fileTree(mapOf(
-        "dir" to "/Users/mikeburke/Documents/GitHub/kotlin/AndroidStudioProjects/MinesweeperCompose/app/lib/mines-java-1.0.1.2.jar",
-        "include" to listOf("*.aar", "*.jar")
-    )))
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(
+        fileTree(
+            mapOf(
+                "dir" to "/Users/mikeburke/Documents/GitHub/kotlin/AndroidStudioProjects/MinesweeperCompose/app/lib/mines-java-1.0.1.2.jar",
+                "include" to listOf("*.aar", "*.jar")
+            )
+        )
+    )
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

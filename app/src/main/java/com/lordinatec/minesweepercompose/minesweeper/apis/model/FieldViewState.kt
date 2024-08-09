@@ -8,6 +8,6 @@ data class FieldViewState(
     val winner: Boolean = false,
     val minesRemaining: Int = -1,
     val timeValue: Long = -1L,
-    val tileStates: List<TileState> = List<TileState>(Config.width * Config.height) { TileState.COVERED },
-    val tileValues: List<String> = List<String>(Config.width * Config.height) { "" }
+    val tileStates: List<TileState> = List<TileState>(Config.WIDTH * Config.HEIGHT) { TileState.COVERED },
+    val tileValues: List<String> = List<String>(Config.WIDTH * Config.HEIGHT) { "" }
 )

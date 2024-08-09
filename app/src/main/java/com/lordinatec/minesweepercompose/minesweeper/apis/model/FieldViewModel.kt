@@ -2,10 +2,10 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.model
 
 import androidx.lifecycle.ViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
+import com.lordinatec.minesweepercompose.minesweeper.apis.Config.indexToXY
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
 import com.mikeburke106.mines.api.model.Field
-import com.mikeburke106.mines.api.model.Game
 import com.mikeburke106.mines.api.model.GameControlStrategy
 import com.mikeburke106.mines.basic.controller.BasicGameController
 import com.mikeburke106.mines.basic.model.BasicConfiguration
@@ -24,16 +24,10 @@ class FieldViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(FieldViewState())
     val uiState: StateFlow<FieldViewState> = _uiState.asStateFlow()
 
-    private val positionPool =
-        BasicPositionPool(BasicPosition.Factory(), Config.width, Config.height)
-    private var game: Game? = null
     private var gameControlStrategy: GameControlStrategy? = null
-
-    private val config: Field.Configuration = BasicConfiguration(positionPool, Config.numOfMines)
+    private var gameCreated: Boolean = false
     private val fieldFactory: BasicFieldFactory =
         BasicFieldFactory(RandomPositionProvider.Factory())
-    private var field: Field? = null
-    private var gameCreated: Boolean = false
 
     private val gameOverListener = object : GameControlStrategy.Listener {
         override fun gameWon() {
@@ -146,7 +140,7 @@ class FieldViewModel : ViewModel() {
             }
         }
 
-        return coveredCount == Config.numOfMines
+        return coveredCount == Config.MINES
     }
 
     private fun clickAdjacentPositions(x: Int, y: Int) {
@@ -155,13 +149,13 @@ class FieldViewModel : ViewModel() {
             val newY: Int = adjacentPosition.applyYTranslationOn(y)
 
             if (validCoordinates(newX, newY) && positionIsCovered(newX, newY)) {
-                clearIndex(newY * Config.width + newX)
+                clearIndex(newY * Config.WIDTH + newX)
             }
         }
     }
 
     private fun validCoordinates(x: Int, y: Int): Boolean {
-        return x in 0..<Config.width && y in 0..<Config.height
+        return x in 0..<Config.WIDTH && y in 0..<Config.HEIGHT
     }
 
     private fun positionIsCovered(x: Int, y: Int): Boolean {
@@ -172,12 +166,15 @@ class FieldViewModel : ViewModel() {
 
     fun resetGame() {
         _uiState.update { FieldViewState() }
+        gameCreated = false
     }
 
-    private fun createGame(initialX: Int, initialY: Int) {
+    private fun createGame(coords: Pair<Int, Int>) {
         this.gameCreated = true
-        this.field = fieldFactory.newInstance(config, initialX, initialY)
-        this.game =
+        val positionPool = BasicPositionPool(BasicPosition.Factory(), Config.WIDTH, Config.HEIGHT)
+        val config: Field.Configuration = BasicConfiguration(positionPool, Config.MINES)
+        val field = fieldFactory.newInstance(config, coords.first, coords.second)
+        val game =
             BasicGame(System.currentTimeMillis(), field, RegularIntervalTimingStrategy(1000L))
 
         this.gameControlStrategy = BasicGameController(game, positionPool, null).also {
@@ -185,20 +182,22 @@ class FieldViewModel : ViewModel() {
         }
 
         _uiState.value = FieldViewState(
-            minesRemaining = Config.numOfMines,
+            minesRemaining = Config.MINES,
             timeValue = 0,
-            tileStates = List<TileState>(Config.width * Config.height) { TileState.COVERED })
+            tileStates = List<TileState>(Config.WIDTH * Config.HEIGHT) { TileState.COVERED })
     }
 
     fun clearIndex(index: Int) {
+        val coords = indexToXY(index)
         if (!gameCreated) {
-            createGame(index % Config.width, index / Config.width)
+            createGame(coords)
         }
-        gameControlStrategy?.clear(index % Config.width, index / Config.width)
+        gameControlStrategy?.clear(coords.first, coords.second)
     }
 
     fun flagIndex(index: Int) {
-        gameControlStrategy?.toggleFlag(index % Config.width, index / Config.width)
+        val coords = indexToXY(index)
+        gameControlStrategy?.toggleFlag(coords.first, coords.second)
     }
 
     private fun updateGameState(

@@ -1,6 +1,5 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.view
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
 import androidx.appcompat.app.AppCompatActivity
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
@@ -37,9 +35,9 @@ fun FieldView(fieldViewModel: FieldViewModel, listener: FieldViewListener) {
     }
 
     Column {
-        for (currHeight in 0..<Config.height) {
+        for (currHeight in 0..<Config.HEIGHT) {
             Row {
-                for (currWidth in 0..<Config.width) {
+                for (currWidth in 0..<Config.WIDTH) {
                     val currIndex = xyToIndex(currWidth, currHeight)
                     TileView(
                         currIndex,

@@ -38,20 +38,49 @@ class FieldViewModel : ViewModel() {
     private var gameCreated: Boolean = false
 
     private val gameOverListener = object : GameControlStrategy.Listener {
-        override fun gameWon() {}
-        override fun gameLost() {}
+        override fun gameWon() {
+            val state = _uiState.value
+            updateGameState(
+                gameOver = true,
+                winner = true,
+                minesRemaining = state.minesRemaining,
+                timeValue = state.timeValue,
+                tileStates = state.tileStates,
+                tileValues = state.tileValues
+            )
+        }
+
+        override fun gameLost() {
+            val state = _uiState.value
+            updateGameState(
+                gameOver = true,
+                winner = false,
+                minesRemaining = state.minesRemaining,
+                timeValue = state.timeValue,
+                tileStates = state.tileStates,
+                tileValues = state.tileValues
+            )
+        }
+
         override fun timeUpdate(newTime: Long) {}
 
-        private fun updatePosition(x: Int, y: Int, state: TileState, value: String) {
+        private fun updatePosition(x: Int, y: Int, tileState: TileState, value: String) {
             val index = xyToIndex(x, y)
-            val stateValue = _uiState.value
-            val tileStates = stateValue.tileStates.toMutableList().also {
-                it[index] = state
+            val state = _uiState.value
+            val tileStates = state.tileStates.toMutableList().also {
+                it[index] = tileState
             }
-            val tileValues = stateValue.tileValues.toMutableList().also {
+            val tileValues = state.tileValues.toMutableList().also {
                 it[index] = value
             }
-            updateGameState(stateValue.minesRemaining, stateValue.timeValue, tileStates, tileValues)
+            updateGameState(
+                gameOver = state.gameOver,
+                winner = state.winner,
+                minesRemaining = state.minesRemaining,
+                timeValue = state.timeValue,
+                tileStates = tileStates,
+                tileValues = tileValues
+            )
         }
 
         override fun positionUnflagged(x: Int, y: Int) {
@@ -90,6 +119,7 @@ class FieldViewModel : ViewModel() {
 
         override fun positionExploded(x: Int, y: Int) {
             gameOverListener.positionExploded(x, y)
+            gameLost()
         }
 
         override fun positionCleared(x: Int, y: Int, numOfAdjacent: Int) {
@@ -97,11 +127,28 @@ class FieldViewModel : ViewModel() {
             if (numOfAdjacent == 0) {
                 clickAdjacentPositions(x, y)
             }
+
+            val winner = assessWinConditions()
+            if (winner) {
+                gameWon()
+            }
         }
 
         override fun positionFlagged(x: Int, y: Int) {
             gameOverListener.positionFlagged(x, y)
         }
+    }
+
+    private fun assessWinConditions(): Boolean {
+        val stateValue = _uiState.value
+        var coveredCount = 0
+        for (state in stateValue.tileStates) {
+            if (state == TileState.COVERED || state == TileState.FLAGGED) {
+                coveredCount++
+            }
+        }
+
+        return coveredCount == Config.numOfMines
     }
 
     private fun clickAdjacentPositions(x: Int, y: Int) {
@@ -142,12 +189,10 @@ class FieldViewModel : ViewModel() {
     }
 
     fun clearIndex(index: Int) {
-        if (gameCreated) {
-            gameControlStrategy?.clear(index % Config.width, index / Config.width)
-        } else {
+        if (!gameCreated) {
             createGame(index % Config.width, index / Config.width)
-            gameControlStrategy?.clear(index % Config.width, index / Config.width)
         }
+        gameControlStrategy?.clear(index % Config.width, index / Config.width)
     }
 
     fun flagIndex(index: Int) {
@@ -155,6 +200,8 @@ class FieldViewModel : ViewModel() {
     }
 
     private fun updateGameState(
+        gameOver: Boolean,
+        winner: Boolean,
         minesRemaining: Int,
         timeValue: Long,
         tileStates: List<TileState>,
@@ -162,6 +209,8 @@ class FieldViewModel : ViewModel() {
     ) {
         _uiState.update { currentState ->
             currentState.copy(
+                gameOver = gameOver,
+                winner = winner,
                 minesRemaining = minesRemaining,
                 timeValue = timeValue,
                 tileStates = tileStates,

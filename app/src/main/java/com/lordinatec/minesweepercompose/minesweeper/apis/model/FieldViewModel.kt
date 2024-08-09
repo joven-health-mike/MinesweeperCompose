@@ -149,7 +149,7 @@ class FieldViewModel : ViewModel() {
             val newY: Int = adjacentPosition.applyYTranslationOn(y)
 
             if (validCoordinates(newX, newY) && positionIsCovered(newX, newY)) {
-                clearIndex(newY * Config.WIDTH + newX)
+                clearIndex(xyToIndex(newX, newY))
             }
         }
     }
@@ -162,6 +162,12 @@ class FieldViewModel : ViewModel() {
         val stateValue = _uiState.value
         val tileState = stateValue.tileStates[xyToIndex(x, y)]
         return tileState == TileState.COVERED
+    }
+
+    private fun positionIsFlagged(x: Int, y: Int): Boolean {
+        val stateValue = _uiState.value
+        val tileState = stateValue.tileStates[xyToIndex(x, y)]
+        return tileState == TileState.FLAGGED
     }
 
     fun resetGame() {
@@ -198,6 +204,27 @@ class FieldViewModel : ViewModel() {
     fun flagIndex(index: Int) {
         val coords = indexToXY(index)
         gameControlStrategy?.toggleFlag(coords.first, coords.second)
+    }
+
+    fun getAdjacentFlags(index: Int): Int {
+        val coords = indexToXY(index)
+        var result = 0
+
+        for (adjacent in AdjacentPosition.entries) {
+            val newX: Int = adjacent.applyXTranslationOn(coords.first)
+            val newY: Int = adjacent.applyYTranslationOn(coords.second)
+
+            if (validCoordinates(newX, newY) && positionIsFlagged(newX, newY)) {
+                result++
+            }
+        }
+
+        return result
+    }
+
+    fun clearAdjacentTiles(index: Int) {
+        val coords = indexToXY(index)
+        clickAdjacentPositions(coords.first, coords.second)
     }
 
     private fun updateGameState(

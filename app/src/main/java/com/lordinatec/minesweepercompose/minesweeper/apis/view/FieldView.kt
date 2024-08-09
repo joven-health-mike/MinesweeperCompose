@@ -46,6 +46,15 @@ fun FieldView(fieldViewModel: FieldViewModel, listener: FieldViewListener) {
 
                                 if (gameUiState.tileStates[index] == TileState.COVERED) {
                                     fieldViewModel.clearIndex(index)
+                                } else if (gameUiState.tileStates[index] == TileState.CLEARED){
+                                    val adjacentFlags = fieldViewModel.getAdjacentFlags(index)
+                                    try {
+                                        if (adjacentFlags == gameUiState.tileValues[index].toInt()) {
+                                            fieldViewModel.clearAdjacentTiles(index)
+                                        }
+                                    } catch (e: NumberFormatException){
+                                        // value is nan - do nothing
+                                    }
                                 }
                             }
 

@@ -6,14 +6,21 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 
@@ -24,21 +31,41 @@ class MainActivity : ComponentActivity() {
         setContent {
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Box(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxSize(), contentAlignment = Alignment.Center
-                    ) {
-                        Column {
-                            Button(
-                                modifier = Modifier.width(250.dp),
-                                onClick = { GameActivity.launch(applicationContext) }) {
-                                Text("New Game")
-                            }
-                            Button(
-                                modifier = Modifier.width(250.dp),
-                                onClick = { finish() }) {
-                                Text("Exit")
+                    Column {
+                        Box(
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .fillMaxWidth(), contentAlignment = Alignment.Center
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Filled.WorkspacePremium,
+                                contentDescription = "",
+                                tint = colorResource(android.R.color.darker_gray),
+                                modifier = Modifier
+                                    .width(200.dp)
+                                    .height(200.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .fillMaxWidth(), contentAlignment = Alignment.Center
+                        ) {
+                            Column {
+                                Button(
+                                    modifier = Modifier.width(250.dp),
+                                    onClick = { GameActivity.launch(applicationContext) }) {
+                                    Text("New Game")
+                                }
+                                Button(
+                                    modifier = Modifier.width(250.dp),
+                                    onClick = { finish() }) {
+                                    Text("Exit")
+                                }
                             }
                         }
                     }

@@ -20,9 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldView
+import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldViewListener
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 
 class GameActivity : ComponentActivity() {
+    val activity = this
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,7 +39,11 @@ class GameActivity : ComponentActivity() {
                             .background(Color.LightGray),
                         contentAlignment = Alignment.Center
                     ) {
-                        FieldView(FieldViewModel())
+                        FieldView(FieldViewModel(), object : FieldViewListener {
+                            override fun onExitClicked() {
+                                activity.finish()
+                            }
+                        })
                     }
                 }
             }

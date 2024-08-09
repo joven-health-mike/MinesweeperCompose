@@ -28,8 +28,6 @@ class FieldViewModel : ViewModel() {
         BasicPositionPool(BasicPosition.Factory(), Config.width, Config.height)
     private var game: Game? = null
     private var gameControlStrategy: GameControlStrategy? = null
-    private var gameOver = false
-    private var firstClickHappened = false
 
     private val config: Field.Configuration = BasicConfiguration(positionPool, Config.numOfMines)
     private val fieldFactory: BasicFieldFactory =
@@ -172,7 +170,11 @@ class FieldViewModel : ViewModel() {
         return tileState == TileState.COVERED
     }
 
-    fun createGame(initialX: Int, initialY: Int) {
+    fun resetGame() {
+        _uiState.update { FieldViewState() }
+    }
+
+    private fun createGame(initialX: Int, initialY: Int) {
         this.gameCreated = true
         this.field = fieldFactory.newInstance(config, initialX, initialY)
         this.game =

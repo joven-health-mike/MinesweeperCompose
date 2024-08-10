@@ -8,8 +8,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +26,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldView
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldViewListener
+import com.lordinatec.minesweepercompose.minesweeper.apis.view.GameTimerView
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.RemainingMinesView
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.mikeburke106.mines.basic.model.BasicFieldFactory
@@ -62,7 +65,14 @@ class GameActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        RemainingMinesView(viewModel = viewModel)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            RemainingMinesView(viewModel = viewModel)
+                            GameTimerView(viewModel = viewModel)
+                        }
                     }
                 }
             }

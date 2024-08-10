@@ -16,11 +16,13 @@ import androidx.compose.ui.unit.sp
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 
 @Composable
-fun RemainingMinesView(viewModel: FieldViewModel) {
-    val remainingMines = viewModel.uiState.collectAsState().value.minesRemaining
+fun GameTimerView(viewModel: FieldViewModel) {
+    val timeIntValue = (viewModel.uiState.collectAsState().value.timeValue / 1000L).toString()
+    val timeDecValue =
+        (viewModel.uiState.collectAsState().value.timeValue % 1000L).toString().padStart(3, '0')
     Box(modifier = Modifier.padding(5.dp), contentAlignment = Alignment.Center) {
         Text(
-            text = "Remaining Mines: $remainingMines",
+            text = "Time: $timeIntValue.$timeDecValue s",
             style = TextStyle(
                 fontSize = 18.sp,
                 fontFamily = FontFamily.Default,

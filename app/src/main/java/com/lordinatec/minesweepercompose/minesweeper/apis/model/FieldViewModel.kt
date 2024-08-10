@@ -23,12 +23,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() {
-    private class Timer(val state: MutableStateFlow<FieldViewState>) :
+    private class Timer(val listener: GameControlStrategy.Listener) :
         CountUpTimer(Long.MAX_VALUE) {
         override fun onMsTick(tenMsInterval: Long) {
-            state.update { currentState ->
-                currentState.copy(timeValue = tenMsInterval)
-            }
+            listener.timeUpdate(tenMsInterval)
         }
     }
 
@@ -37,7 +35,22 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
 
     private var gameControlStrategy: GameControlStrategy? = null
     private var gameCreated: Boolean = false
-    private var timer = Timer(_uiState)
+    private val timerListener = object : GameControlStrategy.Listener {
+        override fun timeUpdate(newTime: Long) {
+            _uiState.update { currentState ->
+                currentState.copy(timeValue = newTime)
+            }
+        }
+
+        // ignore other callbacks
+        override fun positionCleared(p0: Int, p1: Int, p2: Int) {}
+        override fun positionExploded(p0: Int, p1: Int) {}
+        override fun positionFlagged(p0: Int, p1: Int) {}
+        override fun positionUnflagged(p0: Int, p1: Int) {}
+        override fun gameWon() {}
+        override fun gameLost() {}
+    }
+    private val timer = Timer(timerListener)
     private val model = this
 
     private val gamePlayListener = object : GameControlStrategy.Listener {
@@ -62,11 +75,7 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
         }
 
         override fun timeUpdate(newTime: Long) {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    timeValue = newTime
-                )
-            }
+            // do nothing - callback doesn't seem to be working correctly
         }
 
         override fun positionUnflagged(x: Int, y: Int) {

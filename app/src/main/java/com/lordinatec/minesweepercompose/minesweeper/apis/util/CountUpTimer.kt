@@ -3,7 +3,7 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.util
 import android.os.CountDownTimer
 
 
-abstract class CountUpTimer protected constructor(private val duration: Long) :
+abstract class CountUpTimer protected constructor(private val duration: Long = Long.MAX_VALUE) :
     CountDownTimer(duration, INTERVAL_MS) {
     abstract fun onMsTick(tenMsInterval: Long)
 

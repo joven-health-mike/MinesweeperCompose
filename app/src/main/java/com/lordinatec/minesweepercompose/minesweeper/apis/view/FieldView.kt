@@ -8,72 +8,52 @@ import androidx.compose.runtime.getValue
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewState
 
-interface FieldViewListener {
-    fun onExitClicked()
+private val gameOverText: (Boolean) -> String =
+    { winner -> "You " + if (winner) "Win!" else "Lose." }
+
+@Composable
+fun FieldView(
+    fieldViewModel: FieldViewModel,
+    exitClicked: (() -> Unit)? = null
+) {
+    val gameUiState by fieldViewModel.uiState.collectAsState()
+
+    // show game over dialog once the game is over
+    if (gameUiState.gameOver) {
+        GameOverDialog(
+            title = gameOverText(gameUiState.winner),
+            newGameClicked = { fieldViewModel.resetGame() },
+        ) { exitClicked?.let { it() } }
+    }
+
+    Field(gameUiState = gameUiState, fieldViewModel = fieldViewModel)
 }
 
 @Composable
-fun FieldView(fieldViewModel: FieldViewModel, listener: FieldViewListener) {
-    val gameUiState by fieldViewModel.uiState.collectAsState()
+private fun Field(gameUiState: FieldViewState, fieldViewModel: FieldViewModel) {
+    val clickListener = TileViewClickListener(gameUiState, fieldViewModel)
+    val tileViewFactory = TileViewFactory(
+        gameUiState = gameUiState,
+        onClick = { clickListener.onClick(it) },
+        onLongClick = { clickListener.onLongClick(it) })
 
-    if (gameUiState.gameOver) {
-        GameOverDialog(
-            title = "You " + if (gameUiState.winner) "Win!" else "Lose.",
-            object : GameOverDialogListener {
-                override fun onNewGameClicked() {
-                    fieldViewModel.resetGame()
-                }
-
-                override fun onExitClicked() {
-                    listener.onExitClicked()
-                }
-            })
-    }
-
+    // create the field
     Column {
         for (currHeight in 0..<Config.HEIGHT) {
             Row {
-                for (currWidth in 0..<Config.WIDTH) {
-                    val currIndex = xyToIndex(currWidth, currHeight)
-                    TileView(
-                        currIndex,
-                        gameUiState.tileValues[currIndex],
-                        gameUiState.tileStates[currIndex],
-                        object : TileViewListener {
-                            override fun onClick(index: Int) {
-                                if (gameUiState.gameOver) return
-
-                                if (gameUiState.tileStates[index] == TileState.COVERED) {
-                                    fieldViewModel.clearIndex(index)
-                                } else if (gameUiState.tileStates[index] == TileState.CLEARED) {
-                                    tryToClearAdjacentTiles(index)
-                                }
-                            }
-
-                            override fun onLongClick(index: Int) {
-                                if (gameUiState.gameOver) return
-
-                                if (gameUiState.tileStates[index] == TileState.COVERED
-                                    || gameUiState.tileStates[index] == TileState.FLAGGED
-                                ) {
-                                    fieldViewModel.flagIndex(index)
-                                }
-                            }
-
-                            private fun tryToClearAdjacentTiles(index: Int) {
-                                val adjacentFlags = fieldViewModel.getAdjacentFlags(index)
-                                try {
-                                    if (adjacentFlags == gameUiState.tileValues[index].toInt()) {
-                                        fieldViewModel.clearAdjacentTiles(index)
-                                    }
-                                } catch (e: NumberFormatException) {
-                                    // value is nan - do nothing
-                                }
-                            }
-                        })
-                }
+                FieldRow(heightIndex = currHeight, tileViewFactory = tileViewFactory)
             }
         }
+    }
+}
+
+@Composable
+private fun FieldRow(heightIndex: Int, tileViewFactory: TileViewFactory) {
+    // create a row of tiles
+    for (currWidth in 0..<Config.WIDTH) {
+        val currIndex = xyToIndex(currWidth, heightIndex)
+        tileViewFactory.CreateTileView(currIndex = currIndex)
     }
 }

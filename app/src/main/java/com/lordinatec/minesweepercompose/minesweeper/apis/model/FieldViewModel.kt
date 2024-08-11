@@ -35,90 +35,78 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
 
     private var gameControlStrategy: GameControlStrategy? = null
     private var gameCreated: Boolean = false
-    private val timerListener = object : GameControlStrategy.Listener {
-        override fun timeUpdate(newTime: Long) {
-            _uiState.update { currentState ->
-                currentState.copy(timeValue = newTime)
+    private val gamePlayListener: GameControlStrategy.Listener =
+        object : GameControlStrategy.Listener {
+            override fun gameWon() {
+                timer.cancelTimer()
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        gameOver = true,
+                        winner = true,
+                    )
+                }
             }
-        }
 
-        // ignore other callbacks
-        override fun positionCleared(p0: Int, p1: Int, p2: Int) {}
-        override fun positionExploded(p0: Int, p1: Int) {}
-        override fun positionFlagged(p0: Int, p1: Int) {}
-        override fun positionUnflagged(p0: Int, p1: Int) {}
-        override fun gameWon() {}
-        override fun gameLost() {}
-    }
-    private val timer = Timer(timerListener)
-    private val model = this
-
-    private val gamePlayListener = object : GameControlStrategy.Listener {
-        override fun gameWon() {
-            timer.cancelTimer()
-            _uiState.update { currentState ->
-                currentState.copy(
-                    gameOver = true,
-                    winner = true,
-                )
+            override fun gameLost() {
+                timer.cancelTimer()
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        gameOver = true,
+                        winner = false,
+                    )
+                }
             }
-        }
 
-        override fun gameLost() {
-            timer.cancelTimer()
-            _uiState.update { currentState ->
-                currentState.copy(
-                    gameOver = true,
-                    winner = false,
-                )
+            override fun timeUpdate(newTime: Long) {
+                _uiState.update { currentState ->
+                    currentState.copy(timeValue = newTime)
+                }
             }
-        }
 
-        override fun timeUpdate(newTime: Long) {
-            // do nothing - callback doesn't seem to be working correctly
-        }
-
-        override fun positionUnflagged(x: Int, y: Int) {
-            updatePosition(x, y, TileState.COVERED, "")
-            _uiState.update { currentState ->
-                currentState.copy(
-                    minesRemaining = currentState.minesRemaining + 1
-                )
+            override fun positionUnflagged(x: Int, y: Int) {
+                updatePosition(x, y, TileState.COVERED, "")
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        minesRemaining = currentState.minesRemaining + 1
+                    )
+                }
             }
-        }
 
-        override fun positionExploded(x: Int, y: Int) {
-            updatePosition(x, y, TileState.EXPLODED, "*")
-            gameLost()
-        }
-
-        override fun positionCleared(x: Int, y: Int, numOfAdjacent: Int) {
-            updatePosition(x, y, TileState.CLEARED, "$numOfAdjacent")
-
-            if (numOfAdjacent == 0) clickAdjacentPositions(model, x, y)
-            if (assessWinConditions()) gameWon()
-        }
-
-        override fun positionFlagged(x: Int, y: Int) {
-            updatePosition(x, y, TileState.FLAGGED, "F")
-            _uiState.update { currentState ->
-                currentState.copy(
-                    minesRemaining = currentState.minesRemaining - 1
-                )
+            override fun positionExploded(x: Int, y: Int) {
+                updatePosition(x, y, TileState.EXPLODED, "*")
+                gameLost()
             }
-        }
 
-        private fun updatePosition(x: Int, y: Int, tileState: TileState, value: String) {
-            val index = xyToIndex(x, y)
-            _uiState.update {
-                uiState.value.let { state ->
-                    state.copy(tileStates = state.tileStates.toMutableList()
-                        .apply { this[index] = tileState },
-                        tileValues = state.tileValues.toMutableList().apply { this[index] = value })
+            override fun positionCleared(x: Int, y: Int, numOfAdjacent: Int) {
+                updatePosition(x, y, TileState.CLEARED, "$numOfAdjacent")
+
+                if (numOfAdjacent == 0) clickAdjacentPositions(model, x, y)
+                if (assessWinConditions()) gameWon()
+            }
+
+            override fun positionFlagged(x: Int, y: Int) {
+                updatePosition(x, y, TileState.FLAGGED, "F")
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        minesRemaining = currentState.minesRemaining - 1
+                    )
+                }
+            }
+
+            private fun updatePosition(x: Int, y: Int, tileState: TileState, value: String) {
+                val index = xyToIndex(x, y)
+                _uiState.update {
+                    uiState.value.let { state ->
+                        state.copy(tileStates = state.tileStates.toMutableList()
+                            .apply { this[index] = tileState },
+                            tileValues = state.tileValues.toMutableList()
+                                .apply { this[index] = value })
+                    }
                 }
             }
         }
-    }
+    private val timer = Timer(gamePlayListener)
+    private val model = this
 
     /* PUBLIC APIS */
     fun resetGame() {

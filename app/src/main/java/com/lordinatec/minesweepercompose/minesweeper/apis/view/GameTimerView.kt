@@ -13,16 +13,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lordinatec.minesweepercompose.extensions.toStringPair
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 
 @Composable
 fun GameTimerView(viewModel: FieldViewModel) {
-    val timeIntValue = (viewModel.uiState.collectAsState().value.timeValue / 1000L).toString()
-    val timeDecValue =
-        (viewModel.uiState.collectAsState().value.timeValue % 1000L).toString().padStart(3, '0')
+    val timeValue = viewModel.uiState.collectAsState().value.timeValue.toStringPair()
     Box(modifier = Modifier.padding(5.dp), contentAlignment = Alignment.Center) {
         Text(
-            text = "Time: $timeIntValue.$timeDecValue s",
+            text = "Time: ${timeValue.first}.${timeValue.second} s",
             style = TextStyle(
                 fontSize = 18.sp,
                 fontFamily = FontFamily.Default,

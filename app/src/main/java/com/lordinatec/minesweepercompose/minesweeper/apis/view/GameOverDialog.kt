@@ -22,18 +22,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 
-interface GameOverDialogListener {
-    fun onNewGameClicked()
-    fun onExitClicked()
-}
-
 @Composable
 fun GameOverDialog(
     title: String,
-    listener: GameOverDialogListener
+    newGameClicked: (() -> Unit)? = null,
+    exitClicked: (() -> Unit)? = null
 ) {
 
-    Dialog(onDismissRequest = { listener.onExitClicked() }) {
+    Dialog(onDismissRequest = { exitClicked?.let { it() } }) {
         Surface(
             shape = RoundedCornerShape(16.dp),
             color = Color.White
@@ -59,18 +55,15 @@ fun GameOverDialog(
                     Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
                         Column {
                             Button(
-                                onClick = {
-                                    listener.onNewGameClicked()
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
+                                onClick = { newGameClicked?.let { it() } },
+                                modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(text = "New Game")
                             }
                             Spacer(modifier = Modifier.height(20.dp))
                             Button(
                                 onClick = {
-                                    listener.onExitClicked()
+                                    exitClicked?.let { it() }
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()

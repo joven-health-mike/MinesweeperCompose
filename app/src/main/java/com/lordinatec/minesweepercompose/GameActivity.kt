@@ -7,73 +7,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
-import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldView
-import com.lordinatec.minesweepercompose.minesweeper.apis.view.FieldViewListener
-import com.lordinatec.minesweepercompose.minesweeper.apis.view.GameTimerView
-import com.lordinatec.minesweepercompose.minesweeper.apis.view.RemainingMinesView
+import com.lordinatec.minesweepercompose.minesweeper.apis.view.GameView
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
-import com.mikeburke106.mines.basic.model.BasicFieldFactory
-import com.mikeburke106.mines.basic.model.RandomPositionProvider
 
 class GameActivity : ComponentActivity() {
-    private val activity = this
-    private val fieldFactory = BasicFieldFactory(RandomPositionProvider.Factory())
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val viewModel = FieldViewModel(fieldFactory)
-                    Modifier.padding(innerPadding)
-
-                    Column {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color.LightGray),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column {
-                                Spacer(modifier = Modifier.height(75.dp))
-
-                                FieldView(viewModel, object : FieldViewListener {
-                                    override fun onExitClicked() {
-                                        activity.finish()
-                                    }
-                                })
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                        ) {
-                            RemainingMinesView(viewModel = viewModel)
-                            GameTimerView(viewModel = viewModel)
-                        }
-                    }
+                    GameView(
+                        modifier = Modifier.padding(
+                            innerPadding
+                        )
+                    )
                 }
             }
         }

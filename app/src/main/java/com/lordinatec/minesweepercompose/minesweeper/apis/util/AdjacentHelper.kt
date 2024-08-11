@@ -1,6 +1,5 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.util
 
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config.indexToXY
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 
@@ -30,7 +29,7 @@ fun clickAdjacentPositions(model: FieldViewModel, x: Int, y: Int) {
         val newY: Int = adjacentPosition.applyYTranslationOn(y)
 
         if (model.validCoordinates(newX, newY) && model.positionIsCovered(newX, newY)) {
-            model.clearIndex(xyToIndex(newX, newY))
+            model.clear(xyToIndex(newX, newY))
         }
     }
 }

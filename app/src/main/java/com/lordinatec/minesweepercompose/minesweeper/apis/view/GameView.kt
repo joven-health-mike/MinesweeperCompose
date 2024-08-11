@@ -22,7 +22,7 @@ import com.mikeburke106.mines.basic.model.RandomPositionProvider
 private val fieldFactory = BasicFieldFactory(RandomPositionProvider.Factory())
 
 @Composable
-fun GameView(modifier: Modifier = Modifier) {
+fun GameView() {
     val viewModel = FieldViewModel(fieldFactory)
     // display the game view with the field and the bottom sections
     Column {
@@ -53,8 +53,7 @@ private fun FieldSection(viewModel: FieldViewModel) {
 private fun BottomSection(viewModel: FieldViewModel) {
     // display the bottom section with the remaining mines and the game timer
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         RemainingMinesView(viewModel = viewModel)

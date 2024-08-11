@@ -32,7 +32,7 @@ fun GameOverDialog(
     Dialog(onDismissRequest = { exitClicked?.let { it() } }) {
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = Color.White
+            color = Color.White.copy(alpha = 0.4f),
         ) {
             Box(
                 contentAlignment = Alignment.Center

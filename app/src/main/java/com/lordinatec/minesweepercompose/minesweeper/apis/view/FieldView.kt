@@ -41,7 +41,7 @@ private fun Field(gameUiState: FieldViewState, fieldViewModel: FieldViewModel) {
 
     // create the field
     Column {
-        for (currHeight in 0..<Config.HEIGHT) {
+        for (currHeight in 0 until Config.HEIGHT) {
             Row {
                 FieldRow(heightIndex = currHeight, tileViewFactory = tileViewFactory)
             }
@@ -52,7 +52,7 @@ private fun Field(gameUiState: FieldViewState, fieldViewModel: FieldViewModel) {
 @Composable
 private fun FieldRow(heightIndex: Int, tileViewFactory: TileViewFactory) {
     // create a row of tiles
-    for (currWidth in 0..<Config.WIDTH) {
+    for (currWidth in 0 until Config.WIDTH) {
         val currIndex = xyToIndex(currWidth, heightIndex)
         tileViewFactory.CreateTileView(currIndex = currIndex)
     }

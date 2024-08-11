@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.update
 
 class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() {
     private class Timer(val listener: GameControlStrategy.Listener) :
-        CountUpTimer(Long.MAX_VALUE) {
+        CountUpTimer() {
         override fun onMsTick(tenMsInterval: Long) {
             listener.timeUpdate(tenMsInterval)
         }
@@ -48,6 +48,7 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
             }
 
             override fun gameLost() {
+                clearEverything()
                 timer.cancelTimer()
                 _uiState.update { currentState ->
                     currentState.copy(
@@ -74,14 +75,17 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
 
             override fun positionExploded(x: Int, y: Int) {
                 updatePosition(x, y, TileState.EXPLODED, "*")
-                gameLost()
+                if (!_uiState.value.gameOver) {
+                    gameLost()
+                }
             }
 
             override fun positionCleared(x: Int, y: Int, numOfAdjacent: Int) {
                 updatePosition(x, y, TileState.CLEARED, "$numOfAdjacent")
 
                 if (numOfAdjacent == 0) clickAdjacentPositions(model, x, y)
-                if (assessWinConditions()) gameWon()
+
+                if (!_uiState.value.gameOver && assessWinConditions()) gameWon()
             }
 
             override fun positionFlagged(x: Int, y: Int) {
@@ -114,19 +118,25 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
         gameCreated = false
     }
 
-    fun clearIndex(index: Int) {
+    fun clear(index: Int) {
         val (x, y) = indexToXY(index)
         if (!gameCreated) createGame(x, y)
         gameControlStrategy?.clear(x, y)
     }
 
-    fun flagIndex(index: Int) {
+    fun toggleFlag(index: Int) {
         val (x, y) = indexToXY(index)
         gameControlStrategy?.toggleFlag(x, y)
+        val flaggedTiles = _uiState.value.tileStates.count() {
+            it == TileState.FLAGGED
+        }
+        if (flaggedTiles == Config.MINES) {
+            clearEverything()
+        }
     }
 
     fun validCoordinates(x: Int, y: Int): Boolean {
-        return x in 0..<Config.WIDTH && y in 0..<Config.HEIGHT
+        return x in 0 until Config.WIDTH && y in 0 until Config.HEIGHT
     }
 
     fun positionIsCovered(x: Int, y: Int): Boolean {
@@ -166,6 +176,14 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
 
         _uiState.value = FieldViewState()
         timer.start()
+    }
+
+    private fun clearEverything() {
+        for (i in 0 until Config.WIDTH * Config.HEIGHT) {
+            if (_uiState.value.tileStates[i] == TileState.COVERED) {
+                clear(i)
+            }
+        }
     }
 
     private fun assessWinConditions(): Boolean {

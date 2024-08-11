@@ -15,7 +15,7 @@ class TileViewClickListener(
         //   If the tile is covered, clear it.
         //   If the tile is cleared, try to clear adjacent tiles.
         if (gameUiState.tileStates[index] == TileState.COVERED) {
-            fieldViewModel.clearIndex(index)
+            fieldViewModel.clear(index)
         } else if (gameUiState.tileStates[index] == TileState.CLEARED) {
             tryToClearAdjacentTiles(index)
         }
@@ -29,7 +29,7 @@ class TileViewClickListener(
         if (gameUiState.tileStates[index] == TileState.COVERED
             || gameUiState.tileStates[index] == TileState.FLAGGED
         ) {
-            fieldViewModel.flagIndex(index)
+            fieldViewModel.toggleFlag(index)
         }
     }
 

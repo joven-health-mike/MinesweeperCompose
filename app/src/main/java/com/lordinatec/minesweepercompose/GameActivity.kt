@@ -22,11 +22,8 @@ class GameActivity : ComponentActivity() {
         setContent {
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GameView(
-                        modifier = Modifier.padding(
-                            innerPadding
-                        )
-                    )
+                    Modifier.padding(innerPadding)
+                    GameView()
                 }
             }
         }

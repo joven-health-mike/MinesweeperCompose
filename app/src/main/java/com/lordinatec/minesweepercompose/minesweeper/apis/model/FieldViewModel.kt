@@ -23,8 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() {
-    private class Timer(val listener: GameControlStrategy.Listener) :
-        CountUpTimer() {
+    private class Timer(val listener: GameControlStrategy.Listener) : CountUpTimer() {
         override fun onMsTick(tenMsInterval: Long) {
             listener.timeUpdate(tenMsInterval)
         }
@@ -33,82 +32,74 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
     private val _uiState = MutableStateFlow(FieldViewState())
     val uiState: StateFlow<FieldViewState> = _uiState.asStateFlow()
 
+    private val timeUpdate: (newTime: Long) -> Unit = {
+        _uiState.update { currentState ->
+            currentState.copy(timeValue = it)
+        }
+    }
+    private val positionCleared: (x: Int, y: Int, numOfAdjacent: Int) -> Unit =
+        { x, y, numOfAdjacent ->
+            updatePosition(
+                x,
+                y,
+                TileState.CLEARED,
+                if (numOfAdjacent == 0) "" else numOfAdjacent.toString()
+            )
+            if (numOfAdjacent == 0) clickAdjacentPositions(model, x, y)
+            if (!_uiState.value.gameOver && assessWinConditions()) gameWon()
+        }
+    private val positionExploded: (x: Int, y: Int) -> Unit = { x, y ->
+        updatePosition(x, y, TileState.EXPLODED, "*")
+        if (!uiState.value.gameOver) gameLost()
+    }
+    private val positionFlagged: (x: Int, y: Int) -> Unit = { x, y ->
+        updatePosition(x, y, TileState.FLAGGED, "F")
+        _uiState.update { currentState ->
+            currentState.copy(
+                minesRemaining = currentState.minesRemaining - 1
+            )
+        }
+    }
+    private val positionUnflagged: (x: Int, y: Int) -> Unit = { x, y ->
+        updatePosition(x, y, TileState.COVERED, "")
+        _uiState.update { currentState ->
+            currentState.copy(
+                minesRemaining = currentState.minesRemaining + 1
+            )
+        }
+    }
+    private val gameWon: () -> Unit = {
+        timer.cancelTimer()
+        _uiState.update { currentState ->
+            currentState.copy(
+                gameOver = true,
+                winner = true,
+            )
+        }
+    }
+    private val gameLost: () -> Unit = {
+        clearEverything()
+        timer.cancelTimer()
+        _uiState.update { currentState ->
+            currentState.copy(
+                gameOver = true,
+                winner = false,
+            )
+        }
+    }
+
     private var gameControlStrategy: GameControlStrategy? = null
     private var gameCreated: Boolean = false
-    private val gamePlayListener: GameControlStrategy.Listener =
-        object : GameControlStrategy.Listener {
-            override fun gameWon() {
-                timer.cancelTimer()
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        gameOver = true,
-                        winner = true,
-                    )
-                }
-            }
+    private val gamePlayListener: GameControlStrategy.Listener = GameListenerBridge(
+        onTimeUpdate = timeUpdate,
+        onPositionCleared = positionCleared,
+        onPositionExploded = positionExploded,
+        onPositionFlagged = positionFlagged,
+        onPositionUnflagged = positionUnflagged,
+        onGameWon = gameWon,
+        onGameLost = gameLost
+    )
 
-            override fun gameLost() {
-                clearEverything()
-                timer.cancelTimer()
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        gameOver = true,
-                        winner = false,
-                    )
-                }
-            }
-
-            override fun timeUpdate(newTime: Long) {
-                _uiState.update { currentState ->
-                    currentState.copy(timeValue = newTime)
-                }
-            }
-
-            override fun positionUnflagged(x: Int, y: Int) {
-                updatePosition(x, y, TileState.COVERED, "")
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        minesRemaining = currentState.minesRemaining + 1
-                    )
-                }
-            }
-
-            override fun positionExploded(x: Int, y: Int) {
-                updatePosition(x, y, TileState.EXPLODED, "*")
-                if (!_uiState.value.gameOver) {
-                    gameLost()
-                }
-            }
-
-            override fun positionCleared(x: Int, y: Int, numOfAdjacent: Int) {
-                updatePosition(x, y, TileState.CLEARED, "$numOfAdjacent")
-
-                if (numOfAdjacent == 0) clickAdjacentPositions(model, x, y)
-
-                if (!_uiState.value.gameOver && assessWinConditions()) gameWon()
-            }
-
-            override fun positionFlagged(x: Int, y: Int) {
-                updatePosition(x, y, TileState.FLAGGED, "F")
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        minesRemaining = currentState.minesRemaining - 1
-                    )
-                }
-            }
-
-            private fun updatePosition(x: Int, y: Int, tileState: TileState, value: String) {
-                val index = xyToIndex(x, y)
-                _uiState.update {
-                    uiState.value.let { state ->
-                        state.copy(tileStates = state.tileStates.toMutableList()
-                            .apply { this[index] = tileState },
-                            tileValues = state.tileValues.toMutableList()
-                                .apply { this[index] = value })
-                    }
-                }
-            }
-        }
     private val timer = Timer(gamePlayListener)
     private val model = this
 
@@ -167,8 +158,7 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
         val positionPool = BasicPositionPool(BasicPosition.Factory(), Config.WIDTH, Config.HEIGHT)
         val config: Field.Configuration = BasicConfiguration(positionPool, Config.MINES)
         val field = fieldFactory.newInstance(config, x, y)
-        val game =
-            BasicGame(System.currentTimeMillis(), field, RegularIntervalTimingStrategy(1L))
+        val game = BasicGame(System.currentTimeMillis(), field, RegularIntervalTimingStrategy(1L))
 
         this.gameControlStrategy = BasicGameController(game, positionPool, null).also {
             it.setListener(gamePlayListener)
@@ -191,5 +181,16 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
             it == TileState.COVERED || it == TileState.FLAGGED
         }
         return coveredCount == Config.MINES
+    }
+
+    private fun updatePosition(x: Int, y: Int, tileState: TileState, value: String) {
+        val index = xyToIndex(x, y)
+        _uiState.update {
+            uiState.value.let { state ->
+                state.copy(tileStates = state.tileStates.toMutableList()
+                    .apply { this[index] = tileState },
+                    tileValues = state.tileValues.toMutableList().apply { this[index] = value })
+            }
+        }
     }
 }

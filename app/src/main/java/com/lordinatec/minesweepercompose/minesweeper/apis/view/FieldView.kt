@@ -10,24 +10,11 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewState
 
-private val gameOverText: (Boolean) -> String =
-    { winner -> "You " + if (winner) "Win!" else "Lose." }
-
 @Composable
 fun FieldView(
-    fieldViewModel: FieldViewModel,
-    exitClicked: (() -> Unit)? = null
+    fieldViewModel: FieldViewModel
 ) {
     val gameUiState by fieldViewModel.uiState.collectAsState()
-
-    // show game over dialog once the game is over
-    if (gameUiState.gameOver) {
-        GameOverDialog(
-            title = gameOverText(gameUiState.winner),
-            newGameClicked = { fieldViewModel.resetGame() },
-        ) { exitClicked?.let { it() } }
-    }
-
     Field(gameUiState = gameUiState, fieldViewModel = fieldViewModel)
 }
 

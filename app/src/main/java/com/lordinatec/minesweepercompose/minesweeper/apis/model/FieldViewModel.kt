@@ -40,10 +40,7 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
     private val positionCleared: (x: Int, y: Int, numOfAdjacent: Int) -> Unit =
         { x, y, numOfAdjacent ->
             updatePosition(
-                x,
-                y,
-                TileState.CLEARED,
-                if (numOfAdjacent == 0) "" else numOfAdjacent.toString()
+                x, y, TileState.CLEARED, if (numOfAdjacent == 0) "" else numOfAdjacent.toString()
             )
             if (numOfAdjacent == 0) clickAdjacentPositions(model, x, y)
             if (!_uiState.value.gameOver && assessWinConditions()) gameWon()
@@ -69,6 +66,7 @@ class FieldViewModel(private val fieldFactory: BasicFieldFactory) : ViewModel() 
         }
     }
     private val gameWon: () -> Unit = {
+        clearEverything()
         timer.cancelTimer()
         _uiState.update { currentState ->
             currentState.copy(

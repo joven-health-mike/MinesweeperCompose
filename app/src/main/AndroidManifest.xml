@@ -14,7 +14,9 @@
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
+            android:configChanges="keyboardHidden|orientation"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.MinesweeperCompose">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,8 +25,10 @@
         </activity>
         <activity
             android:name=".GameActivity"
+            android:configChanges="keyboardHidden|orientation"
             android:exported="true"
             android:label="GameActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.MinesweeperCompose" />
     </application>
 

@@ -24,7 +24,7 @@ enum class AdjacentPosition(private val xTranslate: Int, private val yTranslate:
 }
 
 fun clickAdjacentPositions(model: FieldViewModel, x: Int, y: Int) {
-    for (adjacentPosition in AdjacentPosition.entries) {
+    AdjacentPosition.entries.forEach() { adjacentPosition ->
         val newX: Int = adjacentPosition.applyXTranslationOn(x)
         val newY: Int = adjacentPosition.applyYTranslationOn(y)
 
@@ -37,9 +37,9 @@ fun clickAdjacentPositions(model: FieldViewModel, x: Int, y: Int) {
 fun countAdjacentFlags(model: FieldViewModel, x: Int, y: Int): Int {
     var result = 0
 
-    for (adjacent in AdjacentPosition.entries) {
-        val newX: Int = adjacent.applyXTranslationOn(x)
-        val newY: Int = adjacent.applyYTranslationOn(y)
+    AdjacentPosition.entries.forEach() { adjacentPosition ->
+        val newX: Int = adjacentPosition.applyXTranslationOn(x)
+        val newY: Int = adjacentPosition.applyYTranslationOn(y)
 
         if (model.validCoordinates(newX, newY) && model.positionIsFlagged(newX, newY)) {
             result++

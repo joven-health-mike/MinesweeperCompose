@@ -11,24 +11,47 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewState
 
-interface TileViewListener {
-    fun onClick(index: Int)
-    fun onLongClick(index: Int)
+class TileViewFactory(
+    private val gameUiState: FieldViewState,
+    private val onClick: ((index: Int) -> Unit)? = null,
+    private val onLongClick: ((index: Int) -> Unit)? = null
+) {
+    @Composable
+    fun CreateTileView(
+        currIndex: Int,
+    ) {
+        TileView(
+            currIndex,
+            gameUiState.tileValues[currIndex],
+            gameUiState.tileStates[currIndex],
+            onClick,
+            onLongClick
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TileView(index: Int, value: String, state: TileState, listener: TileViewListener) {
+fun TileView(
+    index: Int,
+    value: String,
+    state: TileState,
+    onClick: ((index: Int) -> Unit)? = null,
+    onLongClick: ((index: Int) -> Unit)? = null
+) {
     Box(
         modifier = Modifier
-            .combinedClickable(onLongClick = {
-                listener.onLongClick(index)
-            }, onClick = {
-                listener.onClick(index)
-            })
+            .combinedClickable(
+                onLongClick = { onLongClick?.let { it(index) } },
+                onClick = { onClick?.let { it(index) } })
             .size(75.dp)
             .background(
                 brush = Brush.radialGradient(
@@ -39,7 +62,15 @@ fun TileView(index: Int, value: String, state: TileState, listener: TileViewList
             ),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = value, color = Color.White, textAlign = TextAlign.Center)
+        Text(
+            text = value, color = Color.White,
+            style = TextStyle(
+                fontSize = 24.sp,
+                fontFamily = FontFamily.Default,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            ),
+        )
     }
 }
 

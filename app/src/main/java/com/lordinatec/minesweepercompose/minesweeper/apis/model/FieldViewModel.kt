@@ -25,6 +25,7 @@ class FieldViewModel(private val gameFactory: GameFactory) : ViewModel() {
     val uiState: StateFlow<FieldViewState> = _uiState.asStateFlow()
 
     private val gameWon: () -> Unit = {
+        clearEverything()
         timer.cancelTimer()
         _uiState.update { currentState ->
             currentState.copy(

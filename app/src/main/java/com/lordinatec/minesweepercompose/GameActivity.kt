@@ -22,7 +22,7 @@ import com.mikeburke106.mines.basic.model.RandomPositionProvider
 private val fieldFactory = BasicFieldFactory(RandomPositionProvider.Factory())
 
 class GameActivity : ComponentActivity() {
-    val viewModel = FieldViewModel(GameFactory())
+    private val viewModel = FieldViewModel(GameFactory())
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

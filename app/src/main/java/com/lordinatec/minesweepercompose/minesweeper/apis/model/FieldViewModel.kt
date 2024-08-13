@@ -171,6 +171,8 @@ class FieldViewModel(private val gameFactory: GameFactory) : ViewModel() {
     private fun calculateMineLikelihoods() {
         if (!Config.Features.SHOW_COVERED_CHANCES) return
 
+        // TODO: simplify
+        // TODO: for tiles that have multiple adjacent cleared tiles, keep the lowest % available
         for (i in 0 until Config.WIDTH * Config.HEIGHT) {
             val tileState = _uiState.value.tileStates[i]
             if (tileState != TileState.COVERED) continue
@@ -182,7 +184,6 @@ class FieldViewModel(private val gameFactory: GameFactory) : ViewModel() {
             if (adjacent.any { (adjX, adjY) ->
                     _uiState.value.tileStates[xyToIndex(adjX, adjY)] == TileState.CLEARED
                 }) {
-
                 adjacent.forEach { (adjX, adjY) ->
                     val adjIndex = xyToIndex(adjX, adjY)
                     if (_uiState.value.tileStates[adjIndex] == TileState.CLEARED) {

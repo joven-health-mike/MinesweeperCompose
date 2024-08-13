@@ -8,8 +8,11 @@ class TileViewClickListener(
     private val fieldViewModel: FieldViewModel
 ) {
     fun onClick(index: Int) {
-        // ignore clicks once game is over
-        if (gameUiState.gameOver) return
+        // any clicks after game over should reset the game
+        if (gameUiState.gameOver) {
+            fieldViewModel.resetGame()
+            return
+        }
 
         // two types of clicks are allowed:
         //   If the tile is covered, clear it.
@@ -22,8 +25,11 @@ class TileViewClickListener(
     }
 
     fun onLongClick(index: Int) {
-        // ignore clicks once game is over
-        if (gameUiState.gameOver) return
+        // any clicks after game over should reset the game
+        if (gameUiState.gameOver) {
+            fieldViewModel.resetGame()
+            return
+        }
 
         // if the tile is covered or flagged, toggle the flag
         if (gameUiState.tileStates[index] == TileState.COVERED

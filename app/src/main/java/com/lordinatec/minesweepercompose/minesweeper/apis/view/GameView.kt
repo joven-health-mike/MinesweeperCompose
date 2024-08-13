@@ -23,7 +23,7 @@ fun GameView(viewModel: FieldViewModel) {
     val gameUiState = viewModel.uiState.collectAsState().value
     val (snackbarVisibleState, setSnackBarState) = remember { mutableStateOf(false) }
 
-    if (gameUiState.gameOver) setSnackBarState(true)
+    setSnackBarState(gameUiState.gameOver)
 
     // display the game view with the field and the bottom sections
     Column {

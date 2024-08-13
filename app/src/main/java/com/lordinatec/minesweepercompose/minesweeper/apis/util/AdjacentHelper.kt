@@ -2,6 +2,7 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.util
 
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
+import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
 
 enum class AdjacentPosition(private val xTranslate: Int, private val yTranslate: Int) {
     TOP_LEFT(-1, -1),
@@ -28,23 +29,38 @@ fun clickAdjacentPositions(model: FieldViewModel, x: Int, y: Int) {
         val newX: Int = adjacentPosition.applyXTranslationOn(x)
         val newY: Int = adjacentPosition.applyYTranslationOn(y)
 
-        if (model.validCoordinates(newX, newY) && model.positionIsCovered(newX, newY)) {
+        if (model.validCoordinates(newX, newY) && model.positionIs(newX, newY, TileState.COVERED)) {
             model.clear(xyToIndex(newX, newY))
         }
     }
 }
 
-fun countAdjacentFlags(model: FieldViewModel, x: Int, y: Int): Int {
-    var result = 0
+fun countAdjacent(model: FieldViewModel, x: Int, y: Int, tileState: TileState? = null): Int {
+    return getAdjacent(model, x, y, tileState).size
+}
+
+fun getAdjacent(
+    model: FieldViewModel,
+    x: Int,
+    y: Int,
+    tileState: TileState? = null
+): List<Pair<Int, Int>> {
+    val result: MutableList<Pair<Int, Int>> = mutableListOf()
 
     AdjacentPosition.entries.forEach() { adjacentPosition ->
         val newX: Int = adjacentPosition.applyXTranslationOn(x)
         val newY: Int = adjacentPosition.applyYTranslationOn(y)
 
-        if (model.validCoordinates(newX, newY) && model.positionIsFlagged(newX, newY)) {
-            result++
+        if (model.validCoordinates(newX, newY)) {
+            if (tileState != null) {
+                if (model.positionIs(newX, newY, tileState)) {
+                    result.add(Pair(newX, newY))
+                }
+            } else {
+                result.add(Pair(newX, newY))
+            }
         }
     }
 
-    return result
+    return result.toList()
 }

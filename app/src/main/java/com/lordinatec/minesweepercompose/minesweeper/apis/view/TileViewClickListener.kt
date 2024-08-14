@@ -1,16 +1,16 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.view
 
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewState
+import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
 
 class TileViewClickListener(
-    private val gameUiState: FieldViewState,
-    private val fieldViewModel: FieldViewModel
+    private val gameUiState: GameState,
+    private val gameViewModel: GameViewModel
 ) {
     fun onClick(index: Int) {
         // any clicks after game over should reset the game
         if (gameUiState.gameOver) {
-            fieldViewModel.resetGame()
+            gameViewModel.resetGame()
             return
         }
 
@@ -18,7 +18,7 @@ class TileViewClickListener(
         //   If the tile is covered, clear it.
         //   If the tile is cleared, try to clear adjacent tiles.
         if (gameUiState.tileStates[index] == TileState.COVERED) {
-            fieldViewModel.clear(index)
+            gameViewModel.clear(index)
         } else if (gameUiState.tileStates[index] == TileState.CLEARED) {
             tryToClearAdjacentTiles(index)
         }
@@ -27,7 +27,7 @@ class TileViewClickListener(
     fun onLongClick(index: Int) {
         // any clicks after game over should reset the game
         if (gameUiState.gameOver) {
-            fieldViewModel.resetGame()
+            gameViewModel.resetGame()
             return
         }
 
@@ -35,16 +35,16 @@ class TileViewClickListener(
         if (gameUiState.tileStates[index] == TileState.COVERED
             || gameUiState.tileStates[index] == TileState.FLAGGED
         ) {
-            fieldViewModel.toggleFlag(index)
+            gameViewModel.toggleFlag(index)
         }
     }
 
     private fun tryToClearAdjacentTiles(index: Int) {
-        val adjacentFlags = fieldViewModel.getAdjacentFlags(index)
+        val adjacentFlags = gameViewModel.getAdjacentFlags(index)
         try {
             // if the number of adjacent flags is equal to the value of the tile, clear all adjacent tiles
             if (adjacentFlags == gameUiState.tileValues[index].toInt()) {
-                fieldViewModel.clearAdjacentTiles(index)
+                gameViewModel.clearAdjacentTiles(index)
             }
         } catch (e: NumberFormatException) {
             // value is nan - do nothing

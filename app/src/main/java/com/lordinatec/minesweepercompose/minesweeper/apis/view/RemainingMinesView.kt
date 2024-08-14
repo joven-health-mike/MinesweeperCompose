@@ -13,20 +13,5 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
+import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 
-@Composable
-fun RemainingMinesView(viewModel: FieldViewModel) {
-    val remainingMines = viewModel.uiState.collectAsState().value.minesRemaining
-    Box(modifier = Modifier.padding(5.dp), contentAlignment = Alignment.Center) {
-        Text(
-            text = "Remaining Mines: $remainingMines",
-            style = TextStyle(
-                fontSize = 18.sp,
-                fontFamily = FontFamily.Default,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            ),
-        )
-    }
-}

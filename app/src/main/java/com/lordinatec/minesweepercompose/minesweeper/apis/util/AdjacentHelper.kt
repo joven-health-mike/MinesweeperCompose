@@ -1,7 +1,7 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.util
 
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
+import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
 
 enum class AdjacentPosition(private val xTranslate: Int, private val yTranslate: Int) {
@@ -24,7 +24,7 @@ enum class AdjacentPosition(private val xTranslate: Int, private val yTranslate:
     }
 }
 
-fun clickAdjacentPositions(model: FieldViewModel, x: Int, y: Int) {
+fun clickAdjacentPositions(model: GameViewModel, x: Int, y: Int) {
     AdjacentPosition.entries.forEach() { adjacentPosition ->
         val newX: Int = adjacentPosition.applyXTranslationOn(x)
         val newY: Int = adjacentPosition.applyYTranslationOn(y)
@@ -35,12 +35,12 @@ fun clickAdjacentPositions(model: FieldViewModel, x: Int, y: Int) {
     }
 }
 
-fun countAdjacent(model: FieldViewModel, x: Int, y: Int, tileState: TileState? = null): Int {
+fun countAdjacent(model: GameViewModel, x: Int, y: Int, tileState: TileState? = null): Int {
     return getAdjacent(model, x, y, tileState).size
 }
 
 fun getAdjacent(
-    model: FieldViewModel,
+    model: GameViewModel,
     x: Int,
     y: Int,
     tileState: TileState? = null

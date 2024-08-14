@@ -7,20 +7,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewState
+import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
 
 @Composable
 fun FieldView(
-    fieldViewModel: FieldViewModel
+    gameViewModel: GameViewModel
 ) {
-    val gameUiState by fieldViewModel.uiState.collectAsState()
-    Field(gameUiState = gameUiState, fieldViewModel = fieldViewModel)
+    val gameUiState by gameViewModel.uiState.collectAsState()
+    Field(gameUiState = gameUiState, gameViewModel = gameViewModel)
 }
 
 @Composable
-private fun Field(gameUiState: FieldViewState, fieldViewModel: FieldViewModel) {
-    val clickListener = TileViewClickListener(gameUiState, fieldViewModel)
+private fun Field(gameUiState: GameState, gameViewModel: GameViewModel) {
+    val clickListener = TileViewClickListener(gameUiState, gameViewModel)
     val tileViewFactory = TileViewFactory(
         gameUiState = gameUiState,
         onClick = { clickListener.onClick(it) },

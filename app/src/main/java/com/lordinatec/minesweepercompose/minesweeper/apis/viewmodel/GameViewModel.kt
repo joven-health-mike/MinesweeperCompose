@@ -1,10 +1,12 @@
-package com.lordinatec.minesweepercompose.minesweeper.apis.model
+package com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.indexToXY
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
-import com.lordinatec.minesweepercompose.minesweeper.apis.util.CountUpTimer
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameFactory
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameListenerBridge
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.clickAdjacentPositions
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.countAdjacent
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.getAdjacent
@@ -15,34 +17,30 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class FieldViewModel(private val gameFactory: GameFactory) : ViewModel() {
-    private class Timer(val listener: GameControlStrategy.Listener) : CountUpTimer() {
-        override fun onMsTick(tenMsInterval: Long) {
-            listener.timeUpdate(tenMsInterval)
-        }
-    }
+class GameViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(GameState())
+    val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
-    private val _uiState = MutableStateFlow(FieldViewState())
-    val uiState: StateFlow<FieldViewState> = _uiState.asStateFlow()
+    private val gameFactory: GameFactory = GameFactory()
 
     private val gameWon: () -> Unit = {
         clearEverything()
-        timer.cancelTimer()
         _uiState.update { currentState ->
             currentState.copy(
                 gameOver = true,
                 winner = true,
+                runTimer = false
             )
         }
     }
 
     private val gameLost: () -> Unit = {
         clearEverything()
-        timer.cancelTimer()
         _uiState.update { currentState ->
             currentState.copy(
                 gameOver = true,
                 winner = false,
+                runTimer = false
             )
         }
     }
@@ -50,11 +48,6 @@ class FieldViewModel(private val gameFactory: GameFactory) : ViewModel() {
     private var gameModel: GameControlStrategy? = null
     private var gameCreated: Boolean = false
     private val gamePlayListener: GameControlStrategy.Listener = GameListenerBridge(
-        onTimeUpdate = {
-            _uiState.update { currentState ->
-                currentState.copy(timeValue = it / 1000f)
-            }
-        },
         onPositionCleared = { x, y, numOfAdjacent ->
             updatePosition(
                 x,
@@ -92,12 +85,11 @@ class FieldViewModel(private val gameFactory: GameFactory) : ViewModel() {
         onGameLost = gameLost
     )
 
-    private val timer = Timer(gamePlayListener)
     private val model = this
 
     /* PUBLIC APIS */
     fun resetGame() {
-        _uiState.update { FieldViewState() }
+        _uiState.update { GameState() }
         gameCreated = false
     }
 
@@ -141,8 +133,7 @@ class FieldViewModel(private val gameFactory: GameFactory) : ViewModel() {
     private fun createGame(x: Int, y: Int) {
         this.gameCreated = true
         gameModel = gameFactory.createGame(x, y, gamePlayListener)
-        _uiState.value = FieldViewState()
-        timer.start()
+        _uiState.value = GameState().copy(runTimer = true)
     }
 
     private fun clearEverything() {

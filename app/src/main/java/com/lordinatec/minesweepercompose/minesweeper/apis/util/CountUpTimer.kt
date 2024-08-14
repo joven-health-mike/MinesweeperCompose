@@ -2,23 +2,22 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.util
 
 import android.os.CountDownTimer
 
-abstract class CountUpTimer protected constructor(private val duration: Long = Long.MAX_VALUE) :
-    CountDownTimer(duration, INTERVAL_MS) {
-    abstract fun onMsTick(tenMsInterval: Long)
+class CountUpTimer(
+    interval: Long = 10L,
+    private val callback: (tenMsInterval: Long) -> Unit,
+    private val duration: Long = Long.MAX_VALUE
+) :
+    CountDownTimer(duration, interval) {
 
     fun cancelTimer() {
         cancel()
     }
 
     override fun onTick(msUntilFinished: Long) {
-        onMsTick(duration - msUntilFinished)
+        callback(duration - msUntilFinished)
     }
 
     override fun onFinish() {
-        onMsTick(duration)
-    }
-
-    companion object {
-        private const val INTERVAL_MS: Long = 10L
+        callback(duration)
     }
 }

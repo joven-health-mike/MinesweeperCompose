@@ -7,6 +7,8 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameFactory
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameListenerBridge
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.TimerFactory
+import com.lordinatec.minesweepercompose.minesweeper.apis.util.CountUpTimer
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.clickAdjacentPositions
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.countAdjacent
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.getAdjacent
@@ -22,25 +24,36 @@ class GameViewModel : ViewModel() {
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
     private val gameFactory: GameFactory = GameFactory()
+    private val timerFactory: TimerFactory = TimerFactory() { onTimeUpdate(it) }
+
+    private var timer: CountUpTimer? = null
+
+    private val onTimeUpdate: (newTime: Long) -> Unit = {
+        _uiState.update { currentState ->
+            currentState.copy(
+                timeValue = it
+            )
+        }
+    }
 
     private val gameWon: () -> Unit = {
         clearEverything()
+        timer?.cancel()
         _uiState.update { currentState ->
             currentState.copy(
                 gameOver = true,
                 winner = true,
-                runTimer = false
             )
         }
     }
 
     private val gameLost: () -> Unit = {
         clearEverything()
+        timer?.cancel()
         _uiState.update { currentState ->
             currentState.copy(
                 gameOver = true,
                 winner = false,
-                runTimer = false
             )
         }
     }
@@ -48,6 +61,7 @@ class GameViewModel : ViewModel() {
     private var gameModel: GameControlStrategy? = null
     private var gameCreated: Boolean = false
     private val gamePlayListener: GameControlStrategy.Listener = GameListenerBridge(
+        onTimeUpdate = onTimeUpdate,
         onPositionCleared = { x, y, numOfAdjacent ->
             updatePosition(
                 x,
@@ -129,11 +143,26 @@ class GameViewModel : ViewModel() {
         }
     }
 
+    fun pauseTimer() {
+        if(!_uiState.value.gameOver) timer?.cancel()
+    }
+
+    fun resumeTimer() {
+        if(!_uiState.value.gameOver) {
+            timer?.let {
+                timer = timerFactory.create(_uiState.value.timeValue)
+                timer!!.start()
+            }
+        }
+    }
+
     /* PRIVATE FUNCTIONS */
     private fun createGame(x: Int, y: Int) {
         this.gameCreated = true
         gameModel = gameFactory.createGame(x, y, gamePlayListener)
-        _uiState.value = GameState().copy(runTimer = true)
+        _uiState.value = GameState()
+        timer = timerFactory.create(_uiState.value.timeValue)
+        timer!!.start()
     }
 
     private fun clearEverything() {

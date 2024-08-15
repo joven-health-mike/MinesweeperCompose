@@ -25,21 +25,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
-import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameTimerViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 
-private lateinit var gameState: GameState
 private lateinit var gameViewModel: GameViewModel
 
 @Composable
 fun GameView(viewModel: GameViewModel = viewModel()) {
     gameViewModel = viewModel
     val gameUiState by viewModel.uiState.collectAsState()
-    gameState = gameUiState
     val (snackbarVisibleState, setSnackBarState) = remember { mutableStateOf(false) }
 
-    setSnackBarState(gameState.gameOver)
+    setSnackBarState(gameUiState.gameOver)
+
 
     // display the game view with the field and the bottom sections
     Column {
@@ -79,21 +76,15 @@ private fun BottomSection() {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-        RemainingMinesView(viewModel = gameViewModel)
-        // TODO: reset timer when game is reset
-        GameTimerView(start = gameViewModel.uiState.collectAsState().value.runTimer, reset = false)
+        RemainingMinesView()
+        GameTimerView()
     }
 }
 
 @Composable
-private fun GameTimerView(
-    viewModel: GameTimerViewModel = viewModel(),
-    start: Boolean,
-    reset: Boolean
-) {
-    if (reset) viewModel.reset()
-    if (start) viewModel.start() else viewModel.cancel()
-    val time by viewModel.time.collectAsState()
+private fun GameTimerView() {
+    val gameUiState by gameViewModel.uiState.collectAsState()
+    val time = gameUiState.timeValue
     val floatTime = time.toFloat() / 1000
     val timeInt = floatTime.toInt()
     var timeDec = (floatTime - timeInt).toString().padEnd(3, '0')
@@ -112,8 +103,9 @@ private fun GameTimerView(
 }
 
 @Composable
-private fun RemainingMinesView(viewModel: GameViewModel) {
-    val remainingMines = viewModel.uiState.collectAsState().value.minesRemaining
+private fun RemainingMinesView() {
+    val gameUiState by gameViewModel.uiState.collectAsState()
+    val remainingMines = gameUiState.minesRemaining
     Box(modifier = Modifier.padding(5.dp), contentAlignment = Alignment.Center) {
         Text(
             text = "Remaining Mines: $remainingMines",

@@ -4,7 +4,7 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
 
 data class GameState(
-    val runTimer: Boolean = false,
+    val timeValue: Long = 0L,
     val gameOver: Boolean = false,
     val winner: Boolean = false,
     val minesRemaining: Int = Config.MINES,

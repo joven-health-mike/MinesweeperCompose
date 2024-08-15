@@ -4,14 +4,11 @@ import android.os.CountDownTimer
 
 class CountUpTimer(
     interval: Long = 10L,
+    startTime: Long = 0L,
     private val callback: (tenMsInterval: Long) -> Unit,
     private val duration: Long = Long.MAX_VALUE
 ) :
-    CountDownTimer(duration, interval) {
-
-    fun cancelTimer() {
-        cancel()
-    }
+    CountDownTimer(duration - startTime, interval) {
 
     override fun onTick(msUntilFinished: Long) {
         callback(duration - msUntilFinished)

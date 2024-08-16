@@ -1,32 +1,29 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config.indexToXY
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameFactory
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameListenerBridge
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.TimerFactory
-import com.lordinatec.minesweepercompose.minesweeper.apis.util.CountUpTimer
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.clickAdjacentPositions
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.countAdjacent
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.getAdjacent
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
-import com.mikeburke106.mines.api.model.GameControlStrategy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class GameViewModel : ViewModel() {
+class GameViewModel(
+    private val application: Application,
+    private val config: Config = Config,
+    gameControllerFactory: GameController.Factory,
+) : ViewModel() {
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
-    private val gameFactory: GameFactory = GameFactory()
-    private val timerFactory: TimerFactory = TimerFactory() { onTimeUpdate(it) }
-
-    private var timer: CountUpTimer? = null
+    private val gameController = gameControllerFactory.createGameController()
 
     private val onTimeUpdate: (newTime: Long) -> Unit = {
         _uiState.update { currentState ->
@@ -38,7 +35,7 @@ class GameViewModel : ViewModel() {
 
     private val gameWon: () -> Unit = {
         clearEverything()
-        timer?.cancel()
+        gameController.cancelTimer()
         _uiState.update { currentState ->
             currentState.copy(
                 gameOver = true,
@@ -49,7 +46,7 @@ class GameViewModel : ViewModel() {
 
     private val gameLost: () -> Unit = {
         clearEverything()
-        timer?.cancel()
+        gameController.cancelTimer()
         _uiState.update { currentState ->
             currentState.copy(
                 gameOver = true,
@@ -58,27 +55,24 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    private var gameModel: GameControlStrategy? = null
-    private var gameCreated: Boolean = false
-    private val gamePlayListener: GameControlStrategy.Listener = GameListenerBridge(
+    private val gamePlayListener: GameListenerBridge = GameListenerBridge(
         onTimeUpdate = onTimeUpdate,
-        onPositionCleared = { x, y, numOfAdjacent ->
+        onPositionCleared = { index, numOfAdjacent ->
             updatePosition(
-                x,
-                y,
+                index,
                 TileState.CLEARED,
                 if (numOfAdjacent == 0) "" else numOfAdjacent.toString()
             )
-            if (numOfAdjacent == 0) clickAdjacentPositions(model, x, y)
+            if (numOfAdjacent == 0) clickAdjacentPositions(model, index)
             calculateMineLikelihoods()
             if (!_uiState.value.gameOver && assessWinConditions()) gameWon()
         },
-        onPositionExploded = { x, y ->
-            updatePosition(x, y, TileState.EXPLODED, "*")
+        onPositionExploded = { index ->
+            updatePosition(index, TileState.EXPLODED, "*")
             if (!uiState.value.gameOver) gameLost()
         },
-        onPositionFlagged = { x, y ->
-            updatePosition(x, y, TileState.FLAGGED, "F")
+        onPositionFlagged = { index ->
+            updatePosition(index, TileState.FLAGGED, "F")
             _uiState.update { currentState ->
                 currentState.copy(
                     minesRemaining = currentState.minesRemaining - 1
@@ -86,8 +80,8 @@ class GameViewModel : ViewModel() {
             }
             calculateMineLikelihoods()
         },
-        onPositionUnflagged = { x, y ->
-            updatePosition(x, y, TileState.COVERED, "")
+        onPositionUnflagged = { index ->
+            updatePosition(index, TileState.COVERED, "")
             _uiState.update { currentState ->
                 currentState.copy(
                     minesRemaining = currentState.minesRemaining + 1
@@ -104,65 +98,53 @@ class GameViewModel : ViewModel() {
     /* PUBLIC APIS */
     fun resetGame() {
         _uiState.update { GameState() }
-        gameCreated = false
+        gameController.resetGame()
     }
 
     fun clear(index: Int) {
-        val (x, y) = indexToXY(index)
-        if (!gameCreated) createGame(x, y)
-        gameModel?.clear(x, y)
+        createGame(index)
+        gameController.clear(index)
     }
 
     fun toggleFlag(index: Int) {
-        indexToXY(index).let { (x, y) ->
-            gameModel?.toggleFlag(x, y)
-        }
+        gameController.toggleFlag(index)
 
-        if (_uiState.value.tileStates.count { it == TileState.FLAGGED } == Config.MINES) {
+        if (_uiState.value.tileStates.count { it == TileState.FLAGGED } == config.MINES) {
             clearEverything()
         }
     }
 
     fun validCoordinates(x: Int, y: Int): Boolean {
-        return x in 0 until Config.WIDTH && y in 0 until Config.HEIGHT
+        return x in 0 until config.WIDTH && y in 0 until config.HEIGHT
     }
 
-    fun positionIs(x: Int, y: Int, tileState: TileState): Boolean {
-        return _uiState.value.tileStates[xyToIndex(x, y)] == tileState
+    fun positionIs(index: Int, tileState: TileState): Boolean {
+        return _uiState.value.tileStates[index] == tileState
     }
 
     fun clearAdjacentTiles(index: Int) {
-        indexToXY(index).let { (x, y) ->
-            clickAdjacentPositions(model, x, y)
-        }
+        clickAdjacentPositions(model, index)
     }
 
     fun getAdjacentFlags(index: Int): Int {
-        return indexToXY(index).let { (x, y) ->
-            countAdjacent(model, x, y, TileState.FLAGGED)
-        }
+        return countAdjacent(model, index, TileState.FLAGGED)
     }
 
     fun pauseTimer() {
-        if(!_uiState.value.gameOver) timer?.cancel()
+        if (!_uiState.value.gameOver) gameController.pauseTimer()
     }
 
     fun resumeTimer() {
-        if(!_uiState.value.gameOver) {
-            timer?.let {
-                timer = timerFactory.create(_uiState.value.timeValue)
-                timer!!.start()
-            }
+        if (!_uiState.value.gameOver) {
+            gameController.resumeTimer()
         }
     }
 
     /* PRIVATE FUNCTIONS */
-    private fun createGame(x: Int, y: Int) {
-        this.gameCreated = true
-        gameModel = gameFactory.createGame(x, y, gamePlayListener)
+    private fun createGame(index: Int) {
+        gameController.createGame(index, gamePlayListener)
         _uiState.value = GameState()
-        timer = timerFactory.create(_uiState.value.timeValue)
-        timer!!.start()
+        gameController.startTimer()
     }
 
     private fun clearEverything() {
@@ -175,11 +157,10 @@ class GameViewModel : ViewModel() {
     private fun assessWinConditions(): Boolean {
         return _uiState.value.tileStates.count {
             it == TileState.COVERED || it == TileState.FLAGGED
-        } == Config.MINES
+        } == config.MINES
     }
 
-    private fun updatePosition(x: Int, y: Int, tileState: TileState, value: String) {
-        val index = xyToIndex(x, y)
+    private fun updatePosition(index: Int, tileState: TileState, value: String) {
         _uiState.update {
             it.copy(
                 tileStates = it.tileStates.toMutableList().apply { this[index] = tileState },
@@ -189,29 +170,27 @@ class GameViewModel : ViewModel() {
     }
 
     private fun calculateMineLikelihoods() {
-        if (!Config.Features.SHOW_COVERED_CHANCES) return
+        if (!config.FEATURES.SHOW_COVERED_CHANCES) return
 
         // TODO: simplify
         // TODO: for tiles that have multiple adjacent cleared tiles, keep the lowest % available
-        for (i in 0 until Config.WIDTH * Config.HEIGHT) {
+        for (i in 0 until config.WIDTH * config.HEIGHT) {
             val tileState = _uiState.value.tileStates[i]
             if (tileState != TileState.COVERED) continue
 
-            val (x, y) = indexToXY(i)
-            val adjacent = getAdjacent(model, x, y)
+            val adjacent = getAdjacent(model, i)
 
             // Check if any adjacent tile is cleared
-            if (adjacent.any { (adjX, adjY) ->
-                    _uiState.value.tileStates[xyToIndex(adjX, adjY)] == TileState.CLEARED
+            if (adjacent.any {
+                    _uiState.value.tileStates[it] == TileState.CLEARED
                 }) {
-                adjacent.forEach { (adjX, adjY) ->
-                    val adjIndex = xyToIndex(adjX, adjY)
-                    if (_uiState.value.tileStates[adjIndex] == TileState.CLEARED) {
-                        val tileValue = _uiState.value.tileValues[adjIndex]
+                adjacent.forEach {
+                    if (_uiState.value.tileStates[it] == TileState.CLEARED) {
+                        val tileValue = _uiState.value.tileValues[it]
                         val tileLongValue = tileValue.toLongOrNull() ?: 0L
 
-                        val adjFlags = countAdjacent(model, adjX, adjY, TileState.FLAGGED)
-                        val adjCovered = countAdjacent(model, adjX, adjY, TileState.COVERED)
+                        val adjFlags = countAdjacent(model, it, TileState.FLAGGED)
+                        val adjCovered = countAdjacent(model, it, TileState.COVERED)
                         if (adjCovered == 0) return@forEach
 
                         val chance = ((tileLongValue - adjFlags).toFloat() / adjCovered) * 100

@@ -1,7 +1,8 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.util
 
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewModel
+import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
+import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
 
 enum class AdjacentPosition(private val xTranslate: Int, private val yTranslate: Int) {
     TOP_LEFT(-1, -1),
@@ -23,28 +24,43 @@ enum class AdjacentPosition(private val xTranslate: Int, private val yTranslate:
     }
 }
 
-fun clickAdjacentPositions(model: FieldViewModel, x: Int, y: Int) {
-    for (adjacentPosition in AdjacentPosition.entries) {
+fun clickAdjacentPositions(model: GameViewModel, x: Int, y: Int) {
+    AdjacentPosition.entries.forEach() { adjacentPosition ->
         val newX: Int = adjacentPosition.applyXTranslationOn(x)
         val newY: Int = adjacentPosition.applyYTranslationOn(y)
 
-        if (model.validCoordinates(newX, newY) && model.positionIsCovered(newX, newY)) {
+        if (model.validCoordinates(newX, newY) && model.positionIs(newX, newY, TileState.COVERED)) {
             model.clear(xyToIndex(newX, newY))
         }
     }
 }
 
-fun countAdjacentFlags(model: FieldViewModel, x: Int, y: Int): Int {
-    var result = 0
+fun countAdjacent(model: GameViewModel, x: Int, y: Int, tileState: TileState? = null): Int {
+    return getAdjacent(model, x, y, tileState).size
+}
 
-    for (adjacent in AdjacentPosition.entries) {
-        val newX: Int = adjacent.applyXTranslationOn(x)
-        val newY: Int = adjacent.applyYTranslationOn(y)
+fun getAdjacent(
+    model: GameViewModel,
+    x: Int,
+    y: Int,
+    tileState: TileState? = null
+): List<Pair<Int, Int>> {
+    val result: MutableList<Pair<Int, Int>> = mutableListOf()
 
-        if (model.validCoordinates(newX, newY) && model.positionIsFlagged(newX, newY)) {
-            result++
+    AdjacentPosition.entries.forEach() { adjacentPosition ->
+        val newX: Int = adjacentPosition.applyXTranslationOn(x)
+        val newY: Int = adjacentPosition.applyYTranslationOn(y)
+
+        if (model.validCoordinates(newX, newY)) {
+            if (tileState != null) {
+                if (model.positionIs(newX, newY, tileState)) {
+                    result.add(Pair(newX, newY))
+                }
+            } else {
+                result.add(Pair(newX, newY))
+            }
         }
     }
 
-    return result
+    return result.toList()
 }

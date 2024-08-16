@@ -17,10 +17,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.FieldViewState
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
 
 class TileViewFactory(
-    private val gameUiState: FieldViewState,
+    private val gameUiState: GameState,
     private val onClick: ((index: Int) -> Unit)? = null,
     private val onLongClick: ((index: Int) -> Unit)? = null
 ) {

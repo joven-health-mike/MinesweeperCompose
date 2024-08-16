@@ -14,4 +14,8 @@ object Config {
     fun xyToIndex(x: Int, y: Int): Int {
         return y * WIDTH + x
     }
+
+    object Features {
+        const val SHOW_COVERED_CHANCES = false
+    }
 }

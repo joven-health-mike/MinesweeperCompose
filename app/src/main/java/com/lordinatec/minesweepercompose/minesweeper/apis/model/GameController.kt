@@ -10,12 +10,12 @@ class GameController(
     private val timerFactory: TimerFactory,
     private val listener: GameControlStrategy.Listener = GameListenerBridge()
 ) {
-    private var gameCreated: Boolean = false
+    var gameCreated: Boolean = false
     private var gameModel: BasicGameController? = null
     private var timer: CountUpTimer? = null
     private var timerValue = 0L
 
-    fun createGame(index: Int, listener: GameControlStrategy.Listener) {
+    fun createGame(index: Int) {
         if (!gameCreated) {
             gameCreated = true
             val (x, y) = indexToXY(index)
@@ -25,6 +25,7 @@ class GameController(
 
     fun resetGame() {
         gameCreated = false
+        cancelTimer()
     }
 
     fun clear(index: Int) {
@@ -38,8 +39,10 @@ class GameController(
     }
 
     fun startTimer(startTime: Long = 0L) {
+        cancelTimer()
         timer = timerFactory.create(startTime) { time ->
             listener.timeUpdate(time)
+            timerValue = time
         }.apply { start() }
     }
 
@@ -48,8 +51,10 @@ class GameController(
     }
 
     fun resumeTimer() {
+        cancelTimer()
         timer = timerFactory.create(timerValue) { time ->
             listener.timeUpdate(time)
+            timerValue = time
         }.apply { start() }
     }
 
@@ -60,9 +65,8 @@ class GameController(
     class Factory(
         private val gameFactory: GameFactory,
         private val timerFactory: TimerFactory,
-        private val listener: GameControlStrategy.Listener = GameListenerBridge()
     ) {
-        fun createGameController(): GameController {
+        fun createGameController(listener: GameControlStrategy.Listener): GameController {
             return GameController(gameFactory, timerFactory, listener)
         }
     }

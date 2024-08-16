@@ -33,7 +33,7 @@ fun clickAdjacentPositions(model: GameViewModel, index: Int) {
         val newIndex = xyToIndex(newX, newY)
 
         if (model.validCoordinates(newX, newY) && model.positionIs(newIndex, TileState.COVERED)) {
-            model.clear(xyToIndex(newX, newY))
+            model.clear(newIndex)
         }
     }
 }

@@ -23,8 +23,6 @@ class GameViewModel(
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
-    private val gameController = gameControllerFactory.createGameController()
-
     private val onTimeUpdate: (newTime: Long) -> Unit = {
         _uiState.update { currentState ->
             currentState.copy(
@@ -93,6 +91,7 @@ class GameViewModel(
         onGameLost = gameLost
     )
 
+    private val gameController = gameControllerFactory.createGameController(gamePlayListener)
     private val model = this
 
     /* PUBLIC APIS */
@@ -102,7 +101,7 @@ class GameViewModel(
     }
 
     fun clear(index: Int) {
-        createGame(index)
+        if (!gameController.gameCreated) createGame(index)
         gameController.clear(index)
     }
 
@@ -135,14 +134,14 @@ class GameViewModel(
     }
 
     fun resumeTimer() {
-        if (!_uiState.value.gameOver) {
+        if (gameController.gameCreated && !_uiState.value.gameOver) {
             gameController.resumeTimer()
         }
     }
 
     /* PRIVATE FUNCTIONS */
     private fun createGame(index: Int) {
-        gameController.createGame(index, gamePlayListener)
+        gameController.createGame(index)
         _uiState.value = GameState()
         gameController.startTimer()
     }

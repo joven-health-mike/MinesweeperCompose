@@ -20,10 +20,6 @@ class GameController(
             gameCreated = true
             val (x, y) = indexToXY(index)
             gameModel = gameFactory.createGame(x, y, listener)
-            timerFactory.create { time ->
-                timerValue = time
-                listener.timeUpdate(time)
-            }
         }
     }
 

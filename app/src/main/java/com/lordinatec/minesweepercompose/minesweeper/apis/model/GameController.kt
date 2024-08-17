@@ -71,7 +71,7 @@ class GameController(
 
     fun flagIsCorrect(index: Int): Boolean {
         val (x, y) = indexToXY(index)
-        val position = positionPool!!.atLocation(x, y)
+        val position =positionPool!!.atLocation(x, y)
         return gameField?.isMine(position)!!
 
     }

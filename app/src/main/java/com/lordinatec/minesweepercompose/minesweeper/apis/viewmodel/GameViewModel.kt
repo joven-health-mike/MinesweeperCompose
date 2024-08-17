@@ -100,6 +100,10 @@ class GameViewModel(
         gameController.resetGame()
     }
 
+    fun flagIsCorrect(index: Int): Boolean {
+        return gameController.flagIsCorrect(index)
+    }
+
     fun clear(index: Int) {
         if (!gameController.gameCreated) createGame(index)
         gameController.clear(index)

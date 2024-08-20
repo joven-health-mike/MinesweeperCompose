@@ -4,6 +4,7 @@ object Config {
     const val WIDTH = 5
     const val HEIGHT = 7
     const val MINES = 7
+    val FEATURES = Features
 
     fun indexToXY(index: Int): Pair<Int, Int> {
         val xVal = index % WIDTH

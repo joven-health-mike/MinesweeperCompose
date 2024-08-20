@@ -1,8 +1,9 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.util
 
+import com.lordinatec.minesweepercompose.minesweeper.apis.Config.indexToXY
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
-import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
+import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 
 enum class AdjacentPosition(private val xTranslate: Int, private val yTranslate: Int) {
     TOP_LEFT(-1, -1),
@@ -24,28 +25,30 @@ enum class AdjacentPosition(private val xTranslate: Int, private val yTranslate:
     }
 }
 
-fun clickAdjacentPositions(model: GameViewModel, x: Int, y: Int) {
+fun clickAdjacentPositions(model: GameViewModel, index: Int) {
+    val (x, y) = indexToXY(index)
     AdjacentPosition.entries.forEach() { adjacentPosition ->
         val newX: Int = adjacentPosition.applyXTranslationOn(x)
         val newY: Int = adjacentPosition.applyYTranslationOn(y)
+        val newIndex = xyToIndex(newX, newY)
 
-        if (model.validCoordinates(newX, newY) && model.positionIs(newX, newY, TileState.COVERED)) {
-            model.clear(xyToIndex(newX, newY))
+        if (model.validCoordinates(newX, newY) && model.positionIs(newIndex, TileState.COVERED)) {
+            model.clear(newIndex)
         }
     }
 }
 
-fun countAdjacent(model: GameViewModel, x: Int, y: Int, tileState: TileState? = null): Int {
-    return getAdjacent(model, x, y, tileState).size
+fun countAdjacent(model: GameViewModel, index: Int, tileState: TileState? = null): Int {
+    return getAdjacent(model, index, tileState).size
 }
 
 fun getAdjacent(
     model: GameViewModel,
-    x: Int,
-    y: Int,
+    index: Int,
     tileState: TileState? = null
-): List<Pair<Int, Int>> {
-    val result: MutableList<Pair<Int, Int>> = mutableListOf()
+): List<Int> {
+    val result: MutableList<Int> = mutableListOf()
+    val (x, y) = indexToXY(index)
 
     AdjacentPosition.entries.forEach() { adjacentPosition ->
         val newX: Int = adjacentPosition.applyXTranslationOn(x)
@@ -53,11 +56,12 @@ fun getAdjacent(
 
         if (model.validCoordinates(newX, newY)) {
             if (tileState != null) {
-                if (model.positionIs(newX, newY, tileState)) {
-                    result.add(Pair(newX, newY))
+                val newIndex = xyToIndex(newX, newY)
+                if (model.positionIs(newIndex, tileState)) {
+                    result.add(xyToIndex(newX, newY))
                 }
             } else {
-                result.add(Pair(newX, newY))
+                result.add(xyToIndex(newX, newY))
             }
         }
     }

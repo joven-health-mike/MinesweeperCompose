@@ -14,12 +14,34 @@ import com.mikeburke106.mines.basic.model.RegularIntervalTimingStrategy
 
 private val fieldFactory = BasicFieldFactory(RandomPositionProvider.Factory())
 
+interface GameInfoHolder {
+    fun getGameController(): BasicGameController
+    fun getField(): Field
+    fun getPositionPool(): BasicPositionPool
+}
+
 class GameFactory {
-    fun createGame(x: Int, y: Int, listener: Listener): BasicGameController {
+    fun createGame(x: Int, y: Int, listener: Listener): GameInfoHolder {
         val positionPool = BasicPositionPool(BasicPosition.Factory(), Config.WIDTH, Config.HEIGHT)
         val config: Field.Configuration = BasicConfiguration(positionPool, Config.MINES)
         val field = fieldFactory.newInstance(config, x, y)
         val game = BasicGame(System.currentTimeMillis(), field, RegularIntervalTimingStrategy(1L))
-        return BasicGameController(game, positionPool, null).also { it.setListener(listener) }
+        return object : GameInfoHolder {
+            override fun getGameController(): BasicGameController {
+                return BasicGameController(
+                    game,
+                    positionPool,
+                    null
+                ).also { it.setListener(listener) }
+            }
+
+            override fun getField(): Field {
+                return field
+            }
+
+            override fun getPositionPool(): BasicPositionPool {
+                return positionPool
+            }
+        }
     }
 }

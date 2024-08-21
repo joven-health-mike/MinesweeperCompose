@@ -33,12 +33,23 @@ import androidx.compose.ui.unit.sp
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 
+/**
+ * Factory class to create TileView
+ *
+ * @param gameUiState The state of the game
+ * @param gameViewModel The view model of the game
+ * @param onClick Listener for clicks
+ * @param onLongClick Listener for long clicks
+ */
 class TileViewFactory(
     private val gameUiState: GameState,
     private val gameViewModel: GameViewModel,
     private val onClick: ((index: Int) -> Unit)? = null,
     private val onLongClick: ((index: Int) -> Unit)? = null
 ) {
+    /**
+     * Create a TileView with the given index.
+     */
     @Composable
     fun CreateTileView(
         currIndex: Int,
@@ -54,6 +65,16 @@ class TileViewFactory(
     }
 }
 
+/**
+ * View for a tile.
+ *
+ * @param index The index of the tile
+ * @param value The value of the tile
+ * @param state The state of the tile
+ * @param gameViewModel The view model of the game
+ * @param onClick Listener for clicks
+ * @param onLongClick Listener for long clicks
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TileView(
@@ -106,6 +127,12 @@ fun TileView(
     }
 }
 
+/**
+ * Enum class for the state of a tile.
+ *
+ * @param primaryColor The primary color of the tile
+ * @param secondaryColor The secondary color of the tile
+ */
 enum class TileState(val primaryColor: Color, val secondaryColor: Color) {
     COVERED(Color.Blue, Color.Gray),
     CLEARED(Color.Gray, Color.DarkGray),

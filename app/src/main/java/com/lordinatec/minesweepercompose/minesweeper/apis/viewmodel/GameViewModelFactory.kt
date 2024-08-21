@@ -9,8 +9,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.TimerFactory
 
+/**
+ * Factory for creating GameViewModel
+ *
+ * @param mApplication Application object
+ * @param config Configuration of the game
+ * @param gameControllerFactory Factory for creating GameController
+ *
+ * @constructor Creates a GameViewModelFactory
+ */
 class GameViewModelFactory(
     private val mApplication: Application,
     private val config: Config = Config,

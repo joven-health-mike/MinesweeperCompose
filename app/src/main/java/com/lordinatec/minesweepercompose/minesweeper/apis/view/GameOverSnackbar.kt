@@ -20,6 +20,12 @@ import androidx.compose.ui.unit.dp
 private val gameOverText: (Boolean) -> String =
     { winner -> "You " + if (winner) "Win!" else "Lose." }
 
+/**
+ * Snackbar to show game over message
+ *
+ * @param winner true if the player won the game
+ * @param onNewGame callback to start a new game
+ */
 @Composable
 fun GameOverSnackbar(winner: Boolean, onNewGame: () -> Unit) {
     Box(

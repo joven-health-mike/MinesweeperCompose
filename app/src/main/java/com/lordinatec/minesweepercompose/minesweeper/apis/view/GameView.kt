@@ -36,13 +36,18 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewMode
 
 private lateinit var gameViewModel: GameViewModel
 
+/**
+ * The main game view that displays the game field and associated sections
+ *
+ * @param viewModel the view model to use for the game
+ */
 @Composable
 fun GameView(viewModel: GameViewModel = viewModel()) {
     gameViewModel = viewModel
     val gameUiState by viewModel.uiState.collectAsState()
     val (snackbarVisibleState, setSnackBarState) = remember { mutableStateOf(false) }
 
-    println("GameView: ${gameUiState.gameOver}")
+    // TODO: snackbar doesn't show in landscape mode or after device rotation
     setSnackBarState(gameUiState.gameOver)
 
     // display the game view with the field and the bottom sections
@@ -59,6 +64,9 @@ fun GameView(viewModel: GameViewModel = viewModel()) {
     }
 }
 
+/**
+ * The main game display
+ */
 @Composable
 private fun MainGameDisplay() {
     val isPortraitMode =
@@ -78,6 +86,9 @@ private fun MainGameDisplay() {
     }
 }
 
+/**
+ * The field section of the game for portrait mode
+ */
 @Composable
 private fun FieldSectionPortrait() {
     // display the field view
@@ -93,6 +104,9 @@ private fun FieldSectionPortrait() {
     }
 }
 
+/**
+ * The field section of the game for landscape mode
+ */
 @Composable
 private fun FieldSectionLandscape() {
     // display the field view
@@ -108,6 +122,9 @@ private fun FieldSectionLandscape() {
     }
 }
 
+/**
+ * The bottom section of the game in portrait mode
+ */
 @Composable
 private fun BottomSection() {
     // display the bottom section with the remaining mines and the game timer
@@ -120,6 +137,9 @@ private fun BottomSection() {
     }
 }
 
+/**
+ * The left section of the game in landscape mode
+ */
 @Composable
 private fun LeftSection() {
     // display the bottom section with the remaining mines and the game timer
@@ -132,6 +152,9 @@ private fun LeftSection() {
     }
 }
 
+/**
+ * The game timer view
+ */
 @Composable
 private fun GameTimerView() {
     val gameUiState by gameViewModel.uiState.collectAsState()
@@ -153,6 +176,9 @@ private fun GameTimerView() {
     }
 }
 
+/**
+ * The remaining mines view
+ */
 @Composable
 private fun RemainingMinesView() {
     val gameUiState by gameViewModel.uiState.collectAsState()

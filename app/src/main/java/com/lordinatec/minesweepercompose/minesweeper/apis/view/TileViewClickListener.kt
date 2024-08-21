@@ -1,3 +1,7 @@
+/*
+ * Copyright Lordinatec LLC 2024
+ */
+
 package com.lordinatec.minesweepercompose.minesweeper.apis.view
 
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel

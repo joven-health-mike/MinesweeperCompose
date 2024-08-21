@@ -1,14 +1,11 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.view
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalConfiguration
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 
@@ -40,10 +37,20 @@ private fun Field(gameUiState: GameState, gameViewModel: GameViewModel) {
 
 @Composable
 private fun FieldPortrait(tileViewFactory: TileViewFactory) {
-    TileArray(width = Config.WIDTH, height = Config.HEIGHT, tileViewFactory = tileViewFactory)
+    TileArray(
+        width = Config.WIDTH,
+        height = Config.HEIGHT,
+        transposed = false,
+        tileViewFactory = tileViewFactory
+    )
 }
 
 @Composable
 private fun FieldLandscape(tileViewFactory: TileViewFactory) {
-    TileArray(width = Config.HEIGHT, height = Config.WIDTH, tileViewFactory = tileViewFactory)
+    TileArray(
+        width = Config.WIDTH,
+        height = Config.HEIGHT,
+        transposed = true,
+        tileViewFactory = tileViewFactory
+    )
 }

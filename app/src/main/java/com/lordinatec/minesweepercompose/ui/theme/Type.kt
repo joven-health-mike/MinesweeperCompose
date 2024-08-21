@@ -1,3 +1,7 @@
+/*
+ * Copyright Lordinatec LLC 2024
+ */
+
 package com.lordinatec.minesweepercompose.ui.theme
 
 import androidx.compose.material3.Typography

@@ -1,3 +1,7 @@
+/*
+ * Copyright Lordinatec LLC 2024
+ */
+
 package com.lordinatec.minesweepercompose.minesweeper.apis.util
 
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.indexToXY

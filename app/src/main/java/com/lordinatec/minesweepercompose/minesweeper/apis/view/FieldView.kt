@@ -1,12 +1,11 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.view
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalConfiguration
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 
@@ -26,22 +25,32 @@ private fun Field(gameUiState: GameState, gameViewModel: GameViewModel) {
         gameViewModel = gameViewModel,
         onClick = { clickListener.onClick(it) },
         onLongClick = { clickListener.onLongClick(it) })
+    val portraitMode = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
     // create the field
-    Column {
-        for (currHeight in 0 until Config.HEIGHT) {
-            Row {
-                FieldRow(heightIndex = currHeight, tileViewFactory = tileViewFactory)
-            }
-        }
+    if (portraitMode) {
+        FieldPortrait(tileViewFactory = tileViewFactory)
+    } else {
+        FieldLandscape(tileViewFactory = tileViewFactory)
     }
 }
 
 @Composable
-private fun FieldRow(heightIndex: Int, tileViewFactory: TileViewFactory) {
-    // create a row of tiles
-    for (currWidth in 0 until Config.WIDTH) {
-        val currIndex = xyToIndex(currWidth, heightIndex)
-        tileViewFactory.CreateTileView(currIndex = currIndex)
-    }
+private fun FieldPortrait(tileViewFactory: TileViewFactory) {
+    TileArray(
+        width = Config.WIDTH,
+        height = Config.HEIGHT,
+        transposed = false,
+        tileViewFactory = tileViewFactory
+    )
+}
+
+@Composable
+private fun FieldLandscape(tileViewFactory: TileViewFactory) {
+    TileArray(
+        width = Config.WIDTH,
+        height = Config.HEIGHT,
+        transposed = true,
+        tileViewFactory = tileViewFactory
+    )
 }

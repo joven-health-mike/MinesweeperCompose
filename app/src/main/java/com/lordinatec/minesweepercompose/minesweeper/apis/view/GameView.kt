@@ -34,8 +34,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 
-private lateinit var gameViewModel: GameViewModel
-
 /**
  * The main game view that displays the game field and associated sections
  *
@@ -43,7 +41,6 @@ private lateinit var gameViewModel: GameViewModel
  */
 @Composable
 fun GameView(viewModel: GameViewModel = viewModel()) {
-    gameViewModel = viewModel
     val gameUiState by viewModel.uiState.collectAsState()
     val (snackbarVisibleState, setSnackBarState) = remember { mutableStateOf(false) }
 
@@ -52,7 +49,7 @@ fun GameView(viewModel: GameViewModel = viewModel()) {
 
     // display the game view with the field and the bottom sections
     Column {
-        MainGameDisplay()
+        MainGameDisplay(viewModel)
         if (snackbarVisibleState) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
                 GameOverSnackbar(winner = gameUiState.winner) {
@@ -68,20 +65,21 @@ fun GameView(viewModel: GameViewModel = viewModel()) {
  * The main game display
  */
 @Composable
-private fun MainGameDisplay() {
+private fun MainGameDisplay(viewModel: GameViewModel) {
+    val gameUiState by viewModel.uiState.collectAsState()
     val isPortraitMode =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
     if (isPortraitMode) {
         Column {
-            FieldSectionPortrait()
+            FieldSectionPortrait(viewModel)
             Spacer(modifier = Modifier.height(20.dp))
-            BottomSection()
+            BottomSection(gameUiState.minesRemaining, gameUiState.timeValue)
         }
     } else {
         Row {
-            LeftSection()
+            LeftSection(gameUiState.minesRemaining, gameUiState.timeValue)
             Spacer(modifier = Modifier.width(20.dp))
-            FieldSectionLandscape()
+            FieldSectionLandscape(viewModel)
         }
     }
 }
@@ -90,7 +88,7 @@ private fun MainGameDisplay() {
  * The field section of the game for portrait mode
  */
 @Composable
-private fun FieldSectionPortrait() {
+private fun FieldSectionPortrait(viewModel: GameViewModel) {
     // display the field view
     Box(
         modifier = Modifier
@@ -99,7 +97,7 @@ private fun FieldSectionPortrait() {
     ) {
         Column {
             Spacer(modifier = Modifier.height(75.dp))
-            FieldView(gameViewModel = gameViewModel)
+            FieldView(gameViewModel = viewModel)
         }
     }
 }
@@ -108,7 +106,7 @@ private fun FieldSectionPortrait() {
  * The field section of the game for landscape mode
  */
 @Composable
-private fun FieldSectionLandscape() {
+private fun FieldSectionLandscape(viewModel: GameViewModel) {
     // display the field view
     Box(
         modifier = Modifier
@@ -117,7 +115,7 @@ private fun FieldSectionLandscape() {
     ) {
         Column {
             Spacer(modifier = Modifier.height(25.dp))
-            FieldView(gameViewModel = gameViewModel)
+            FieldView(gameViewModel = viewModel)
         }
     }
 }
@@ -126,14 +124,14 @@ private fun FieldSectionLandscape() {
  * The bottom section of the game in portrait mode
  */
 @Composable
-private fun BottomSection() {
+private fun BottomSection(remainingMines: Int, gameTimer: Long) {
     // display the bottom section with the remaining mines and the game timer
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-        RemainingMinesView()
-        GameTimerView()
+        RemainingMinesView(remainingMines)
+        GameTimerView(gameTimer)
     }
 }
 
@@ -141,14 +139,14 @@ private fun BottomSection() {
  * The left section of the game in landscape mode
  */
 @Composable
-private fun LeftSection() {
+private fun LeftSection(remainingMines: Int, gameTimer: Long) {
     // display the bottom section with the remaining mines and the game timer
     Column(
         modifier = Modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
-        RemainingMinesView()
-        GameTimerView()
+        RemainingMinesView(remainingMines)
+        GameTimerView(gameTimer)
     }
 }
 
@@ -156,9 +154,7 @@ private fun LeftSection() {
  * The game timer view
  */
 @Composable
-private fun GameTimerView() {
-    val gameUiState by gameViewModel.uiState.collectAsState()
-    val time = gameUiState.timeValue
+private fun GameTimerView(time: Long) {
     val floatTime = time.toFloat() / 1000
     val timeInt = floatTime.toInt()
     var timeDec = (floatTime - timeInt).toString().padEnd(3, '0')
@@ -180,9 +176,7 @@ private fun GameTimerView() {
  * The remaining mines view
  */
 @Composable
-private fun RemainingMinesView() {
-    val gameUiState by gameViewModel.uiState.collectAsState()
-    val remainingMines = gameUiState.minesRemaining
+private fun RemainingMinesView(remainingMines: Int) {
     Box(modifier = Modifier.padding(5.dp), contentAlignment = Alignment.Center) {
         Text(
             text = "Remaining Mines: $remainingMines",

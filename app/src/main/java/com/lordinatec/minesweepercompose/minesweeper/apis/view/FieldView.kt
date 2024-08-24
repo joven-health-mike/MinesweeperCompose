@@ -13,6 +13,9 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 
+/**
+ * The view for the field.
+ */
 @Composable
 fun FieldView(
     gameViewModel: GameViewModel
@@ -21,6 +24,12 @@ fun FieldView(
     Field(gameUiState = gameUiState, gameViewModel = gameViewModel)
 }
 
+/**
+ * The view for the field.
+ *
+ * @param gameUiState the game UI state
+ * @param gameViewModel the game view model
+ */
 @Composable
 private fun Field(gameUiState: GameState, gameViewModel: GameViewModel) {
     val clickListener = TileViewClickListener(gameUiState, gameViewModel)
@@ -39,6 +48,11 @@ private fun Field(gameUiState: GameState, gameViewModel: GameViewModel) {
     }
 }
 
+/**
+ * The view for the field in portrait mode.
+ *
+ * @param tileViewFactory the tile view factory
+ */
 @Composable
 private fun FieldPortrait(tileViewFactory: TileViewFactory) {
     TileArray(
@@ -49,6 +63,11 @@ private fun FieldPortrait(tileViewFactory: TileViewFactory) {
     )
 }
 
+/**
+ * The view for the field in landscape mode.
+ *
+ * @param tileViewFactory the tile view factory
+ */
 @Composable
 private fun FieldLandscape(tileViewFactory: TileViewFactory) {
     TileArray(

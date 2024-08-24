@@ -9,6 +9,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 
+/**
+ * A 2D array of tiles.
+ *
+ * @param width The width of the array.
+ * @param height The height of the array.
+ * @param transposed Whether the array should be transposed.
+ * @param tileViewFactory The factory to create the tile views.
+ */
 @Composable
 fun TileArray(width: Int, height: Int, transposed: Boolean, tileViewFactory: TileViewFactory) {
     if (transposed) {
@@ -18,6 +26,9 @@ fun TileArray(width: Int, height: Int, transposed: Boolean, tileViewFactory: Til
     }
 }
 
+/**
+ * A 2D array of tiles where width and height are transposed.
+ */
 @Composable
 private fun TransposedTileArray(width: Int, height: Int, tileViewFactory: TileViewFactory) {
     Row {
@@ -32,6 +43,9 @@ private fun TransposedTileArray(width: Int, height: Int, tileViewFactory: TileVi
     }
 }
 
+/**
+ * A 2D array of tiles where width and height are not transposed.
+ */
 @Composable
 private fun RegularTileArray(width: Int, height: Int, tileViewFactory: TileViewFactory) {
     Column {

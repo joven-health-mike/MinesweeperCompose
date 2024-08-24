@@ -8,7 +8,11 @@ import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
 
-// extension function to get an activity from a context
+/**
+ * Get the [ComponentActivity] from a [Context] if available.
+ *
+ * @return the [ComponentActivity] if available, otherwise null.
+ */
 fun Context.getActivity(): ComponentActivity? = when (this) {
     is ComponentActivity -> this
     is ContextWrapper -> baseContext.getActivity()

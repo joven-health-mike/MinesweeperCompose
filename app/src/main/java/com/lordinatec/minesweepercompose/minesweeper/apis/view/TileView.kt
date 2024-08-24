@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,12 +33,23 @@ import androidx.compose.ui.unit.sp
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 
+/**
+ * Factory class to create TileView
+ *
+ * @param gameUiState The state of the game
+ * @param gameViewModel The view model of the game
+ * @param onClick Listener for clicks
+ * @param onLongClick Listener for long clicks
+ */
 class TileViewFactory(
     private val gameUiState: GameState,
     private val gameViewModel: GameViewModel,
     private val onClick: ((index: Int) -> Unit)? = null,
     private val onLongClick: ((index: Int) -> Unit)? = null
 ) {
+    /**
+     * Create a TileView with the given index.
+     */
     @Composable
     fun CreateTileView(
         currIndex: Int,
@@ -54,6 +65,16 @@ class TileViewFactory(
     }
 }
 
+/**
+ * View for a tile.
+ *
+ * @param index The index of the tile
+ * @param value The value of the tile
+ * @param state The state of the tile
+ * @param gameViewModel The view model of the game
+ * @param onClick Listener for clicks
+ * @param onLongClick Listener for long clicks
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TileView(
@@ -77,38 +98,79 @@ fun TileView(
                     )
                 )
             ),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = value, color = Color.White,
-            style = TextStyle(
-                fontSize = 24.sp,
-                fontFamily = FontFamily.Default,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            ),
-        )
-        val gameUiState = gameViewModel.uiState.collectAsState()
-        if (gameUiState.value.gameOver && state == TileState.FLAGGED && !gameViewModel.flagIsCorrect(
-                index
-            )
-        ) {
-            Icon(
-                Icons.Filled.Close,
-                contentDescription = "Flag is wrong",
-                tint = colorResource(android.R.color.holo_red_dark),
-                modifier = Modifier
-                    .width(70.dp)
-                    .height(70.dp)
-                    .shadow(10.dp)
-            )
+        if (state == TileState.COVERED) {
+            TextTile("")
+        } else {
+            when (value) {
+                "F" -> FlagTile(gameViewModel, index)
+                "*" -> MineTile()
+                else -> TextTile(value)
+            }
         }
     }
 }
 
+@Composable
+private fun TextTile(value: String) {
+    Text(
+        text = value,
+        color = Color.White,
+        style = TextStyle(
+            fontFamily = FontFamily.Default,
+            fontWeight = FontWeight.Bold,
+            fontSize = 24.sp,
+            textAlign = TextAlign.Center
+        )
+    )
+}
+
+@Composable
+private fun FlagTile(gameViewModel: GameViewModel, index: Int) {
+    val gameUiState = gameViewModel.uiState.collectAsState()
+    Icon(
+        Icons.Filled.Flag,
+        contentDescription = "Flagged tile",
+        tint = colorResource(android.R.color.holo_green_dark),
+        modifier = Modifier
+            .width(70.dp)
+            .height(70.dp)
+            .shadow(10.dp)
+    )
+    if (gameUiState.value.gameOver && !gameViewModel.flagIsCorrect(index)
+    ) {
+        IncorrectFlagOverlay()
+    }
+}
+
+@Composable
+private fun MineTile() {
+    AppIcon(size = 70.dp)
+}
+
+@Composable
+private fun IncorrectFlagOverlay() {
+    Icon(
+        Icons.Filled.Close,
+        contentDescription = "Flag is wrong",
+        tint = colorResource(android.R.color.holo_red_dark),
+        modifier = Modifier
+            .width(70.dp)
+            .height(70.dp)
+            .shadow(10.dp)
+    )
+}
+
+/**
+ * Enum class for the state of a tile.
+ *
+ * @param primaryColor The primary color of the tile
+ * @param secondaryColor The secondary color of the tile
+ */
 enum class TileState(val primaryColor: Color, val secondaryColor: Color) {
     COVERED(Color.Blue, Color.Gray),
     CLEARED(Color.Gray, Color.DarkGray),
-    FLAGGED(Color.Green, Color.Blue),
+    FLAGGED(Color.Blue, Color(0xff669900)),
     EXPLODED(Color.Red, Color.Magenta)
 }

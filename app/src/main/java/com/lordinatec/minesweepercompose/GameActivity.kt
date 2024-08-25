@@ -44,11 +44,24 @@ class GameActivity : ComponentActivity() {
                     Modifier.padding(innerPadding)
                     if (gameState.gameOver && gameState.winner) {
                         maybeSaveBestTime(this, gameState.timeValue)
+                        saveWin(this)
+                    } else if (gameState.gameOver && !gameState.winner) {
+                        saveLoss(this)
                     }
                     GameView(viewModel)
                 }
             }
         }
+    }
+
+    private fun saveLoss(context: Context) {
+        val losses = Stats.getLosses(context)
+        Stats.setLosses(context, losses + 1)
+    }
+
+    private fun saveWin(context: Context) {
+        val wins = Stats.getWins(context)
+        Stats.setWins(context, wins + 1)
     }
 
     private fun maybeSaveBestTime(context: Context, timeValue: Long) {

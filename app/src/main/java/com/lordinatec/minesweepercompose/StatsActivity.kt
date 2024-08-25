@@ -32,19 +32,39 @@ class StatsActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
+                val wins = Stats.getWins(activityContext)
+                val losses = Stats.getLosses(activityContext)
                 Spacer(modifier = Modifier.fillMaxSize(0.1f))
                 Text("Stats")
-                Text("Best Time: ${formatTime(Stats.getBestTime(activityContext))} seconds")
+                Text(
+                    "Best Time: ${
+                        formatFloat(
+                            Stats.getBestTime(activityContext) / 1000f,
+                            3
+                        )
+                    } seconds"
+                )
+                Text("Wins: $wins")
+                Text("Losses: $losses")
+                Text(
+                    "Win Rate: ${
+                        if (wins + losses == 0) "0.0" else formatFloat(
+                            wins.toFloat() * 100 / (wins + losses),
+                            1
+                        )
+                    }%"
+                )
             }
         }
     }
 
-    private fun formatTime(time: Long): String {
-        val floatTime = time.toFloat() / 1000
-        val timeInt = floatTime.toInt()
-        var timeDec = (floatTime - timeInt).toString().padEnd(3, '0')
-        timeDec = timeDec.substring(2, if (timeDec.length > 5) 5 else timeDec.length)
-        return "$timeInt.$timeDec"
+    private fun formatFloat(value: Float, padding: Int): String {
+        val intValue = value.toInt()
+        var decValue = (value - intValue).toString().padEnd(padding, '0')
+        val maxLength = 2 + padding
+        decValue =
+            decValue.substring(2, if (decValue.length > maxLength) maxLength else decValue.length)
+        return "$intValue.$decValue"
     }
 
     companion object {

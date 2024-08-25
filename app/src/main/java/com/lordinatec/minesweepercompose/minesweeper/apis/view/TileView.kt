@@ -56,7 +56,7 @@ class TileViewFactory(
         val gameUiState by gameViewModel.uiState.collectAsState()
         val dropDownAnimation = rememberDropDownAnimation()
         Box(modifier = Modifier.dropDown(dropDownAnimation)) {
-            if (gameUiState.newGame) {
+            if (!gameUiState.gameOver) {
                 LaunchedEffect(Unit) {
                     dropDownAnimation.drop()
                 }

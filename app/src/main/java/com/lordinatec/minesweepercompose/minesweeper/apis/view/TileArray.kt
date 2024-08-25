@@ -57,10 +57,12 @@ private fun TransposedTileArray(
                 for (currWidth in 0 until width) {
                     val currIndex = xyToIndex(currWidth, currHeight)
                     var visible by remember { mutableStateOf(true) }
-                    LaunchedEffect(Unit) {
-                        visible = false
-                        delay(100L * currIndex)
-                        visible = true
+                    if (gameState.newGame) {
+                        LaunchedEffect(Unit) {
+                            visible = false
+                            delay(100L * currIndex)
+                            visible = true
+                        }
                     }
                     if (visible) {
                         tileViewFactory.CreateTileView(currIndex = currIndex)
@@ -88,15 +90,12 @@ private fun RegularTileArray(
                 for (currWidth in 0 until width) {
                     val currIndex = xyToIndex(currWidth, currHeight)
                     var visible by remember { mutableStateOf(true) }
-                    // TODO: Left off here.
-                    // I probably need another variable to represent "new game" or something
-                    // because right now, it's reanimating the tiles when the game is over AND
-                    // when a new game begins...
-                    // shake effect also seems to be affected by the animation delay.
-                    LaunchedEffect(Unit) {
-                        visible = false
-                        delay(100L * currIndex)
-                        visible = true
+                    if (gameState.newGame) {
+                        LaunchedEffect(Unit) {
+                            visible = false
+                            delay(50L * currIndex)
+                            visible = true
+                        }
                     }
                     if (visible) {
                         tileViewFactory.CreateTileView(currIndex = currIndex)

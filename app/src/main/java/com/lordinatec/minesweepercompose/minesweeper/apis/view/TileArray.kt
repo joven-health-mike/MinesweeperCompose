@@ -63,6 +63,8 @@ private fun TransposedTileArray(
                             delay(100L * currIndex)
                             visible = true
                         }
+                    } else if (!visible) {
+                        visible = true
                     }
                     if (visible) {
                         tileViewFactory.CreateTileView(currIndex = currIndex)
@@ -96,6 +98,8 @@ private fun RegularTileArray(
                             delay(50L * currIndex)
                             visible = true
                         }
+                    } else if (!visible) {
+                        visible = true
                     }
                     if (visible) {
                         tileViewFactory.CreateTileView(currIndex = currIndex)

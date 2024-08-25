@@ -250,7 +250,11 @@ class GameViewModel(
      */
     private fun createGame(index: Int) {
         gameController.createGame(index)
-        _uiState.value = GameState()
+        _uiState.update { currentState ->
+            currentState.copy(
+                newGame = false
+            )
+        }
         gameController.startTimer()
     }
 

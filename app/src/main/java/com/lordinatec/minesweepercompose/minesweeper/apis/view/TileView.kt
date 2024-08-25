@@ -17,11 +17,11 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
+import kotlinx.coroutines.delay
 
 /**
  * Factory class to create TileView
@@ -54,14 +55,22 @@ class TileViewFactory(
         currIndex: Int,
     ) {
         val gameUiState by gameViewModel.uiState.collectAsState()
-        TileView(
-            currIndex,
-            gameUiState.tileValues[currIndex],
-            gameUiState.tileStates[currIndex],
-            gameViewModel,
-            onClick,
-            onLongClick
-        )
+        val dropDownAnimation = rememberDropDownAnimation()
+        Box(modifier = Modifier.dropDown(dropDownAnimation)) {
+            if (!gameUiState.gameOver) {
+                LaunchedEffect(Unit) {
+                    dropDownAnimation.drop()
+                }
+            }
+            TileView(
+                currIndex,
+                gameUiState.tileValues[currIndex],
+                gameUiState.tileStates[currIndex],
+                gameViewModel,
+                onClick,
+                onLongClick
+            )
+        }
     }
 }
 

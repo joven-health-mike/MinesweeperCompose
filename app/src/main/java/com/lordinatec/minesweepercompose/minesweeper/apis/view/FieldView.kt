@@ -50,7 +50,7 @@ private fun Field(gameViewModel: GameViewModel) {
                 shakeable.shake()
             }
         }
-        FieldTileArray(!portraitMode, tileViewFactory)
+        FieldTileArray(gameViewModel, !portraitMode, tileViewFactory)
     }
 }
 
@@ -61,8 +61,13 @@ private fun Field(gameViewModel: GameViewModel) {
  * @param tileViewFactory the tile view factory
  */
 @Composable
-private fun FieldTileArray(transposed: Boolean, tileViewFactory: TileViewFactory) {
+private fun FieldTileArray(
+    viewModel: GameViewModel,
+    transposed: Boolean,
+    tileViewFactory: TileViewFactory
+) {
     TileArray(
+        viewModel,
         width = Config.WIDTH,
         height = Config.HEIGHT,
         transposed = transposed,

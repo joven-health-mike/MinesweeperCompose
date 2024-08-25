@@ -32,7 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
-import kotlinx.coroutines.delay
 
 /**
  * Factory class to create TileView
@@ -57,7 +56,7 @@ class TileViewFactory(
         val gameUiState by gameViewModel.uiState.collectAsState()
         val dropDownAnimation = rememberDropDownAnimation()
         Box(modifier = Modifier.dropDown(dropDownAnimation)) {
-            if (!gameUiState.gameOver) {
+            if (gameUiState.newGame) {
                 LaunchedEffect(Unit) {
                     dropDownAnimation.drop()
                 }

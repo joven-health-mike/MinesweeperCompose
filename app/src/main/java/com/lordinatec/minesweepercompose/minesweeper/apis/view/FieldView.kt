@@ -44,46 +44,28 @@ private fun Field(gameViewModel: GameViewModel) {
     val shakeable = rememberShakeable()
 
     Box(modifier = Modifier.shakeable(shakeable)) {
+        // shake the field when the game is lost
         if (gameUiState.gameOver && !gameUiState.winner) {
             LaunchedEffect(Unit) {
                 shakeable.shake()
             }
         }
-        // create the field
-        if (portraitMode) {
-            FieldPortrait(tileViewFactory = tileViewFactory)
-        } else {
-            FieldLandscape(tileViewFactory = tileViewFactory)
-        }
+        FieldTileArray(!portraitMode, tileViewFactory)
     }
 }
 
 /**
  * The view for the field in portrait mode.
  *
+ * @param transposed whether the field is transposed
  * @param tileViewFactory the tile view factory
  */
 @Composable
-private fun FieldPortrait(tileViewFactory: TileViewFactory) {
+private fun FieldTileArray(transposed: Boolean, tileViewFactory: TileViewFactory) {
     TileArray(
         width = Config.WIDTH,
         height = Config.HEIGHT,
-        transposed = false,
-        tileViewFactory = tileViewFactory
-    )
-}
-
-/**
- * The view for the field in landscape mode.
- *
- * @param tileViewFactory the tile view factory
- */
-@Composable
-private fun FieldLandscape(tileViewFactory: TileViewFactory) {
-    TileArray(
-        width = Config.WIDTH,
-        height = Config.HEIGHT,
-        transposed = true,
+        transposed = transposed,
         tileViewFactory = tileViewFactory
     )
 }

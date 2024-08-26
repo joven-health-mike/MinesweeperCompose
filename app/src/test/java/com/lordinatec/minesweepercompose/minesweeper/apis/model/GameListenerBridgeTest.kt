@@ -2,10 +2,9 @@
  * Copyright Lordinatec LLC 2024
  */
 
-package com.lordinatec.minesweepercompose.minesweeper.apis.util
+package com.lordinatec.minesweepercompose.minesweeper.apis.model
 
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameListenerBridge
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock

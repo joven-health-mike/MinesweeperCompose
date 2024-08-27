@@ -182,7 +182,7 @@ class GameViewModel(
     }
 
     /**
-     * Ensures the given coodinates are in range of the field.
+     * Ensures the given coordinates are in range of the field.
      *
      * @param x The x-coordinate.
      * @param y The y-coordinate.
@@ -230,7 +230,9 @@ class GameViewModel(
      * Pauses the timer.
      */
     fun pauseTimer() {
-        if (gameController.gameCreated && !_uiState.value.gameOver) gameController.pauseTimer()
+        if (gameController.gameCreated && !_uiState.value.gameOver) {
+            gameController.pauseTimer()
+        }
     }
 
     /**

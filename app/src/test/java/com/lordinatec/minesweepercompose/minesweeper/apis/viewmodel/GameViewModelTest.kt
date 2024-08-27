@@ -14,11 +14,16 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.verify
-import junit.framework.TestCase.assertTrue
-import org.junit.Before
-import org.junit.Test
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class GameViewModelTest {
     @MockK
@@ -29,7 +34,7 @@ class GameViewModelTest {
 
     private lateinit var gameViewModel: GameViewModel
 
-    @Before
+    @BeforeTest
     fun setUp() {
         MockKAnnotations.init(this)
         every { gameController.createGame(any()) } answers { }
@@ -46,61 +51,67 @@ class GameViewModelTest {
     }
 
     @Test
-    fun testCreateGame() {
+    fun testCreateGame() = runTest {
         every { gameController.gameCreated } answers { false }
         gameViewModel.clear(0)
         verify { gameController.createGame(0) }
     }
 
     @Test
-    fun testTimerStartsOnCreateGame() {
+    fun testTimerStartsOnCreateGame() = runTest {
         every { gameController.gameCreated } answers { false }
         gameViewModel.clear(0)
         verify { gameController.startTimer() }
     }
 
     @Test
-    fun testClearIfGameCreated() {
+    fun testClearIfGameCreated() = runTest {
         every { gameController.gameCreated } answers { true }
         gameViewModel.clear(0)
         verify { gameController.clear(0) }
     }
 
     @Test
-    fun testClearIfGameNotCreated() {
+    fun testClearIfGameNotCreated() = runTest {
         every { gameController.gameCreated } answers { false }
         gameViewModel.clear(0)
         verify { gameController.clear(0) }
     }
 
     @Test
-    fun testToggleFlagIfGameCreated() {
+    fun testToggleFlagIfGameCreated() = runTest {
         every { gameController.gameCreated } answers { true }
         gameViewModel.toggleFlag(0)
         verify { gameController.toggleFlag(0) }
     }
 
     @Test
-    fun testToggleFlagIfGameNotCreated() {
+    fun testToggleFlagIfGameNotCreated() = runTest {
         every { gameController.gameCreated } answers { false }
         gameViewModel.toggleFlag(0)
         verify { gameController.toggleFlag(0) }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun testClearEverythingOnLastFlag() {
+    fun testClearEverythingOnLastFlag() = runTest {
         every { gameController.gameCreated } answers { true }
-        for (i in 0 until Config.MINES)
-            gameViewModel.toggleFlag(i)
-        // TODO: Verify that clear is called for all tiles
-//         val gameState = gameViewModel.uiState
-//         val coveredCount = gameState.tileStates.count() { it == TileState.COVERED }
-//         assertEquals(coveredCount, 0)
+        // TODO: figure out how to get updated state
+//        var currentState = gameViewModel.uiState.value
+//        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+//            gameViewModel.uiState.collect { state ->
+//                currentState = state
+//            }
+//        }
+//        for (i in 0 until Config.MINES)
+//            gameViewModel.toggleFlag(i)
+//        val coveredCount = currentState.tileStates.count() { it == TileState.COVERED }
+//        assertEquals(0, coveredCount)
         assertTrue(false)
     }
 
     @Test
-    fun testPositionIsTrue() {
+    fun testPositionIsTrue() = runTest {
         every { gameController.gameCreated } answers { true }
         gameViewModel.positionIs(0, TileState.COVERED)
         // TODO: Verify that true is returned if the position is covered
@@ -110,7 +121,7 @@ class GameViewModelTest {
     }
 
     @Test
-    fun testPositionIsFalse() {
+    fun testPositionIsFalse() = runTest {
         every { gameController.gameCreated } answers { true }
         gameViewModel.positionIs(0, TileState.COVERED)
         // TODO: Verify that true is returned if the position is not covered
@@ -120,42 +131,42 @@ class GameViewModelTest {
     }
 
     @Test
-    fun testPauseTimerIfGameStarted() {
+    fun testPauseTimerIfGameStarted() = runTest {
         every { gameController.gameCreated } answers { true }
         gameViewModel.pauseTimer()
         verify { gameController.pauseTimer() }
     }
 
     @Test
-    fun testResumeTimerIfGameStarted() {
+    fun testResumeTimerIfGameStarted() = runTest {
         every { gameController.gameCreated } answers { true }
         gameViewModel.resumeTimer()
         verify { gameController.resumeTimer() }
     }
 
     @Test
-    fun testPauseTimerIfGameNotStarted() {
+    fun testPauseTimerIfGameNotStarted() = runTest {
         every { gameController.gameCreated } answers { false }
         gameViewModel.pauseTimer()
         verify(never()) { gameController.pauseTimer() }
     }
 
     @Test
-    fun testResumeTimerIfGameNotStarted() {
+    fun testResumeTimerIfGameNotStarted() = runTest {
         every { gameController.gameCreated } answers { false }
         gameViewModel.resumeTimer()
         verify(never()) { gameController.resumeTimer() }
     }
 
     @Test
-    fun testFlagIsCorrect() {
+    fun testFlagIsCorrect() = runTest {
         every { gameController.gameCreated } answers { true }
         gameViewModel.flagIsCorrect(0)
         verify { gameController.flagIsCorrect(0) }
     }
 
     @Test
-    fun testResetGame() {
+    fun testResetGame() = runTest {
         every { gameController.gameCreated } answers { true }
         gameViewModel.resetGame()
         verify { gameController.resetGame() }

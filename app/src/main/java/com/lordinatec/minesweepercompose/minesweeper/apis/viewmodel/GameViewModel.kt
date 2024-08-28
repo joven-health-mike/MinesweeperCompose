@@ -174,6 +174,7 @@ class GameViewModel(
     fun toggleFlag(index: Int) {
         gameController.toggleFlag(index)
 
+        // TODO: Wrap in feature flag
         // if all mines are flagged, clear all other tiles
         if (_uiState.value.tileStates.count { it == TileState.FLAGGED } == config.MINES) {
             clearEverything()
@@ -181,13 +182,14 @@ class GameViewModel(
     }
 
     /**
-     * Ensures the given coodinates are in range of the field.
+     * Ensures the given coordinates are in range of the field.
      *
      * @param x The x-coordinate.
      * @param y The y-coordinate.
      *
      * @return True if the coordinates are in range, false otherwise.
      */
+    // TODO: Move this somewhere else
     fun validCoordinates(x: Int, y: Int): Boolean {
         return x in 0 until config.WIDTH && y in 0 until config.HEIGHT
     }
@@ -228,7 +230,9 @@ class GameViewModel(
      * Pauses the timer.
      */
     fun pauseTimer() {
-        if (!_uiState.value.gameOver) gameController.pauseTimer()
+        if (gameController.gameCreated && !_uiState.value.gameOver) {
+            gameController.pauseTimer()
+        }
     }
 
     /**

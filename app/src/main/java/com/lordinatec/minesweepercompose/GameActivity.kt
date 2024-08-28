@@ -19,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModelProvider
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameFactory
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.TimerFactory
@@ -75,10 +74,7 @@ class GameActivity : ComponentActivity() {
     private fun createCustomViewModel(): GameViewModel {
         return ViewModelProvider(
             this,
-            GameViewModelFactory(
-                this.application, Config,
-                GameController.Factory(GameFactory(), TimerFactory())
-            )
+            GameViewModelFactory(GameController.Factory(GameFactory(), TimerFactory()))
         )[GameViewModel::class.java]
     }
 

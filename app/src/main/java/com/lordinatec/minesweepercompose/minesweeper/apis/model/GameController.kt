@@ -25,7 +25,7 @@ import com.mikeburke106.mines.basic.model.BasicPositionPool
 class GameController(
     private val gameFactory: GameFactory,
     private val timerFactory: TimerFactory,
-    private val listener: GameControlStrategy.Listener = GameListenerBridge()
+    var listener: GameControlStrategy.Listener = GameListenerBridge()
 ) {
     var gameCreated: Boolean = false
     private var gameModel: BasicGameController? = null
@@ -125,7 +125,6 @@ class GameController(
         val (x, y) = indexToXY(index)
         val position = positionPool!!.atLocation(x, y)
         return gameField?.isMine(position)!!
-
     }
 
     /**
@@ -145,7 +144,7 @@ class GameController(
          *
          * @param listener - Listener for game events
          */
-        fun createGameController(listener: GameControlStrategy.Listener): GameController {
+        fun createGameController(listener: GameControlStrategy.Listener = GameListenerBridge()): GameController {
             return GameController(gameFactory, timerFactory, listener)
         }
     }

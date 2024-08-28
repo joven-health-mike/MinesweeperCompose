@@ -4,7 +4,6 @@
 
 package com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController
@@ -22,16 +21,12 @@ import kotlinx.coroutines.flow.update
 /**
  * ViewModel for the Game screen.
  *
- * @param application The application context.
- * @param config The configuration object.
- * @param gameControllerFactory The factory for creating a GameController.
+ * @param gameController The GameController to use.
  *
  * @return A ViewModel for the Game screen.
  */
 class GameViewModel(
-    private val application: Application,
-    private val config: Config = Config,
-    gameControllerFactory: GameController.Factory,
+    private val gameController: GameController
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
@@ -39,7 +34,7 @@ class GameViewModel(
     /**
      * Update timeValue when time is updated.
      */
-    private val onTimeUpdate: (newTime: Long) -> Unit = {
+    private var onTimeUpdate: (newTime: Long) -> Unit = {
         _uiState.update { currentState ->
             currentState.copy(
                 timeValue = it
@@ -79,60 +74,58 @@ class GameViewModel(
         }
     }
 
-    /**
-     * Handle game events through the GameListenerBridge.
-     */
-    private val gamePlayListener: GameListenerBridge = GameListenerBridge(
-        onTimeUpdate = onTimeUpdate,
-        onPositionCleared = { index, numOfAdjacent ->
-            // when position is cleared, clear the position and update the value
-            updatePosition(
-                index,
-                TileState.CLEARED,
-                if (numOfAdjacent == 0) "" else numOfAdjacent.toString()
-            )
-            // if no adjacent mines, click all adjacent positions
-            if (numOfAdjacent == 0) clickAdjacentPositions(model, index)
-            // calculate % chance for each covered tile
-            calculateMineLikelihoods()
-            // check if game is won
-            if (!_uiState.value.gameOver && assessWinConditions()) gameWon()
-        },
-        onPositionExploded = { index ->
-            // when position is exploded, explode the position and update the value
-            updatePosition(index, TileState.EXPLODED, "*")
-            // check if game is lost
-            if (!uiState.value.gameOver) gameLost()
-        },
-        onPositionFlagged = { index ->
-            // when position is flagged, flag the position and update the value
-            updatePosition(index, TileState.FLAGGED, "F")
-            // decrease number of mines remaining
-            _uiState.update { currentState ->
-                currentState.copy(
-                    minesRemaining = currentState.minesRemaining - 1
+    init {
+        gameController.listener = GameListenerBridge(
+            onTimeUpdate = onTimeUpdate,
+            onPositionCleared = { index, numOfAdjacent ->
+                // when position is cleared, clear the position and update the value
+                updatePosition(
+                    index,
+                    TileState.CLEARED,
+                    if (numOfAdjacent == 0) "" else numOfAdjacent.toString()
                 )
-            }
-            // calculate % chance for each covered tile
-            calculateMineLikelihoods()
-        },
-        onPositionUnflagged = { index ->
-            // when position is unflagged, unflag the position and update the value
-            updatePosition(index, TileState.COVERED, "")
-            // increase number of mines remaining
-            _uiState.update { currentState ->
-                currentState.copy(
-                    minesRemaining = currentState.minesRemaining + 1
-                )
-            }
-            // calculate % chance for each covered tile
-            calculateMineLikelihoods()
-        },
-        onGameWon = gameWon,
-        onGameLost = gameLost
-    )
+                // if no adjacent mines, click all adjacent positions
+                if (numOfAdjacent == 0) clickAdjacentPositions(model, index)
+                // calculate % chance for each covered tile
+                calculateMineLikelihoods()
+                // check if game is won
+                if (!_uiState.value.gameOver && assessWinConditions()) gameWon()
+            },
+            onPositionExploded = { index ->
+                // when position is exploded, explode the position and update the value
+                updatePosition(index, TileState.EXPLODED, "*")
+                // check if game is lost
+                if (!uiState.value.gameOver) gameLost()
+            },
+            onPositionFlagged = { index ->
+                // when position is flagged, flag the position and update the value
+                updatePosition(index, TileState.FLAGGED, "F")
+                // decrease number of mines remaining
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        minesRemaining = currentState.minesRemaining - 1
+                    )
+                }
+                // calculate % chance for each covered tile
+                calculateMineLikelihoods()
+            },
+            onPositionUnflagged = { index ->
+                // when position is unflagged, unflag the position and update the value
+                updatePosition(index, TileState.COVERED, "")
+                // increase number of mines remaining
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        minesRemaining = currentState.minesRemaining + 1
+                    )
+                }
+                // calculate % chance for each covered tile
+                calculateMineLikelihoods()
+            },
+            onGameWon = gameWon,
+            onGameLost = gameLost
+        )
+    }
 
-    private val gameController = gameControllerFactory.createGameController(gamePlayListener)
     private val model = this
 
     /* PUBLIC APIS */
@@ -176,7 +169,7 @@ class GameViewModel(
 
         // TODO: Wrap in feature flag
         // if all mines are flagged, clear all other tiles
-        if (_uiState.value.tileStates.count { it == TileState.FLAGGED } == config.MINES) {
+        if (_uiState.value.tileStates.count { it == TileState.FLAGGED } == Config.MINES) {
             clearEverything()
         }
     }
@@ -191,7 +184,7 @@ class GameViewModel(
      */
     // TODO: Move this somewhere else
     fun validCoordinates(x: Int, y: Int): Boolean {
-        return x in 0 until config.WIDTH && y in 0 until config.HEIGHT
+        return x in 0 until Config.WIDTH && y in 0 until Config.HEIGHT
     }
 
     /**
@@ -280,7 +273,7 @@ class GameViewModel(
     private fun assessWinConditions(): Boolean {
         return _uiState.value.tileStates.count {
             it == TileState.COVERED || it == TileState.FLAGGED
-        } == config.MINES
+        } == Config.MINES
     }
 
     /**
@@ -307,11 +300,11 @@ class GameViewModel(
      * Feature Flag: SHOW_COVERED_CHANCES
      */
     private fun calculateMineLikelihoods() {
-        if (!config.FEATURES.SHOW_COVERED_CHANCES) return
+        if (!Config.FEATURES.SHOW_COVERED_CHANCES) return
 
         // TODO: simplify
         // TODO: for tiles that have multiple adjacent cleared tiles, keep the lowest % available
-        for (i in 0 until config.WIDTH * config.HEIGHT) {
+        for (i in 0 until Config.WIDTH * Config.HEIGHT) {
             val tileState = _uiState.value.tileStates[i]
             if (tileState != TileState.COVERED) continue
 

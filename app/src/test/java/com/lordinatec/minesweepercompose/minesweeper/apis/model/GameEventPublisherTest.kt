@@ -6,6 +6,8 @@
 
 package com.lordinatec.minesweepercompose.minesweeper.apis.model
 
+import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -13,7 +15,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.mockito.MockitoAnnotations
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

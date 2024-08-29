@@ -24,7 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import com.lordinatec.minesweepercompose.minesweeper.apis.view.AppIcon
+import com.lordinatec.minesweepercompose.gameplay.GameActivity
+import com.lordinatec.minesweepercompose.stats.StatsActivity
+import com.lordinatec.minesweepercompose.views.AppIcon
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 
 

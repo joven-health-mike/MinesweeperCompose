@@ -4,7 +4,7 @@
 
 package com.lordinatec.minesweepercompose.minesweeper.apis.model
 
-interface GameEvent {
+interface GameEvent : Event {
     object GameCreated : GameEvent
     object GameWon : GameEvent
     object GameLost : GameEvent

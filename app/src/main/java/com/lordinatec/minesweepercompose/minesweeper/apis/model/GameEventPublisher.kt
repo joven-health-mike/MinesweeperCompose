@@ -8,6 +8,7 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.mikeburke106.mines.api.model.GameControlStrategy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
@@ -19,64 +20,50 @@ import kotlinx.coroutines.launch
  * @constructor Creates a new GameEventPublisher
  */
 class GameEventPublisher(private val coroutineScope: CoroutineScope) :
-    GameControlStrategy.Listener {
-    private val _events = MutableSharedFlow<Any>()
-    val events = _events.asSharedFlow()
+    GameControlStrategy.Listener, EventPublisher {
+    private val _events = MutableSharedFlow<Event>()
+    override val events = _events.asSharedFlow()
 
-    fun publishEvent(event: GameEvent) {
+    override fun publish(event: Event) {
         coroutineScope.launch {
-            publish(event)
+            publishEvent(event as GameEvent)
         }
     }
 
-    private suspend fun publish(event: GameEvent) {
+    private suspend fun publishEvent(event: GameEvent) {
         _events.emit(event)
     }
 
     override fun timeUpdate(newTime: Long) {
-        coroutineScope.launch {
-            publish(GameEvent.TimeUpdate(newTime))
-        }
+        publish(GameEvent.TimeUpdate(newTime))
     }
 
     override fun positionCleared(x: Int, y: Int, adjacentMines: Int) {
         val index = xyToIndex(x, y)
-        coroutineScope.launch {
-            publish(GameEvent.PositionCleared(index, adjacentMines))
-        }
+        publish(GameEvent.PositionCleared(index, adjacentMines))
     }
 
     override fun positionExploded(x: Int, y: Int) {
         val index = xyToIndex(x, y)
-        coroutineScope.launch {
-            publish(GameEvent.PositionExploded(index))
-        }
+        publish(GameEvent.PositionExploded(index))
     }
 
     override fun positionFlagged(x: Int, y: Int) {
         val index = xyToIndex(x, y)
-        coroutineScope.launch {
-            publish(GameEvent.PositionFlagged(index))
-        }
+        publish(GameEvent.PositionFlagged(index))
     }
 
     override fun positionUnflagged(x: Int, y: Int) {
         val index = xyToIndex(x, y)
-        coroutineScope.launch {
-            publish(GameEvent.PositionUnflagged(index))
-        }
+        publish(GameEvent.PositionUnflagged(index))
     }
 
     override fun gameWon() {
-        coroutineScope.launch {
-            publish(GameEvent.GameWon)
-        }
+        publish(GameEvent.GameWon)
     }
 
     override fun gameLost() {
-        coroutineScope.launch {
-            publish(GameEvent.GameLost)
-        }
+        publish(GameEvent.GameLost)
     }
 
     class Factory {

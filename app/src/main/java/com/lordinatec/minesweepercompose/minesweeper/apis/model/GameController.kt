@@ -26,7 +26,8 @@ class GameController(
     private val timerFactory: TimerFactory,
     private val eventPublisher: GameEventPublisher
 ) {
-    var gameCreated: Boolean = false
+    private var gameCreated: Boolean = false
+    private var gameOver: Boolean = false
     private var gameModel: BasicGameController? = null
     private var gameField: Field? = null
     private var positionPool: BasicPositionPool? = null
@@ -38,16 +39,30 @@ class GameController(
      *
      * @param index - index of the initial clicked tile
      */
-    fun createGame(index: Int) {
+    fun maybeCreateGame(index: Int) {
         if (!gameCreated) {
             gameCreated = true
+            gameOver = false
             val (x, y) = indexToXY(index)
             val gameInfoHolder = gameFactory.createGame(x, y, eventPublisher)
             gameModel = gameInfoHolder.getGameController()
             gameField = gameInfoHolder.getField()
             positionPool = gameInfoHolder.getPositionPool()
-            eventPublisher.publishEvent(GameEvent.GameCreated)
+            eventPublisher.publish(GameEvent.GameCreated)
         }
+    }
+
+    fun clearEverything() {
+        // TODO
+    }
+
+    fun clearAdjacentTiles(index: Int) {
+        // TODO
+    }
+
+    fun countAdjacentFlags(index: Int): Int {
+        // TODO
+        return 0
     }
 
     /**
@@ -55,7 +70,7 @@ class GameController(
      */
     fun resetGame() {
         gameCreated = false
-        cancelTimer()
+        stopTimer()
     }
 
     /**
@@ -84,9 +99,9 @@ class GameController(
      * @param startTime - start time of the timer (default = 0L)
      */
     fun startTimer(startTime: Long = 0L) {
-        cancelTimer()
+        stopTimer()
         timer = timerFactory.create(startTime) { time ->
-            eventPublisher.publishEvent(GameEvent.TimeUpdate(time))
+            eventPublisher.publish(GameEvent.TimeUpdate(time))
         }.apply { start() }
     }
 
@@ -94,16 +109,16 @@ class GameController(
      * Pauses the timer
      */
     fun pauseTimer() {
-        cancelTimer()
+        stopTimer()
     }
 
     /**
      * Resumes the timer
      */
     fun resumeTimer() {
-        cancelTimer()
+        stopTimer()
         timer = timerFactory.create(timerValue) { time ->
-            eventPublisher.publishEvent(GameEvent.TimeUpdate(time))
+            eventPublisher.publish(GameEvent.TimeUpdate(time))
             timerValue = time
         }.apply { start() }
     }
@@ -111,7 +126,7 @@ class GameController(
     /**
      * Cancels the timer
      */
-    fun cancelTimer() {
+    fun stopTimer() {
         timer?.cancel()
     }
 

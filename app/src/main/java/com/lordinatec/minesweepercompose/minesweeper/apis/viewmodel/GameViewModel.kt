@@ -6,13 +6,10 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.EventPublisher
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameEvent
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameEventPublisher
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
-import com.lordinatec.minesweepercompose.minesweeper.apis.util.clickAdjacentPositions
-import com.lordinatec.minesweepercompose.minesweeper.apis.util.countAdjacent
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,12 +21,13 @@ import kotlinx.coroutines.launch
  * ViewModel for the Game screen.
  *
  * @param gameController The GameController to use.
+ * @param gameEvents The GameEventPublisher to use.
  *
  * @return A ViewModel for the Game screen.
  */
 class GameViewModel(
     private val gameController: GameController,
-    private val gameEvents: GameEventPublisher
+    private val gameEvents: EventPublisher
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
@@ -48,13 +46,13 @@ class GameViewModel(
                     is GameEvent.PositionExploded -> updatePosition(
                         event.index,
                         TileState.EXPLODED,
-                        ""
+                        "*"
                     )
 
                     is GameEvent.PositionFlagged -> updatePosition(
                         event.index,
                         TileState.FLAGGED,
-                        ""
+                        "F"
                     )
 
                     is GameEvent.PositionUnflagged -> updatePosition(
@@ -65,6 +63,13 @@ class GameViewModel(
 
                     is GameEvent.GameWon -> gameWon()
                     is GameEvent.GameLost -> gameLost()
+                    is GameEvent.GameCreated -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                newGame = true
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -87,8 +92,8 @@ class GameViewModel(
      * This will clear the entire field and stop the timer.
      */
     private val gameWon: () -> Unit = {
-        clearEverything()
-        gameController.cancelTimer()
+        gameController.clearEverything()
+        gameController.stopTimer()
         _uiState.update { state ->
             state.copy(
                 gameOver = true,
@@ -103,8 +108,8 @@ class GameViewModel(
      * This will clear the entire field and stop the timer.
      */
     private val gameLost: () -> Unit = {
-        clearEverything()
-        gameController.cancelTimer()
+        gameController.clearEverything()
+        gameController.stopTimer()
         _uiState.update { state ->
             state.copy(
                 gameOver = true,
@@ -140,7 +145,7 @@ class GameViewModel(
      */
     fun clear(index: Int) {
         // if game is not created, create the game
-        if (!gameController.gameCreated) createGame(index)
+        gameController.maybeCreateGame(index)
         gameController.clear(index)
     }
 
@@ -154,37 +159,12 @@ class GameViewModel(
     }
 
     /**
-     * Ensures the given coordinates are in range of the field.
-     *
-     * @param x The x-coordinate.
-     * @param y The y-coordinate.
-     *
-     * @return True if the coordinates are in range, false otherwise.
-     */
-    // TODO: Move this somewhere else
-    fun validCoordinates(x: Int, y: Int): Boolean {
-        return x in 0 until Config.WIDTH && y in 0 until Config.HEIGHT
-    }
-
-    /**
-     * Checks if the tile at the given index is in the given state.
-     *
-     * @param index The index of the tile to check.
-     * @param tileState The state to check for.
-     *
-     * @return True if the tile is in the given state, false otherwise.
-     */
-    fun positionIs(index: Int, tileState: TileState): Boolean {
-        return _uiState.value.tileStates[index] == tileState
-    }
-
-    /**
      * Clears all adjacent tiles to the given index.
      *
      * @param index The index of the tile to clear adjacent tiles.
      */
     fun clearAdjacentTiles(index: Int) {
-        clickAdjacentPositions(this, index)
+        gameController.clearAdjacentTiles(index)
     }
 
     /**
@@ -195,66 +175,24 @@ class GameViewModel(
      * @return The number of adjacent mines.
      */
     fun getAdjacentFlags(index: Int): Int {
-        return countAdjacent(this, index, TileState.FLAGGED)
+        return gameController.countAdjacentFlags(index)
     }
 
     /**
      * Pauses the timer.
      */
     fun pauseTimer() {
-        if (gameController.gameCreated && !_uiState.value.gameOver) {
-            gameController.pauseTimer()
-        }
+        gameController.pauseTimer()
     }
 
     /**
      * Resumes the timer.
      */
     fun resumeTimer() {
-        if (gameController.gameCreated && !_uiState.value.gameOver) {
-            gameController.resumeTimer()
-        }
+        gameController.resumeTimer()
     }
 
     /* PRIVATE FUNCTIONS */
-    /**
-     * Creates a new game. The given index is guaranteed to NOT be a mine.
-     *
-     * This function resets the game state and starts the timer.
-     *
-     * @param index The index of the first tile to clear.
-     */
-    private fun createGame(index: Int) {
-        gameController.createGame(index)
-        _uiState.update { state ->
-            state.copy(
-                newGame = false
-            )
-        }
-        gameController.startTimer()
-    }
-
-    /**
-     * Clears all covered tiles.
-     */
-    private fun clearEverything() {
-        _uiState.value.tileStates
-            .withIndex()
-            .filter { it.value == TileState.COVERED }
-            .forEach { clear(it.index) }
-    }
-
-    /**
-     * Checks if the win conditions are met.
-     *
-     * @return True if the win conditions are met, false otherwise.
-     */
-    private fun assessWinConditions(): Boolean {
-        return _uiState.value.tileStates.count {
-            it == TileState.COVERED || it == TileState.FLAGGED
-        } == Config.MINES
-    }
-
     /**
      * Updates the position at the given index.
      *

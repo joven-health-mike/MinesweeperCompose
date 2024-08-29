@@ -39,14 +39,14 @@ class GameActivity : ComponentActivity() {
             val viewModel: GameViewModel = createCustomViewModel()
             val gameState by viewModel.uiState.collectAsState()
             val lifecycleObserver = TimerLifecycleObserver(viewModel)
-            lifecycle.addObserver(lifecycleObserver);
+            lifecycle.addObserver(lifecycleObserver)
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Modifier.padding(innerPadding)
                     if (gameState.gameOver && gameState.winner) {
                         maybeSaveBestTime(this, gameState.timeValue)
                         saveWin(this)
-                    } else if (gameState.gameOver && !gameState.winner) {
+                    } else if (gameState.gameOver) {
                         saveLoss(this)
                     }
                     GameView(viewModel)
@@ -74,7 +74,7 @@ class GameActivity : ComponentActivity() {
 
 
     private fun createCustomViewModel(): GameViewModel {
-        val gameEvents = GameEventPublisher.Factory().create(lifecycleScope)
+        val gameEvents = GameEventPublisher()
         return ViewModelProvider(
             this,
             GameViewModelFactory(

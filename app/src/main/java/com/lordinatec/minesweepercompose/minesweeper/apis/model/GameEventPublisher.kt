@@ -6,26 +6,23 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.model
 
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.xyToIndex
 import com.mikeburke106.mines.api.model.GameControlStrategy
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.callbackFlow
 
 /**
  * Bridge class to convert GameControlStrategy.Listener events to GameEvent objects
  *
- * @param coroutineScope - CoroutineScope to use for publishing events
- *
  * @constructor Creates a new GameEventPublisher
  */
-class GameEventPublisher(private val coroutineScope: CoroutineScope) :
+class GameEventPublisher :
     GameControlStrategy.Listener, EventPublisher {
     private val _events = MutableSharedFlow<Event>()
     override val events = _events.asSharedFlow()
 
     override fun publish(event: Event) {
-        coroutineScope.launch {
+        callbackFlow<Event> {
             publishEvent(event as GameEvent)
         }
     }
@@ -64,11 +61,5 @@ class GameEventPublisher(private val coroutineScope: CoroutineScope) :
 
     override fun gameLost() {
         publish(GameEvent.GameLost)
-    }
-
-    class Factory {
-        fun create(coroutineScope: CoroutineScope): GameEventPublisher {
-            return GameEventPublisher(coroutineScope)
-        }
     }
 }

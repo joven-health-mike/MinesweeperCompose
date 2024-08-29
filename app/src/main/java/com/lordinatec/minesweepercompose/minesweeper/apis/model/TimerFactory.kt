@@ -11,7 +11,7 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.util.CountUpTimer
  *
  * @constructor Create a new TimerFactory instance.
  */
-class TimerFactory() {
+class TimerFactory {
     /**
      * Create a new CountUpTimer instance.
      *

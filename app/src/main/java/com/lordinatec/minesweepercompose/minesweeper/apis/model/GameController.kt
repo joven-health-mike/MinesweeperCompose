@@ -15,7 +15,6 @@ import com.mikeburke106.mines.basic.model.BasicPositionPool
  *
  * @param gameFactory - Create games
  * @param timerFactory - Creates timers
- * @param listener - Listener for game events
  *
  * @property gameCreated - flag to indicate if a game has been created
  *

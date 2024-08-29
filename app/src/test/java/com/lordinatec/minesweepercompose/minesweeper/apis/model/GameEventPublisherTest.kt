@@ -16,7 +16,7 @@ class GameEventPublisherTest {
     @BeforeTest
     fun setUp() = runTest {
         MockitoAnnotations.openMocks(this)
-        gameEventPublisher = GameEventPublisher()
+        gameEventPublisher = GameEventPublisher(backgroundScope)
     }
 
     @Test

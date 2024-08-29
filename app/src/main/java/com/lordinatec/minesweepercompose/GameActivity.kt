@@ -74,7 +74,7 @@ class GameActivity : ComponentActivity() {
 
 
     private fun createCustomViewModel(): GameViewModel {
-        val gameEvents = GameEventPublisher()
+        val gameEvents = GameEventPublisher(lifecycleScope)
         return ViewModelProvider(
             this,
             GameViewModelFactory(

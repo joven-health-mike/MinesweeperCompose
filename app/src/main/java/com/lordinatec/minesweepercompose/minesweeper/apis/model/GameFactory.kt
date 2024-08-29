@@ -7,6 +7,7 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.model
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.GameControlStrategy.Listener
+import com.mikeburke106.mines.api.model.Position
 import com.mikeburke106.mines.basic.controller.BasicGameController
 import com.mikeburke106.mines.basic.model.BasicConfiguration
 import com.mikeburke106.mines.basic.model.BasicFieldFactory
@@ -41,7 +42,7 @@ interface GameInfoHolder {
      *
      * @return the position pool
      */
-    fun getPositionPool(): BasicPositionPool
+    fun getPositionPool(): Position.Pool
 }
 
 /**
@@ -77,7 +78,7 @@ class GameFactory {
                 return field
             }
 
-            override fun getPositionPool(): BasicPositionPool {
+            override fun getPositionPool(): Position.Pool {
                 return positionPool
             }
         }

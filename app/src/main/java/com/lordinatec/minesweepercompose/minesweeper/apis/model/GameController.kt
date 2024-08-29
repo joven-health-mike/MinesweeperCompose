@@ -7,8 +7,8 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.model
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.indexToXY
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.CountUpTimer
 import com.mikeburke106.mines.api.model.Field
+import com.mikeburke106.mines.api.model.Position
 import com.mikeburke106.mines.basic.controller.BasicGameController
-import com.mikeburke106.mines.basic.model.BasicPositionPool
 
 /**
  * GameController - wraps functionality of the game model from the mines-java engine
@@ -25,11 +25,12 @@ class GameController(
     private val timerFactory: TimerFactory,
     private val eventPublisher: GameEventPublisher
 ) {
+    // TODO: reduce dependencies
     private var gameCreated: Boolean = false
     private var gameOver: Boolean = false
     private var gameModel: BasicGameController? = null
     private var gameField: Field? = null
-    private var positionPool: BasicPositionPool? = null
+    private var positionPool: Position.Pool? = null
     private var timer: CountUpTimer? = null
     private var timerValue = 0L
 
@@ -136,8 +137,8 @@ class GameController(
      */
     fun flagIsCorrect(index: Int): Boolean {
         val (x, y) = indexToXY(index)
-        val position = positionPool!!.atLocation(x, y)
-        return gameField?.isMine(position)!!
+        val position = positionPool?.atLocation(x, y)
+        return gameField?.isMine(position) ?: false
     }
 
     /**

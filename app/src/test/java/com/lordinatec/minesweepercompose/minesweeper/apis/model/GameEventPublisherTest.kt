@@ -24,7 +24,6 @@ class GameEventPublisherTest {
     @BeforeTest
     fun setUp() = runTest {
         Dispatchers.setMain(StandardTestDispatcher())
-        MockitoAnnotations.openMocks(this)
         gameEventPublisher = GameEventPublisher(TestScope())
     }
 

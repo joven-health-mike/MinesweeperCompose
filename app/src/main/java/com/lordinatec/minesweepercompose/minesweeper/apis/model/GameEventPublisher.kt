@@ -37,6 +37,7 @@ class GameEventPublisher(private val publisherScope: CoroutineScope) :
     }
 
     override fun positionCleared(x: Int, y: Int, adjacentMines: Int) {
+        // TODO: remove this dependency on xyToIndex
         val index = xyToIndex(x, y)
         publish(GameEvent.PositionCleared(index, adjacentMines))
     }

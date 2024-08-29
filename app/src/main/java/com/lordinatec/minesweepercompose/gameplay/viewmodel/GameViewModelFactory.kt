@@ -4,6 +4,7 @@
 
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.lordinatec.minesweepercompose.gameplay.GameController
@@ -18,11 +19,12 @@ import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
  * @constructor Creates a GameViewModelFactory
  */
 class GameViewModelFactory(
+    private val application: Application,
     private val gameController: GameController,
     private val gameEvents: GameEventPublisher
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return GameViewModel(gameController, gameEvents) as T
+        return GameViewModel(application, gameController, gameEvents) as T
     }
 }

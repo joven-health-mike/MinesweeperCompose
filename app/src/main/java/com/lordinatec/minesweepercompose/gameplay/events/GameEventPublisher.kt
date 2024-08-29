@@ -7,9 +7,11 @@ package com.lordinatec.minesweepercompose.gameplay.events
 import com.lordinatec.minesweepercompose.config.Config.xyToIndex
 import com.mikeburke106.mines.api.model.GameControlStrategy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Bridge class to convert GameControlStrategy.Listener events to GameEvent objects
@@ -23,7 +25,9 @@ class GameEventPublisher(private val publisherScope: CoroutineScope) :
 
     override fun publish(event: Event) {
         publisherScope.launch {
-            publishEvent(event as GameEvent)
+            withContext(Dispatchers.IO) {
+                publishEvent(event as GameEvent)
+            }
         }
     }
 

@@ -4,12 +4,14 @@
 
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.GameController
+import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
+import com.lordinatec.minesweepercompose.stats.Stats
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +27,7 @@ import kotlinx.coroutines.launch
  * @return A ViewModel for the Game screen.
  */
 class GameViewModel(
+    private val application: Application,
     private val gameController: GameController,
     private val gameEvents: EventPublisher
 ) : ViewModel() {
@@ -97,6 +100,8 @@ class GameViewModel(
                     winner = true,
                 )
             }
+            saveWin()
+            maybeSaveBestTime(uiState.value.timeValue)
         }
     }
 
@@ -116,6 +121,24 @@ class GameViewModel(
                     winner = false,
                 )
             }
+            saveLoss()
+        }
+    }
+
+    private fun saveLoss() {
+        val losses = Stats.getLosses(application)
+        Stats.setLosses(application, losses + 1)
+    }
+
+    private fun saveWin() {
+        val wins = Stats.getWins(application)
+        Stats.setWins(application, wins + 1)
+    }
+
+    private fun maybeSaveBestTime(timeValue: Long) {
+        val bestTime = Stats.getBestTime(application)
+        if (timeValue < bestTime || bestTime == 0L) {
+            Stats.setBestTime(application, timeValue)
         }
     }
 
@@ -191,6 +214,7 @@ class GameViewModel(
      * Resumes the timer.
      */
     fun resumeTimer() {
+        if (uiState.value.gameOver) return
         gameController.resumeTimer()
     }
 

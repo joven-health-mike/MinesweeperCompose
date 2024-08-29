@@ -4,10 +4,10 @@
 
 package com.lordinatec.minesweepercompose.gameplay
 
-import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
-import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.config.Config.indexToXY
+import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
 import com.lordinatec.minesweepercompose.gameplay.timer.CountUpTimer
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerFactory
@@ -31,7 +31,6 @@ class GameController(
 ) {
     // TODO: reduce dependencies
     private var gameCreated: Boolean = false
-    private var gameOver: Boolean = false
     private var gameModel: AndroidGameControlStrategy? = null
     private var gameField: Field? = null
     private var positionPool: Position.Pool? = null
@@ -46,7 +45,6 @@ class GameController(
     fun maybeCreateGame(index: Int) {
         if (!gameCreated) {
             gameCreated = true
-            gameOver = false
             val (x, y) = indexToXY(index)
             val gameInfoHolder = gameFactory.createGame(x, y, eventPublisher)
             gameModel = gameInfoHolder.getGameController()
@@ -69,14 +67,14 @@ class GameController(
         if (!gameCreated) return
 
         val (x, y) = indexToXY(index)
-        gameModel?.clearAdjacentTiles(x,y)
+        gameModel?.clearAdjacentTiles(x, y)
     }
 
     fun countAdjacentFlags(index: Int): Int {
         if (!gameCreated) return -1
 
         val (x, y) = indexToXY(index)
-        return gameModel?.countAdjacentFlags(x,y) ?: 0
+        return gameModel?.countAdjacentFlags(x, y) ?: 0
     }
 
     /**
@@ -124,6 +122,7 @@ class GameController(
         stopTimer()
         timer = timerFactory.create(startTime) { time ->
             eventPublisher.publish(GameEvent.TimeUpdate(time))
+            timerValue = time
         }.apply { start() }
     }
 

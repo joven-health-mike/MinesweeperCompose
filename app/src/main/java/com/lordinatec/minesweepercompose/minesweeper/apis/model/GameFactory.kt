@@ -8,16 +8,13 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.GameControlStrategy.Listener
 import com.mikeburke106.mines.api.model.Position
-import com.mikeburke106.mines.basic.controller.BasicGameController
 import com.mikeburke106.mines.basic.model.BasicConfiguration
-import com.mikeburke106.mines.basic.model.BasicFieldFactory
 import com.mikeburke106.mines.basic.model.BasicGame
 import com.mikeburke106.mines.basic.model.BasicPosition
 import com.mikeburke106.mines.basic.model.BasicPositionPool
-import com.mikeburke106.mines.basic.model.RandomPositionProvider
 import com.mikeburke106.mines.basic.model.RegularIntervalTimingStrategy
 
-private val fieldFactory = BasicFieldFactory(RandomPositionProvider.Factory())
+private val fieldFactory = AndroidFieldFactory()
 
 /**
  * GameInfoHolder holds objects to return from the factory
@@ -28,7 +25,7 @@ interface GameInfoHolder {
      *
      * @return the game controller
      */
-    fun getGameController(): BasicGameController
+    fun getGameController(): AndroidGameControlStrategy
 
     /**
      * Get the field
@@ -66,8 +63,8 @@ class GameFactory {
         val field = fieldFactory.newInstance(config, x, y)
         val game = BasicGame(System.currentTimeMillis(), field, RegularIntervalTimingStrategy(1L))
         return object : GameInfoHolder {
-            override fun getGameController(): BasicGameController {
-                return BasicGameController(
+            override fun getGameController(): AndroidGameControlStrategy {
+                return AndroidGameControlStrategy(
                     game,
                     positionPool,
                     null

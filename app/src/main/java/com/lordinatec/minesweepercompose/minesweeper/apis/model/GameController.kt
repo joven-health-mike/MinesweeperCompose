@@ -4,6 +4,7 @@
 
 package com.lordinatec.minesweepercompose.minesweeper.apis.model
 
+import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.indexToXY
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.CountUpTimer
 import com.mikeburke106.mines.api.model.Field
@@ -28,7 +29,7 @@ class GameController(
     // TODO: reduce dependencies
     private var gameCreated: Boolean = false
     private var gameOver: Boolean = false
-    private var gameModel: BasicGameController? = null
+    private var gameModel: AndroidGameControlStrategy? = null
     private var gameField: Field? = null
     private var positionPool: Position.Pool? = null
     private var timer: CountUpTimer? = null
@@ -53,16 +54,26 @@ class GameController(
     }
 
     fun clearEverything() {
-        // TODO
+        if (!gameCreated) return
+
+        for (i in 0 until Config.WIDTH * Config.HEIGHT) {
+            val (x, y) = indexToXY(i)
+            gameModel?.clear(x, y)
+        }
     }
 
     fun clearAdjacentTiles(index: Int) {
-        // TODO
+        if (!gameCreated) return
+
+        val (x, y) = indexToXY(index)
+        gameModel?.clearAdjacentTiles(x,y)
     }
 
     fun countAdjacentFlags(index: Int): Int {
-        // TODO
-        return 0
+        if (!gameCreated) return -1
+
+        val (x, y) = indexToXY(index)
+        return gameModel?.countAdjacentFlags(x,y) ?: 0
     }
 
     /**

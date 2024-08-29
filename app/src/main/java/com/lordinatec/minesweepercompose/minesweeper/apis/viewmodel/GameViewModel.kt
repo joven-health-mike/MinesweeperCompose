@@ -40,7 +40,7 @@ class GameViewModel(
                     is GameEvent.PositionCleared -> updatePosition(
                         event.index,
                         TileState.CLEARED,
-                        event.adjacentMines.toString()
+                        if (event.adjacentMines == 0) "" else event.adjacentMines.toString()
                     )
 
                     is GameEvent.PositionExploded -> updatePosition(
@@ -92,13 +92,15 @@ class GameViewModel(
      * This will clear the entire field and stop the timer.
      */
     private val gameWon: () -> Unit = {
-        gameController.clearEverything()
-        gameController.stopTimer()
-        _uiState.update { state ->
-            state.copy(
-                gameOver = true,
-                winner = true,
-            )
+        if (!uiState.value.gameOver) {
+            gameController.clearEverything()
+            gameController.stopTimer()
+            _uiState.update { state ->
+                state.copy(
+                    gameOver = true,
+                    winner = true,
+                )
+            }
         }
     }
 
@@ -108,13 +110,15 @@ class GameViewModel(
      * This will clear the entire field and stop the timer.
      */
     private val gameLost: () -> Unit = {
-        gameController.clearEverything()
-        gameController.stopTimer()
-        _uiState.update { state ->
-            state.copy(
-                gameOver = true,
-                winner = false,
-            )
+        if (!uiState.value.gameOver) {
+            gameController.clearEverything()
+            gameController.stopTimer()
+            _uiState.update { state ->
+                state.copy(
+                    gameOver = true,
+                    winner = false,
+                )
+            }
         }
     }
 

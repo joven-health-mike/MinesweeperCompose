@@ -5,10 +5,10 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.model
 
 import android.os.CountDownTimer
+import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.CountUpTimer
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.Position
-import com.mikeburke106.mines.basic.controller.BasicGameController
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every
@@ -23,6 +23,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -44,7 +45,7 @@ class GameControllerTest {
     private lateinit var countDownTimer: CountDownTimer
 
     @MockK
-    private lateinit var gameModel: BasicGameController
+    private lateinit var gameModel: AndroidGameControlStrategy
 
     @MockK
     private lateinit var field: Field
@@ -53,7 +54,7 @@ class GameControllerTest {
     private lateinit var positionPool: Position.Pool
 
     private val gameInfoHolder = object : GameInfoHolder {
-        override fun getGameController(): BasicGameController {
+        override fun getGameController(): AndroidGameControlStrategy {
             return gameModel
         }
 
@@ -79,7 +80,10 @@ class GameControllerTest {
         every { gameModel.clear(any(), any()) } just Runs
         every { gameModel.toggleFlag(any(), any()) } just Runs
         every { positionPool.atLocation(any(), any()) } answers { mockk() }
+        every { positionPool.width() } answers { Config.WIDTH }
+        every { positionPool.height() } answers { Config.HEIGHT }
         every { field.isMine(any()) } answers { false }
+        every { field.isFlag(any()) } answers { false }
         every { eventPublisher.publish(any()) } just Runs
         gameController = GameController(gameFactory, timerFactory, eventPublisher)
     }
@@ -198,25 +202,44 @@ class GameControllerTest {
 
     @Test
     fun testClearEverything() = runTest {
+        gameController.maybeCreateGame(0)
         gameController.clearEverything()
-        // TODO
-        //verify(exactly = 1) { field.isMine(any()) }
-        assertTrue(false)
+        verify(exactly = Config.HEIGHT * Config.WIDTH) { gameModel.clear(any(), any()) }
     }
 
     @Test
-    fun testClearAdjacentTiles() = runTest {
+    fun testClearAdjacentTilesCorner() = runTest {
+        gameController.maybeCreateGame(0)
         gameController.clearAdjacentTiles(0)
-        // TODO
-        //verify(exactly = 1) { field.isMine(any()) }
-        assertTrue(false)
+        verify(exactly = 3) { gameModel.clear(any(), any()) }
+    }
+
+    @Test
+    fun testClearAdjacentTilesTopEdge() = runTest {
+        gameController.maybeCreateGame(0)
+        gameController.clearAdjacentTiles(1)
+        verify(exactly = 5) { gameModel.clear(any(), any()) }
+    }
+
+    @Test
+    fun testClearAdjacentTilesSideEdge() = runTest {
+        gameController.maybeCreateGame(0)
+        gameController.clearAdjacentTiles(5)
+        verify(exactly = 5) { gameModel.clear(any(), any()) }
+    }
+
+    @Test
+    fun testClearAdjacentTilesMiddle() = runTest {
+        gameController.maybeCreateGame(0)
+        gameController.clearAdjacentTiles(6)
+        verify(exactly = 8) { gameModel.clear(any(), any()) }
     }
 
     @Test
     fun testCountAdjacentFlags() = runTest {
-        gameController.countAdjacentFlags(0)
-        // TODO
-        //verify(exactly = 1) { field.isMine(any()) }
-        assertTrue(false)
+        every { field.isFlag(any()) } answers { true }
+        gameController.maybeCreateGame(0)
+        val adjacentFlags = gameController.countAdjacentFlags(0)
+        assertEquals(3, adjacentFlags)
     }
 }

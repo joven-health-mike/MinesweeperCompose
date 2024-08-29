@@ -7,7 +7,6 @@ package com.lordinatec.minesweepercompose.minesweeper.apis.model
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config.indexToXY
 import com.lordinatec.minesweepercompose.minesweeper.apis.util.CountUpTimer
 import com.mikeburke106.mines.api.model.Field
-import com.mikeburke106.mines.api.model.GameControlStrategy
 import com.mikeburke106.mines.basic.controller.BasicGameController
 import com.mikeburke106.mines.basic.model.BasicPositionPool
 
@@ -25,7 +24,7 @@ import com.mikeburke106.mines.basic.model.BasicPositionPool
 class GameController(
     private val gameFactory: GameFactory,
     private val timerFactory: TimerFactory,
-    var listener: GameControlStrategy.Listener = GameListenerBridge()
+    private val eventPublisher: GameEventPublisher
 ) {
     var gameCreated: Boolean = false
     private var gameModel: BasicGameController? = null
@@ -43,10 +42,11 @@ class GameController(
         if (!gameCreated) {
             gameCreated = true
             val (x, y) = indexToXY(index)
-            val gameInfoHolder = gameFactory.createGame(x, y, listener)
+            val gameInfoHolder = gameFactory.createGame(x, y, eventPublisher)
             gameModel = gameInfoHolder.getGameController()
             gameField = gameInfoHolder.getField()
             positionPool = gameInfoHolder.getPositionPool()
+            eventPublisher.publishEvent(GameEvent.GameCreated)
         }
     }
 
@@ -86,8 +86,7 @@ class GameController(
     fun startTimer(startTime: Long = 0L) {
         cancelTimer()
         timer = timerFactory.create(startTime) { time ->
-            listener.timeUpdate(time)
-            timerValue = time
+            eventPublisher.publishEvent(GameEvent.TimeUpdate(time))
         }.apply { start() }
     }
 
@@ -104,7 +103,7 @@ class GameController(
     fun resumeTimer() {
         cancelTimer()
         timer = timerFactory.create(timerValue) { time ->
-            listener.timeUpdate(time)
+            eventPublisher.publishEvent(GameEvent.TimeUpdate(time))
             timerValue = time
         }.apply { start() }
     }
@@ -142,10 +141,10 @@ class GameController(
         /**
          * Create a GameController
          *
-         * @param listener - Listener for game events
+         * @param eventPublisher - Listener for game events
          */
-        fun createGameController(listener: GameControlStrategy.Listener = GameListenerBridge()): GameController {
-            return GameController(gameFactory, timerFactory, listener)
+        fun createGameController(eventPublisher: GameEventPublisher): GameController {
+            return GameController(gameFactory, timerFactory, eventPublisher)
         }
     }
 }

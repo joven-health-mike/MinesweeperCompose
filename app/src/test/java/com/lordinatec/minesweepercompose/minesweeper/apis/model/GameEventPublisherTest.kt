@@ -11,7 +11,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-class GameListenerBridgeTest {
+class GameEventPublisherTest {
     @Mock
     private lateinit var onTimeUpdate: (newTime: Long) -> Unit
 
@@ -33,12 +33,12 @@ class GameListenerBridgeTest {
     @Mock
     private lateinit var onGameLost: () -> Unit
 
-    private lateinit var gameListenerBridge: GameListenerBridge
+    private lateinit var gameEventPublisher: GameEventPublisher
 
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        gameListenerBridge = GameListenerBridge(
+        gameEventPublisher = GameEventPublisher(
             onTimeUpdate,
             onPositionCleared,
             onPositionExploded,
@@ -52,7 +52,7 @@ class GameListenerBridgeTest {
     @Test
     fun testTimeUpdate() {
         val newTime = 100L
-        gameListenerBridge.timeUpdate(newTime)
+        gameEventPublisher.timeUpdate(newTime)
         verify(onTimeUpdate).invoke(newTime)
     }
 
@@ -61,40 +61,40 @@ class GameListenerBridgeTest {
         // TOOD: Get rid of xyToIndex dependency
         val index = xyToIndex(1, 2)
         val adjacentMines = 2
-        gameListenerBridge.positionCleared(1, 2, adjacentMines)
+        gameEventPublisher.positionCleared(1, 2, adjacentMines)
         verify(onPositionCleared).invoke(index, adjacentMines)
     }
 
     @Test
     fun testPositionExploded() {
         val index = xyToIndex(1, 2)
-        gameListenerBridge.positionExploded(1, 2)
+        gameEventPublisher.positionExploded(1, 2)
         verify(onPositionExploded).invoke(index)
     }
 
     @Test
     fun testPositionFlagged() {
         val index = xyToIndex(1, 2)
-        gameListenerBridge.positionFlagged(1, 2)
+        gameEventPublisher.positionFlagged(1, 2)
         verify(onPositionFlagged).invoke(index)
     }
 
     @Test
     fun testPositionUnflagged() {
         val index = xyToIndex(1, 2)
-        gameListenerBridge.positionUnflagged(1, 2)
+        gameEventPublisher.positionUnflagged(1, 2)
         verify(onPositionUnflagged).invoke(index)
     }
 
     @Test
     fun testGameWon() {
-        gameListenerBridge.gameWon()
+        gameEventPublisher.gameWon()
         verify(onGameWon).invoke()
     }
 
     @Test
     fun testGameLost() {
-        gameListenerBridge.gameLost()
+        gameEventPublisher.gameLost()
         verify(onGameLost).invoke()
     }
 }

@@ -5,14 +5,15 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel
 
 import android.app.Application
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController.Factory
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameEventPublisher
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
+import com.mikeburke106.mines.api.model.GameControlStrategy
 import io.mockk.MockKAnnotations
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
+import io.mockk.just
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -29,22 +30,25 @@ class GameViewModelTest {
     @MockK
     private lateinit var gameController: GameController
 
+    @MockK
+    private lateinit var listener: GameControlStrategy.Listener
+
     private lateinit var gameViewModel: GameViewModel
 
     @BeforeTest
     fun setUp() {
         MockKAnnotations.init(this)
-        every { gameController.createGame(any()) } answers { }
-        every { gameController.startTimer(any()) } answers { }
-        every { gameController.clear(any()) } answers { }
-        every { gameController.resetGame() } answers { }
+        every { gameController.createGame(any()) } just Runs
+        every { gameController.startTimer(any()) } just Runs
+        every { gameController.clear(any()) } just Runs
+        every { gameController.resetGame() } just Runs
         every { gameController.flagIsCorrect(any()) } answers { false }
-        every { gameController.toggleFlag(any()) } answers { }
-        every { gameController.pauseTimer() } answers { }
-        every { gameController.resumeTimer() } answers { }
-        val gameControllerFactory = mockk<Factory>()
-        every { gameControllerFactory.createGameController(any()) } returns gameController
-        gameViewModel = GameViewModel(application, Config, gameControllerFactory)
+        every { gameController.toggleFlag(any()) } just Runs
+        every { gameController.pauseTimer() } just Runs
+        every { gameController.resumeTimer() } just Runs
+        every { gameController.listener } answers { GameEventPublisher() }
+        every { gameController.listener = any() } just Runs
+        gameViewModel = GameViewModel(gameController)
     }
 
     @Test
@@ -93,16 +97,11 @@ class GameViewModelTest {
     @Test
     fun testClearEverythingOnLastFlag() = runTest {
         every { gameController.gameCreated } answers { true }
+
         // TODO: figure out how to get updated state
-//        var currentState = gameViewModel.uiState.value
-//        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-//            gameViewModel.uiState.collect { state ->
-//                currentState = state
-//            }
-//        }
 //        for (i in 0 until Config.MINES)
 //            gameViewModel.toggleFlag(i)
-//        val coveredCount = currentState.tileStates.count() { it == TileState.COVERED }
+//        val coveredCount = currentState?.tileStates?.count() { it == TileState.COVERED }
 //        assertEquals(0, coveredCount)
         assertTrue(false)
     }

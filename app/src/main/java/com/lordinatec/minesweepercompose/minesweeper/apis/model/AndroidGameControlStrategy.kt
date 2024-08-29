@@ -11,10 +11,12 @@ import com.mikeburke106.mines.api.model.Position
 class AndroidGameControlStrategy(
     private val game: Game,
     private val positionPool: Position.Pool,
+    private val numMines: Int,
     private var listener: GameControlStrategy.Listener? = null
 ) : GameControlStrategy {
     private var gameOver = false
     private var cleared = mutableSetOf<Position>()
+    private var flagged = mutableSetOf<Position>()
 
     override fun clear(x: Int, y: Int) {
         val position = positionPool.atLocation(x, y)
@@ -32,6 +34,9 @@ class AndroidGameControlStrategy(
             listener?.positionCleared(x, y, adjacentMines)
             if (adjacentMines == 0) {
                 clearAdjacentTiles(position.x(), position.y())
+            }
+            if (cleared.size == positionPool.size() - numMines) {
+                listener?.gameWon()
             }
         }
     }
@@ -95,8 +100,23 @@ class AndroidGameControlStrategy(
         val isFlag = game.field().flag(position)
         if (isFlag) {
             listener?.positionUnflagged(x, y)
+            flagged.remove(position)
         } else {
             listener?.positionFlagged(x, y)
+            flagged.add(position)
+            if (flagged.size == numMines) {
+                var gameWon = true
+                for (flaggedPosition in flagged) {
+                    if (!game.field().isMine(flaggedPosition)) {
+                        gameWon = false
+                    }
+                }
+                if (gameWon) {
+                    listener?.gameWon()
+                } else {
+                    listener?.gameLost()
+                }
+            }
         }
     }
 

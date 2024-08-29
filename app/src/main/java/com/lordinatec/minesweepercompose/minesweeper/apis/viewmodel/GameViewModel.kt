@@ -64,9 +64,10 @@ class GameViewModel(
                     is GameEvent.GameWon -> gameWon()
                     is GameEvent.GameLost -> gameLost()
                     is GameEvent.GameCreated -> {
+                        gameController.startTimer()
                         _uiState.update { state ->
                             state.copy(
-                                newGame = true
+                                newGame = false
                             )
                         }
                     }
@@ -206,9 +207,16 @@ class GameViewModel(
      */
     private fun updatePosition(index: Int, tileState: TileState, value: String) {
         _uiState.update { state ->
+            var newMinesValue = state.minesRemaining
+            if (tileState == TileState.FLAGGED) {
+                newMinesValue--
+            } else if (tileState == TileState.COVERED) {
+                newMinesValue++
+            }
             state.copy(
                 tileStates = state.tileStates.toMutableList().apply { this[index] = tileState },
-                tileValues = state.tileValues.toMutableList().apply { this[index] = value }
+                tileValues = state.tileValues.toMutableList().apply { this[index] = value },
+                minesRemaining = newMinesValue
             )
         }
     }

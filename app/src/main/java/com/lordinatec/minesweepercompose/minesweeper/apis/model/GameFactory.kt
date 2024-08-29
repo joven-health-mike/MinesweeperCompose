@@ -67,6 +67,7 @@ class GameFactory {
                 return AndroidGameControlStrategy(
                     game,
                     positionPool,
+                    config.numMines(),
                     null
                 ).also { it.setListener(listener) }
             }

@@ -80,6 +80,8 @@ class GameController(
      * Reset the game
      */
     fun resetGame() {
+        if (!gameCreated) return
+
         gameCreated = false
         stopTimer()
     }
@@ -90,6 +92,8 @@ class GameController(
      * @param index - index of the tile to clear
      */
     fun clear(index: Int) {
+        if (!gameCreated) return
+
         val (x, y) = indexToXY(index)
         gameModel?.clear(x, y)
     }
@@ -100,6 +104,8 @@ class GameController(
      * @param index - index of the tile to toggle flag
      */
     fun toggleFlag(index: Int) {
+        if (!gameCreated) return
+
         val (x, y) = indexToXY(index)
         gameModel?.toggleFlag(x, y)
     }
@@ -110,6 +116,8 @@ class GameController(
      * @param startTime - start time of the timer (default = 0L)
      */
     fun startTimer(startTime: Long = 0L) {
+        if (!gameCreated) return
+
         stopTimer()
         timer = timerFactory.create(startTime) { time ->
             eventPublisher.publish(GameEvent.TimeUpdate(time))
@@ -120,6 +128,8 @@ class GameController(
      * Pauses the timer
      */
     fun pauseTimer() {
+        if (!gameCreated) return
+
         stopTimer()
     }
 
@@ -127,6 +137,8 @@ class GameController(
      * Resumes the timer
      */
     fun resumeTimer() {
+        if (!gameCreated) return
+
         stopTimer()
         timer = timerFactory.create(timerValue) { time ->
             eventPublisher.publish(GameEvent.TimeUpdate(time))
@@ -138,6 +150,8 @@ class GameController(
      * Cancels the timer
      */
     fun stopTimer() {
+        if (!gameCreated) return
+
         timer?.cancel()
     }
 
@@ -147,6 +161,8 @@ class GameController(
      * @param index - index of the tile to check
      */
     fun flagIsCorrect(index: Int): Boolean {
+        if (!gameCreated) return false
+
         val (x, y) = indexToXY(index)
         val position = positionPool?.atLocation(x, y)
         return gameField?.isMine(position) ?: false

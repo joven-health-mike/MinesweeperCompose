@@ -201,10 +201,10 @@ class GameViewModel(
      * @param value The new value of the tile.
      */
     private fun updatePosition(index: Int, tileState: TileState, value: String) {
-        _uiState.update {
-            it.copy(
-                tileStates = it.tileStates.toMutableList().apply { this[index] = tileState },
-                tileValues = it.tileValues.toMutableList().apply { this[index] = value }
+        _uiState.update { state ->
+            state.copy(
+                tileStates = state.tileStates.toMutableList().apply { this[index] = tileState },
+                tileValues = state.tileValues.toMutableList().apply { this[index] = value }
             )
         }
     }

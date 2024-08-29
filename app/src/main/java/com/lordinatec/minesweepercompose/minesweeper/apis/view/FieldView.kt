@@ -28,7 +28,6 @@ fun FieldView(
 /**
  * The view for the field.
  *
- * @param gameUiState the game UI state
  * @param gameViewModel the game view model
  */
 @Composable

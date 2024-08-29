@@ -36,7 +36,6 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewMode
 /**
  * Factory class to create TileView
  *
- * @param gameUiState The state of the game
  * @param gameViewModel The view model of the game
  * @param onClick Listener for clicks
  * @param onLongClick Listener for long clicks

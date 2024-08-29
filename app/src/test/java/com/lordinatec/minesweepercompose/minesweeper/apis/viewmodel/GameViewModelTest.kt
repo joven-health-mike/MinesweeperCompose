@@ -2,170 +2,180 @@
  * Copyright Lordinatec LLC 2024
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel
 
-import android.app.Application
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.Event
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.EventPublisher
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController.Factory
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameEvent
 import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
 import io.mockk.MockKAnnotations
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
+import io.mockk.just
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
+import kotlinx.coroutines.test.setMain
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class GameViewModelTest {
     @MockK
-    private lateinit var application: Application
+    private lateinit var gameController: GameController
 
     @MockK
-    private lateinit var gameController: GameController
+    private lateinit var eventPublisher: EventPublisher
+
+    private lateinit var testFlow: MutableSharedFlow<Event>
 
     private lateinit var gameViewModel: GameViewModel
 
     @BeforeTest
     fun setUp() {
+        Dispatchers.setMain(StandardTestDispatcher())
+        testFlow = MutableSharedFlow()
         MockKAnnotations.init(this)
-        every { gameController.createGame(any()) } answers { }
-        every { gameController.startTimer(any()) } answers { }
-        every { gameController.clear(any()) } answers { }
-        every { gameController.resetGame() } answers { }
+        every { gameController.maybeCreateGame(any()) } just Runs
+        every { gameController.startTimer(any()) } just Runs
+        every { gameController.clear(any()) } just Runs
+        every { gameController.resetGame() } just Runs
         every { gameController.flagIsCorrect(any()) } answers { false }
-        every { gameController.toggleFlag(any()) } answers { }
-        every { gameController.pauseTimer() } answers { }
-        every { gameController.resumeTimer() } answers { }
-        val gameControllerFactory = mockk<Factory>()
-        every { gameControllerFactory.createGameController(any()) } returns gameController
-        gameViewModel = GameViewModel(application, Config, gameControllerFactory)
+        every { gameController.toggleFlag(any()) } just Runs
+        every { gameController.pauseTimer() } just Runs
+        every { gameController.resumeTimer() } just Runs
+        every { gameController.stopTimer() } just Runs
+        every { gameController.clearEverything() } just Runs
+        every { eventPublisher.events } answers { testFlow.asSharedFlow() }
+        gameViewModel = GameViewModel(gameController, eventPublisher)
     }
 
     @Test
     fun testCreateGame() = runTest {
-        every { gameController.gameCreated } answers { false }
         gameViewModel.clear(0)
-        verify { gameController.createGame(0) }
+        verify { gameController.maybeCreateGame(0) }
     }
 
     @Test
-    fun testTimerStartsOnCreateGame() = runTest {
-        every { gameController.gameCreated } answers { false }
-        gameViewModel.clear(0)
-        verify { gameController.startTimer() }
-    }
-
-    @Test
-    fun testClearIfGameCreated() = runTest {
-        every { gameController.gameCreated } answers { true }
+    fun testClear() = runTest {
         gameViewModel.clear(0)
         verify { gameController.clear(0) }
     }
 
     @Test
-    fun testClearIfGameNotCreated() = runTest {
-        every { gameController.gameCreated } answers { false }
-        gameViewModel.clear(0)
-        verify { gameController.clear(0) }
-    }
-
-    @Test
-    fun testToggleFlagIfGameCreated() = runTest {
-        every { gameController.gameCreated } answers { true }
+    fun testToggleFlag() = runTest {
         gameViewModel.toggleFlag(0)
         verify { gameController.toggleFlag(0) }
     }
 
     @Test
-    fun testToggleFlagIfGameNotCreated() = runTest {
-        every { gameController.gameCreated } answers { false }
-        gameViewModel.toggleFlag(0)
-        verify { gameController.toggleFlag(0) }
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun testClearEverythingOnLastFlag() = runTest {
-        every { gameController.gameCreated } answers { true }
-        // TODO: figure out how to get updated state
-//        var currentState = gameViewModel.uiState.value
-//        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-//            gameViewModel.uiState.collect { state ->
-//                currentState = state
-//            }
-//        }
-//        for (i in 0 until Config.MINES)
-//            gameViewModel.toggleFlag(i)
-//        val coveredCount = currentState.tileStates.count() { it == TileState.COVERED }
-//        assertEquals(0, coveredCount)
-        assertTrue(false)
-    }
-
-    @Test
-    fun testPositionIsTrue() = runTest {
-        every { gameController.gameCreated } answers { true }
-        gameViewModel.positionIs(0, TileState.COVERED)
-        // TODO: Verify that true is returned if the position is covered
-//         val gameState = gameViewModel.uiState
-//         assertEquals(coveredCount, 0)
-        assertTrue(false)
-    }
-
-    @Test
-    fun testPositionIsFalse() = runTest {
-        every { gameController.gameCreated } answers { true }
-        gameViewModel.positionIs(0, TileState.COVERED)
-        // TODO: Verify that true is returned if the position is not covered
-//         val gameState = gameViewModel.uiState
-//         assertEquals(coveredCount, 0)
-        assertTrue(false)
-    }
-
-    @Test
-    fun testPauseTimerIfGameStarted() = runTest {
-        every { gameController.gameCreated } answers { true }
+    fun testPauseTimer() = runTest {
         gameViewModel.pauseTimer()
         verify { gameController.pauseTimer() }
     }
 
     @Test
-    fun testResumeTimerIfGameStarted() = runTest {
-        every { gameController.gameCreated } answers { true }
+    fun testResumeTimer() = runTest {
         gameViewModel.resumeTimer()
         verify { gameController.resumeTimer() }
     }
 
     @Test
-    fun testPauseTimerIfGameNotStarted() = runTest {
-        every { gameController.gameCreated } answers { false }
-        gameViewModel.pauseTimer()
-        verify(never()) { gameController.pauseTimer() }
-    }
-
-    @Test
-    fun testResumeTimerIfGameNotStarted() = runTest {
-        every { gameController.gameCreated } answers { false }
-        gameViewModel.resumeTimer()
-        verify(never()) { gameController.resumeTimer() }
-    }
-
-    @Test
     fun testFlagIsCorrect() = runTest {
-        every { gameController.gameCreated } answers { true }
         gameViewModel.flagIsCorrect(0)
         verify { gameController.flagIsCorrect(0) }
     }
 
     @Test
     fun testResetGame() = runTest {
-        every { gameController.gameCreated } answers { true }
         gameViewModel.resetGame()
         verify { gameController.resetGame() }
+    }
+
+    @Test
+    fun testTimeUpdate() = runTest {
+        val testTimeValue = 1000L
+        testFlow.emit(GameEvent.TimeUpdate(testTimeValue))
+        gameViewModel.uiState.first().let {
+            assertEquals(testTimeValue, it.timeValue)
+        }
+    }
+
+    @Test
+    fun testPositionCleared() = runTest {
+        val testIndex = 1
+        val testAdjacent = 2
+        testFlow.emit(GameEvent.PositionCleared(testIndex, testAdjacent))
+        gameViewModel.uiState.first().let {
+            assertEquals(TileState.CLEARED, it.tileStates[testIndex])
+            assertEquals(testAdjacent.toString(), it.tileValues[testIndex])
+        }
+    }
+
+    @Test
+    fun testPositionExploded() = runTest {
+        val testIndex = 1
+        testFlow.emit(GameEvent.PositionExploded(testIndex))
+        gameViewModel.uiState.first().let {
+            assertEquals(TileState.EXPLODED, it.tileStates[testIndex])
+            assertEquals("*", it.tileValues[testIndex])
+        }
+    }
+
+    @Test
+    fun testPositionFlagged() = runTest {
+        val testIndex = 1
+        testFlow.emit(GameEvent.PositionFlagged(testIndex))
+        gameViewModel.uiState.first().let {
+            assertEquals(TileState.FLAGGED, it.tileStates[testIndex])
+            assertEquals("F", it.tileValues[testIndex])
+        }
+    }
+
+    @Test
+    fun testPositionUnflagged() = runTest {
+        val testIndex = 1
+        testFlow.emit(GameEvent.PositionUnflagged(testIndex))
+        gameViewModel.uiState.first().let {
+            assertEquals(TileState.COVERED, it.tileStates[testIndex])
+            assertEquals("", it.tileValues[testIndex])
+        }
+    }
+
+    @Test
+    fun testGameWon() = runTest {
+        testFlow.emit(GameEvent.GameWon)
+        gameViewModel.uiState.first().let {
+            assertTrue(it.gameOver)
+            assertTrue(it.winner)
+        }
+    }
+
+    @Test
+    fun testGameLost() = runTest {
+        testFlow.emit(GameEvent.GameLost)
+        gameViewModel.uiState.first().let {
+            assertTrue(it.gameOver)
+            assertFalse(it.winner)
+        }
+    }
+
+    @Test
+    fun testGameCreated() = runTest {
+        testFlow.emit(GameEvent.GameCreated)
+        gameViewModel.uiState.first().let {
+            assertFalse(it.newGame)
+        }
     }
 }

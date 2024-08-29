@@ -4,28 +4,25 @@
 
 package com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config
 import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController
+import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameEventPublisher
 
 /**
  * Factory for creating GameViewModel
  *
- * @param mApplication Application object
- * @param config Configuration of the game
- * @param gameControllerFactory Factory for creating GameController
+ * @param gameController The GameController to use.
+ * @param gameEvents The GameEventPublisher to use.
  *
  * @constructor Creates a GameViewModelFactory
  */
 class GameViewModelFactory(
-    private val mApplication: Application,
-    private val config: Config = Config,
-    private val gameControllerFactory: GameController.Factory,
+    private val gameController: GameController,
+    private val gameEvents: GameEventPublisher
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return GameViewModel(mApplication, config, gameControllerFactory) as T
+        return GameViewModel(gameController, gameEvents) as T
     }
 }

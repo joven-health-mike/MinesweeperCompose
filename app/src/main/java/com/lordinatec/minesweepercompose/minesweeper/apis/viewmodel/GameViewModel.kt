@@ -36,7 +36,13 @@ class GameViewModel(
         viewModelScope.launch {
             gameEvents.events.collect { event ->
                 when (event) {
-                    is GameEvent.TimeUpdate -> onTimeUpdate(event.newTime)
+                    is GameEvent.TimeUpdate ->
+                        _uiState.update { state ->
+                            state.copy(
+                                timeValue = event.newTime
+                            )
+                        }
+
                     is GameEvent.PositionCleared -> updatePosition(
                         event.index,
                         TileState.CLEARED,
@@ -77,22 +83,12 @@ class GameViewModel(
     }
 
     /**
-     * Update timeValue when time is updated.
-     */
-    private var onTimeUpdate: (newTime: Long) -> Unit = {
-        _uiState.update { state ->
-            state.copy(
-                timeValue = it
-            )
-        }
-    }
-
-    /**
      * Update the game state when the game is won.
      *
      * This will clear the entire field and stop the timer.
      */
     private val gameWon: () -> Unit = {
+        // this could be called multiple times, so only do anything if the game isn't over
         if (!uiState.value.gameOver) {
             gameController.clearEverything()
             gameController.stopTimer()
@@ -111,6 +107,7 @@ class GameViewModel(
      * This will clear the entire field and stop the timer.
      */
     private val gameLost: () -> Unit = {
+        // this could be called multiple times, so only do anything if the game isn't over
         if (!uiState.value.gameOver) {
             gameController.clearEverything()
             gameController.stopTimer()
@@ -149,7 +146,7 @@ class GameViewModel(
      * @param index The index of the tile to clear.
      */
     fun clear(index: Int) {
-        // if game is not created, create the game
+        // lazily create the game when the user makes their first move
         gameController.maybeCreateGame(index)
         gameController.clear(index)
     }
@@ -160,6 +157,7 @@ class GameViewModel(
      * @param index The index of the tile to toggle the flag.
      */
     fun toggleFlag(index: Int) {
+        // TODO: what should happen if the user flags a tile before the game has been created?
         gameController.toggleFlag(index)
     }
 

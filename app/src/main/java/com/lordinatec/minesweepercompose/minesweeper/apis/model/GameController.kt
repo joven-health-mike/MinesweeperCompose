@@ -150,8 +150,6 @@ class GameController(
      * Cancels the timer
      */
     fun stopTimer() {
-        if (!gameCreated) return
-
         timer?.cancel()
     }
 

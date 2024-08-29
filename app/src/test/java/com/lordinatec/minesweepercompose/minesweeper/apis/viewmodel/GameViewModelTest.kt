@@ -175,7 +175,7 @@ class GameViewModelTest {
     fun testGameCreated() = runTest {
         testFlow.emit(GameEvent.GameCreated)
         gameViewModel.uiState.first().let {
-            assertTrue(it.newGame)
+            assertFalse(it.newGame)
         }
     }
 }

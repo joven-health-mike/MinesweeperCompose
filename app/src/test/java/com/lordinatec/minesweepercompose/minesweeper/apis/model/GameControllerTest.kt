@@ -23,8 +23,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GameControllerTest {
@@ -79,6 +77,8 @@ class GameControllerTest {
         every { timer.cancel() } just Runs
         every { gameModel.clear(any(), any()) } just Runs
         every { gameModel.toggleFlag(any(), any()) } just Runs
+        every { gameModel.clearAdjacentTiles(any(), any()) } just Runs
+        every { gameModel.countAdjacentFlags(any(), any()) } answers { 0 }
         every { positionPool.atLocation(any(), any()) } answers { mockk() }
         every { positionPool.width() } answers { Config.WIDTH }
         every { positionPool.height() } answers { Config.HEIGHT }
@@ -149,6 +149,7 @@ class GameControllerTest {
 
     @Test
     fun testStartTimer() = runTest {
+        gameController.maybeCreateGame(0)
         gameController.startTimer()
         verify(exactly = 1) { timerFactory.create(any(), any()) }
         verify(exactly = 1) { timer.start() }
@@ -156,6 +157,7 @@ class GameControllerTest {
 
     @Test
     fun testPauseTimerAfterStarted() = runTest {
+        gameController.maybeCreateGame(0)
         gameController.startTimer()
         gameController.pauseTimer()
         verify(exactly = 1) { timer.cancel() }
@@ -169,6 +171,7 @@ class GameControllerTest {
 
     @Test
     fun testStopTimerAfterStarted() = runTest {
+        gameController.maybeCreateGame(0)
         gameController.startTimer()
         gameController.stopTimer()
         verify(exactly = 1) { timer.cancel() }
@@ -176,12 +179,14 @@ class GameControllerTest {
 
     @Test
     fun testStopTimerBeforeStarted() = runTest {
+        gameController.maybeCreateGame(0)
         gameController.stopTimer()
         verify(exactly = 0) { timer.cancel() }
     }
 
     @Test
     fun testResumeTimer() = runTest {
+        gameController.maybeCreateGame(0)
         gameController.resumeTimer()
         verify(exactly = 1) { timerFactory.create(any(), any()) }
         verify(exactly = 1) { timer.start() }
@@ -208,38 +213,16 @@ class GameControllerTest {
     }
 
     @Test
-    fun testClearAdjacentTilesCorner() = runTest {
+    fun testClearAdjacentTiles() = runTest {
         gameController.maybeCreateGame(0)
         gameController.clearAdjacentTiles(0)
-        verify(exactly = 3) { gameModel.clear(any(), any()) }
-    }
-
-    @Test
-    fun testClearAdjacentTilesTopEdge() = runTest {
-        gameController.maybeCreateGame(0)
-        gameController.clearAdjacentTiles(1)
-        verify(exactly = 5) { gameModel.clear(any(), any()) }
-    }
-
-    @Test
-    fun testClearAdjacentTilesSideEdge() = runTest {
-        gameController.maybeCreateGame(0)
-        gameController.clearAdjacentTiles(5)
-        verify(exactly = 5) { gameModel.clear(any(), any()) }
-    }
-
-    @Test
-    fun testClearAdjacentTilesMiddle() = runTest {
-        gameController.maybeCreateGame(0)
-        gameController.clearAdjacentTiles(6)
-        verify(exactly = 8) { gameModel.clear(any(), any()) }
+        verify(exactly = 1) { gameModel.clearAdjacentTiles(any(), any()) }
     }
 
     @Test
     fun testCountAdjacentFlags() = runTest {
-        every { field.isFlag(any()) } answers { true }
         gameController.maybeCreateGame(0)
         val adjacentFlags = gameController.countAdjacentFlags(0)
-        assertEquals(3, adjacentFlags)
+        verify(exactly = 1) { gameModel.countAdjacentFlags(any(), any()) }
     }
 }

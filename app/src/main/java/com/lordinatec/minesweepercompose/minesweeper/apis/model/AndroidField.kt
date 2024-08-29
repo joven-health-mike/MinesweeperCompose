@@ -15,7 +15,6 @@ class AndroidField(private val configuration: Field.Configuration) : Field {
         val randomPositionPool = RandomPositionPool(configuration.positionPool())
         for (i in 0 until configuration.numMines()) {
             val position = randomPositionPool.next()
-            println("Mine at ${position.x()}, ${position.y()}")
             mines.add(position)
         }
     }
@@ -26,7 +25,6 @@ class AndroidField(private val configuration: Field.Configuration) : Field {
         while (minesAdded < configuration.numMines()) {
             val position = randomPositionPool.next()
             if (position.x() != initX && position.y() != initY) {
-                println("Mine at ${position.x()}, ${position.y()}")
                 mines.add(position)
                 minesAdded++
             }

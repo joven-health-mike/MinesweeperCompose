@@ -5,12 +5,14 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.view
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import com.lordinatec.minesweepercompose.minesweeper.apis.Config
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameState
 import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewModel
 
 /**
@@ -20,60 +22,54 @@ import com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel.GameViewMode
 fun FieldView(
     gameViewModel: GameViewModel
 ) {
-    val gameUiState by gameViewModel.uiState.collectAsState()
-    Field(gameUiState = gameUiState, gameViewModel = gameViewModel)
+    Field(gameViewModel = gameViewModel)
 }
 
 /**
  * The view for the field.
  *
- * @param gameUiState the game UI state
  * @param gameViewModel the game view model
  */
 @Composable
-private fun Field(gameUiState: GameState, gameViewModel: GameViewModel) {
+private fun Field(gameViewModel: GameViewModel) {
+    val gameUiState by gameViewModel.uiState.collectAsState()
     val clickListener = TileViewClickListener(gameUiState, gameViewModel)
     val tileViewFactory = TileViewFactory(
-        gameUiState = gameUiState,
         gameViewModel = gameViewModel,
         onClick = { clickListener.onClick(it) },
         onLongClick = { clickListener.onLongClick(it) })
     val portraitMode = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
-    // create the field
-    if (portraitMode) {
-        FieldPortrait(tileViewFactory = tileViewFactory)
-    } else {
-        FieldLandscape(tileViewFactory = tileViewFactory)
+    val shakeable = rememberShakeable()
+
+    Box(modifier = Modifier.shakeable(shakeable)) {
+        // shake the field when the game is lost
+        if (gameUiState.gameOver && !gameUiState.winner) {
+            LaunchedEffect(Unit) {
+                shakeable.shake()
+            }
+        }
+        FieldTileArray(gameViewModel, !portraitMode, tileViewFactory)
     }
 }
 
 /**
  * The view for the field in portrait mode.
  *
+ * @param transposed whether the field is transposed
  * @param tileViewFactory the tile view factory
  */
 @Composable
-private fun FieldPortrait(tileViewFactory: TileViewFactory) {
+private fun FieldTileArray(
+    viewModel: GameViewModel,
+    transposed: Boolean,
+    tileViewFactory: TileViewFactory
+) {
     TileArray(
+        viewModel,
         width = Config.WIDTH,
         height = Config.HEIGHT,
-        transposed = false,
-        tileViewFactory = tileViewFactory
-    )
-}
-
-/**
- * The view for the field in landscape mode.
- *
- * @param tileViewFactory the tile view factory
- */
-@Composable
-private fun FieldLandscape(tileViewFactory: TileViewFactory) {
-    TileArray(
-        width = Config.WIDTH,
-        height = Config.HEIGHT,
-        transposed = true,
+        transposed = transposed,
         tileViewFactory = tileViewFactory
     )
 }

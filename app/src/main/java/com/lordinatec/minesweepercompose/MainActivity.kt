@@ -85,6 +85,11 @@ class MainActivity : ComponentActivity() {
             }
             Button(
                 modifier = Modifier.width(250.dp),
+                onClick = { StatsActivity.launch(applicationContext) }) {
+                Text("Stats")
+            }
+            Button(
+                modifier = Modifier.width(250.dp),
                 onClick = { finish() }) {
                 Text("Exit")
             }

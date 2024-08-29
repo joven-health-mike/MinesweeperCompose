@@ -12,7 +12,6 @@ object Config {
     const val WIDTH = 5
     const val HEIGHT = 7
     const val MINES = 7
-    val FEATURES = Features
 
     // TODO: Move these functions somewhere more appropriate
     fun indexToXY(index: Int): Pair<Int, Int> {
@@ -23,15 +22,5 @@ object Config {
 
     fun xyToIndex(x: Int, y: Int): Int {
         return y * WIDTH + x
-    }
-
-    /**
-     * Feature flags that can be toggled on or off
-     */
-    object Features {
-        /**
-         * Show the number of covered chances in the UI
-         */
-        const val SHOW_COVERED_CHANCES = false
     }
 }

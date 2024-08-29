@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(
         fileTree(
             mapOf(
@@ -70,6 +71,14 @@ dependencies {
         )
     )
     testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.core)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(kotlin("test"))
+    androidTestImplementation(libs.core.testing)
+    androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

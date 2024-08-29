@@ -18,6 +18,7 @@
             android:theme="@style/Theme.MinesweeperCompose">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -25,6 +26,11 @@
             android:name=".GameActivity"
             android:exported="true"
             android:label="GameActivity"
+            android:theme="@style/Theme.MinesweeperCompose" />
+        <activity
+            android:name=".StatsActivity"
+            android:exported="true"
+            android:label="StatsActivity"
             android:theme="@style/Theme.MinesweeperCompose" />
     </application>
 

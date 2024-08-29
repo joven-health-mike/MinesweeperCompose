@@ -6,11 +6,12 @@
 
 package com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel
 
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.Event
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.EventPublisher
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameController
-import com.lordinatec.minesweepercompose.minesweeper.apis.model.GameEvent
-import com.lordinatec.minesweepercompose.minesweeper.apis.view.TileState
+import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
+import com.lordinatec.minesweepercompose.gameplay.events.Event
+import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
+import com.lordinatec.minesweepercompose.gameplay.GameController
+import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every

@@ -5,8 +5,15 @@
 package com.lordinatec.minesweepercompose.minesweeper.apis.model
 
 import android.os.CountDownTimer
-import com.lordinatec.minesweepercompose.minesweeper.apis.Config
-import com.lordinatec.minesweepercompose.minesweeper.apis.util.CountUpTimer
+import com.lordinatec.minesweepercompose.gameplay.GameController
+import com.lordinatec.minesweepercompose.gameplay.GameFactory
+import com.lordinatec.minesweepercompose.gameplay.GameInfoHolder
+import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
+import com.lordinatec.minesweepercompose.config.Config
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
+import com.lordinatec.minesweepercompose.gameplay.timer.CountUpTimer
+import com.lordinatec.minesweepercompose.gameplay.timer.TimerFactory
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.Position
 import io.mockk.MockKAnnotations

@@ -2,12 +2,9 @@
  * Copyright Lordinatec LLC 2024
  */
 
-package com.lordinatec.minesweepercompose.minesweeper.apis.model
+package com.lordinatec.minesweepercompose.gameplay
 
 import android.os.CountDownTimer
-import com.lordinatec.minesweepercompose.gameplay.GameController
-import com.lordinatec.minesweepercompose.gameplay.GameFactory
-import com.lordinatec.minesweepercompose.gameplay.GameInfoHolder
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.config.Config
@@ -229,7 +226,7 @@ class GameControllerTest {
     @Test
     fun testCountAdjacentFlags() = runTest {
         gameController.maybeCreateGame(0)
-        val adjacentFlags = gameController.countAdjacentFlags(0)
+        gameController.countAdjacentFlags(0)
         verify(exactly = 1) { gameModel.countAdjacentFlags(any(), any()) }
     }
 }

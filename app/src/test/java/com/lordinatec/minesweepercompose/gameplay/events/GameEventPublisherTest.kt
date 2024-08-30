@@ -4,10 +4,8 @@
 
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.lordinatec.minesweepercompose.minesweeper.apis.model
+package com.lordinatec.minesweepercompose.gameplay.events
 
-import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
-import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first

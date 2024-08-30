@@ -4,12 +4,14 @@
 
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.lordinatec.minesweepercompose.minesweeper.apis.viewmodel
+package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
-import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
+import android.app.Application
+import android.content.SharedPreferences
+import android.content.SharedPreferences.Editor
+import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.Event
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
-import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import io.mockk.MockKAnnotations
@@ -33,6 +35,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class GameViewModelTest {
+    @MockK
+    private lateinit var application: Application
+
+    @MockK
+    private lateinit var sharedPreferences: SharedPreferences
+
+    @MockK
+    private lateinit var editor: Editor
+
     @MockK
     private lateinit var gameController: GameController
 
@@ -58,8 +69,15 @@ class GameViewModelTest {
         every { gameController.resumeTimer() } just Runs
         every { gameController.stopTimer() } just Runs
         every { gameController.clearEverything() } just Runs
+        every { application.getSharedPreferences(any(), any()) } answers { sharedPreferences }
+        every { sharedPreferences.getInt(any(), any()) } answers { 0 }
+        every { sharedPreferences.getLong(any(), any()) } answers { 0 }
+        every { sharedPreferences.edit() } answers { editor }
+        every { editor.putInt(any(), any()) } answers { editor }
+        every { editor.putLong(any(), any()) } answers { editor }
+        every { editor.apply() } just Runs
         every { eventPublisher.events } answers { testFlow.asSharedFlow() }
-        gameViewModel = GameViewModel(gameController, eventPublisher)
+        gameViewModel = GameViewModel(application, gameController, eventPublisher)
     }
 
     @Test
@@ -156,6 +174,7 @@ class GameViewModelTest {
 
     @Test
     fun testGameWon() = runTest {
+        gameViewModel.resetGame()
         testFlow.emit(GameEvent.GameWon)
         gameViewModel.uiState.first().let {
             assertTrue(it.gameOver)

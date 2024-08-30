@@ -35,7 +35,7 @@ class GameController(
     private var gameField: Field? = null
     private var positionPool: Position.Pool? = null
     private var timer: CountUpTimer? = null
-    private var timerValue = 0L
+    var timerValue = 0L
 
     /**
      * Create a game. Mine will never occur at the given index.

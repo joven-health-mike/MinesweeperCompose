@@ -6,7 +6,7 @@ package com.lordinatec.minesweepercompose.gameplay.events
 
 interface GameEvent : Event {
     object GameCreated : GameEvent
-    object GameWon : GameEvent
+    data class GameWon(val endTime: Long) : GameEvent
     object GameLost : GameEvent
     data class TimeUpdate(val newTime: Long) : GameEvent
     data class PositionCleared(val index: Int, val adjacentMines: Int) : GameEvent

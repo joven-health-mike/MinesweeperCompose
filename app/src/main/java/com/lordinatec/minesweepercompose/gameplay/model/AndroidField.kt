@@ -12,23 +12,37 @@ class AndroidField(private val configuration: Field.Configuration) : Field {
     private val flags = mutableSetOf<Position>()
 
     fun createMines() {
-        val randomPositionPool = RandomPositionPool(configuration.positionPool())
-        for (i in 0 until configuration.numMines()) {
-            val position = randomPositionPool.next()
+        mines.clear()
+
+        val randomPositionPool = configuration.positionPool()
+        for (position in randomPositionPool) {
             mines.add(position)
+            if (mines.size == configuration.numMines()) {
+                break
+            }
         }
     }
 
     fun createMines(initX: Int, initY: Int) {
-        val randomPositionPool = RandomPositionPool(configuration.positionPool())
-        var minesAdded = 0
-        while (minesAdded < configuration.numMines()) {
-            val position = randomPositionPool.next()
-            if (position.x() != initX && position.y() != initY) {
+        mines.clear()
+
+        val randomPositionPool = configuration.positionPool()
+        for (position in randomPositionPool) {
+            if (position.x() != initX || position.y() != initY) {
                 mines.add(position)
-                minesAdded++
+            }
+            if (mines.size == configuration.numMines()) {
+                break
             }
         }
+    }
+
+    fun minesPlaced(): Int {
+        return mines.size
+    }
+
+    fun flagsPlaced(): Int {
+        return flags.size
     }
 
     override fun configuration(): Field.Configuration {

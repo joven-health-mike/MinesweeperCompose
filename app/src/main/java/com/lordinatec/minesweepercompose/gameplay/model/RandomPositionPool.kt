@@ -4,10 +4,12 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import com.lordinatec.minesweepercompose.config.Config.indexToXY
+import com.lordinatec.minesweepercompose.config.CoordinateTranslator
+import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.mikeburke106.mines.api.model.Position
 
-class RandomPositionPool(private val positionPool: Position.Pool) {
+class RandomPositionPool(private val positionPool: Position.Pool) :
+    CoordinateTranslator by XYIndexTranslator() {
     private val positions = mutableListOf<Position>()
     private var index = 0
 

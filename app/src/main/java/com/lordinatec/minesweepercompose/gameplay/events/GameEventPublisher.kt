@@ -4,7 +4,9 @@
 
 package com.lordinatec.minesweepercompose.gameplay.events
 
-import com.lordinatec.minesweepercompose.config.Config.xyToIndex
+import com.lordinatec.minesweepercompose.config.CoordinateTranslator
+import com.lordinatec.minesweepercompose.config.XYIndexTranslator
+import com.lordinatec.minesweepercompose.gameplay.timer.TimeProvider
 import com.mikeburke106.mines.api.model.GameControlStrategy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,15 +20,23 @@ import kotlinx.coroutines.withContext
  *
  * @constructor Creates a new GameEventPublisher
  */
-class GameEventPublisher(private val publisherScope: CoroutineScope) :
-    GameControlStrategy.Listener, EventPublisher {
+class GameEventPublisher(
+    private val publisherScope: CoroutineScope,
+    var timeProvider: TimeProvider? = null
+) :
+    GameControlStrategy.Listener, EventPublisher, CoordinateTranslator by XYIndexTranslator() {
     private val _events = MutableSharedFlow<Event>()
     override val events = _events.asSharedFlow()
+    private var gameOver = false
 
     override fun publish(event: Event) {
         publisherScope.launch {
             withContext(Dispatchers.IO) {
-                publishEvent(event as GameEvent)
+                val gameEvent = event as GameEvent
+                if (gameEvent is GameEvent.GameCreated) {
+                    gameOver = false
+                }
+                publishEvent(gameEvent)
             }
         }
     }
@@ -61,10 +71,16 @@ class GameEventPublisher(private val publisherScope: CoroutineScope) :
     }
 
     override fun gameWon() {
-        publish(GameEvent.GameWon)
+        if (!gameOver) {
+            publish(GameEvent.GameWon(timeProvider?.currentMillis() ?: Long.MAX_VALUE))
+            gameOver = true
+        }
     }
 
     override fun gameLost() {
-        publish(GameEvent.GameLost)
+        if (!gameOver) {
+            publish(GameEvent.GameLost)
+            gameOver = true
+        }
     }
 }

@@ -13,9 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.lordinatec.minesweepercompose.config.Config.xyToIndex
+import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import kotlinx.coroutines.delay
+
+private val xyIndexTranslator = XYIndexTranslator()
 
 /**
  * A 2D array of tiles.
@@ -45,17 +47,14 @@ fun TileArray(
  */
 @Composable
 private fun TransposedTileArray(
-    viewModel: GameViewModel,
-    width: Int,
-    height: Int,
-    tileViewFactory: TileViewFactory
+    viewModel: GameViewModel, width: Int, height: Int, tileViewFactory: TileViewFactory
 ) {
     val gameState by viewModel.uiState.collectAsState()
     Row {
         for (currHeight in 0 until height) {
             Column {
                 for (currWidth in 0 until width) {
-                    val currIndex = xyToIndex(currWidth, currHeight)
+                    val currIndex = xyIndexTranslator.xyToIndex(currWidth, currHeight)
                     var visible by remember { mutableStateOf(true) }
                     if (gameState.newGame) {
                         LaunchedEffect(Unit) {
@@ -80,17 +79,14 @@ private fun TransposedTileArray(
  */
 @Composable
 private fun RegularTileArray(
-    viewModel: GameViewModel,
-    width: Int,
-    height: Int,
-    tileViewFactory: TileViewFactory
+    viewModel: GameViewModel, width: Int, height: Int, tileViewFactory: TileViewFactory
 ) {
     val gameState by viewModel.uiState.collectAsState()
     Column {
         for (currHeight in 0 until height) {
             Row {
                 for (currWidth in 0 until width) {
-                    val currIndex = xyToIndex(currWidth, currHeight)
+                    val currIndex = xyIndexTranslator.xyToIndex(currWidth, currHeight)
                     var visible by remember { mutableStateOf(true) }
                     if (gameState.newGame) {
                         LaunchedEffect(Unit) {

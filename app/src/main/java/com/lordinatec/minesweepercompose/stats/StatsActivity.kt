@@ -21,8 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat.startActivity
 
 class StatsActivity : ComponentActivity() {
-    private val activityContext = this
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -32,14 +30,15 @@ class StatsActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                val wins = Stats.getWins(activityContext)
-                val losses = Stats.getLosses(activityContext)
+                val statsProvider = StatsUpdater(applicationContext)
+                val wins = statsProvider.getWins()
+                val losses = statsProvider.getLosses()
                 Spacer(modifier = Modifier.fillMaxSize(0.1f))
                 Text("Stats")
                 Text(
                     "Best Time: ${
                         formatFloat(
-                            Stats.getBestTime(activityContext) / 1000f,
+                            statsProvider.getBestTime() / 1000f,
                             3
                         )
                     } seconds"

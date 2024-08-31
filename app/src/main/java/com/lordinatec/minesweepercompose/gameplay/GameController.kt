@@ -5,7 +5,8 @@
 package com.lordinatec.minesweepercompose.gameplay
 
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.config.Config.indexToXY
+import com.lordinatec.minesweepercompose.config.CoordinateTranslator
+import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
@@ -28,7 +29,7 @@ class GameController(
     private val gameFactory: GameFactory,
     private val timerFactory: TimerFactory,
     private val eventPublisher: GameEventPublisher
-) {
+) : CoordinateTranslator by XYIndexTranslator() {
     // TODO: reduce dependencies
     private var gameCreated: Boolean = false
     private var gameModel: AndroidGameControlStrategy? = null

@@ -4,7 +4,7 @@
 
 package com.lordinatec.minesweepercompose.config
 
-import com.lordinatec.minesweepercompose.config.Config.WIDTH
+import com.lordinatec.minesweepercompose.config.Config.width
 
 interface CoordinateTranslator {
     fun xyToIndex(x: Int, y: Int): Int
@@ -13,12 +13,12 @@ interface CoordinateTranslator {
 
 class XYIndexTranslator : CoordinateTranslator {
     override fun xyToIndex(x: Int, y: Int): Int {
-        return y * WIDTH + x
+        return y * width + x
     }
 
     override fun indexToXY(index: Int): Pair<Int, Int> {
-        val xVal = index % WIDTH
-        val yVal = index / WIDTH
+        val xVal = index % width
+        val yVal = index / width
         return Pair(xVal, yVal)
     }
 

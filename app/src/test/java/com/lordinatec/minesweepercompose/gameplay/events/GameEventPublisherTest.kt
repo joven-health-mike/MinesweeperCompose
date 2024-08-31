@@ -46,7 +46,7 @@ class GameEventPublisherTest {
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.PositionCleared)
             assertEquals(index, (it as GameEvent.PositionCleared).index)
-            assertEquals(adjacentMines, (it as GameEvent.PositionCleared).adjacentMines)
+            assertEquals(adjacentMines, it.adjacentMines)
         }
     }
 

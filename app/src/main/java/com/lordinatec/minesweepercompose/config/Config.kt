@@ -8,8 +8,7 @@ package com.lordinatec.minesweepercompose.config
  * Configuration for the Minesweeper game
  */
 object Config {
-    // TODO: make these changeable based on screen size and user preferences
-    const val WIDTH = 5
-    const val HEIGHT = 7
-    const val MINES = 7
+    var width = 5
+    var height = 7
+    var mines = 7
 }

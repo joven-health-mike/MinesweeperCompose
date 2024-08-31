@@ -68,15 +68,15 @@ class AndroidGameControlStrategyTest : CoordinateTranslator by XYIndexTranslator
             }
 
             override fun size(): Int {
-                return Config.WIDTH * Config.HEIGHT
+                return Config.width * Config.height
             }
 
             override fun width(): Int {
-                return Config.WIDTH
+                return Config.width
             }
 
             override fun height(): Int {
-                return Config.HEIGHT
+                return Config.height
             }
 
         }
@@ -95,7 +95,7 @@ class AndroidGameControlStrategyTest : CoordinateTranslator by XYIndexTranslator
         every { listener.gameWon() } just Runs
         every { listener.gameLost() } just Runs
         androidGameControlStrategy =
-            AndroidGameControlStrategy(game, inOrderPositionPool, Config.MINES, listener)
+            AndroidGameControlStrategy(game, inOrderPositionPool, Config.mines, listener)
     }
 
     @Test
@@ -122,15 +122,15 @@ class AndroidGameControlStrategyTest : CoordinateTranslator by XYIndexTranslator
         val minePositionSlot = slot<Position>()
         every { field.isMine(capture(minePositionSlot)) } answers {
             val index = xyToIndex(minePositionSlot.captured.x(), minePositionSlot.captured.y())
-            index < Config.MINES
+            index < Config.mines
         }
         every { field.isFlag(any()) } answers { false }
         val clearPositionSlot = slot<Position>()
         every { field.clear(capture(clearPositionSlot)) } answers {
             val index = xyToIndex(clearPositionSlot.captured.x(), clearPositionSlot.captured.y())
-            index < Config.MINES
+            index < Config.mines
         }
-        for (i in Config.MINES..<inOrderPositionPool.size() - Config.MINES) {
+        for (i in Config.mines..<inOrderPositionPool.size() - Config.mines) {
             val (x, y) = indexToXY(i)
             androidGameControlStrategy.clear(x, y)
             verify { listener.positionCleared(x, y, any()) }

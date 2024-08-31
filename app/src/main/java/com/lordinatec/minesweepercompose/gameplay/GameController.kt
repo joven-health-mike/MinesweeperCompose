@@ -58,7 +58,7 @@ class GameController(
     fun clearEverything() {
         if (!gameCreated) return
 
-        for (i in 0 until Config.WIDTH * Config.HEIGHT) {
+        for (i in 0 until Config.width * Config.height) {
             val (x, y) = indexToXY(i)
             gameModel?.clear(x, y)
         }

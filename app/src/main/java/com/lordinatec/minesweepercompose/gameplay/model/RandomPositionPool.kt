@@ -8,15 +8,14 @@ import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.mikeburke106.mines.api.model.Position
 
-class RandomPositionPool(private val positionPool: Position.Pool) :
+class RandomPositionPool(private val positionPool: Position.Pool) : Position.Pool,
     CoordinateTranslator by XYIndexTranslator() {
     private val positions = mutableListOf<Position>()
     private var index = 0
 
     init {
-        for (i in 0 until positionPool.size()) {
-            val (x, y) = indexToXY(i)
-            positions.add(positionPool.atLocation(x, y))
+        for (position in positionPool) {
+            positions.add(position)
         }
         positions.shuffle()
     }
@@ -27,5 +26,25 @@ class RandomPositionPool(private val positionPool: Position.Pool) :
             positions.shuffle()
         }
         return positions[index++]
+    }
+
+    override fun iterator(): MutableIterator<Position> {
+        return positions.iterator()
+    }
+
+    override fun atLocation(p0: Int, p1: Int): Position {
+        return positionPool.atLocation(p0, p1)
+    }
+
+    override fun size(): Int {
+        return positions.size
+    }
+
+    override fun width(): Int {
+        return positionPool.width()
+    }
+
+    override fun height(): Int {
+        return positionPool.height()
     }
 }

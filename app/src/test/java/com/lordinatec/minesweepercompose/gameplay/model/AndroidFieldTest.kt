@@ -59,15 +59,15 @@ class AndroidFieldTest {
             }
 
             override fun size(): Int {
-                return Config.WIDTH * Config.HEIGHT
+                return Config.width * Config.height
             }
 
             override fun width(): Int {
-                return Config.WIDTH
+                return Config.width
             }
 
             override fun height(): Int {
-                return Config.HEIGHT
+                return Config.height
             }
 
         }
@@ -79,7 +79,7 @@ class AndroidFieldTest {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
         every { configuration.positionPool() } answers { inOrderPositionPool }
-        every { configuration.numMines() } answers { Config.MINES }
+        every { configuration.numMines() } answers { Config.mines }
         androidField = AndroidField(configuration)
     }
 

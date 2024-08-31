@@ -70,8 +70,8 @@ private fun FieldTileArray(
 ) {
     TileArray(
         viewModel,
-        width = Config.WIDTH,
-        height = Config.HEIGHT,
+        width = Config.width,
+        height = Config.height,
         transposed = transposed,
         tileViewFactory = tileViewFactory
     )

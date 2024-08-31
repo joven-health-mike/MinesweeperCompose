@@ -84,8 +84,8 @@ class GameControllerTest {
         every { gameModel.clearAdjacentTiles(any(), any()) } just Runs
         every { gameModel.countAdjacentFlags(any(), any()) } answers { 0 }
         every { positionPool.atLocation(any(), any()) } answers { mockk() }
-        every { positionPool.width() } answers { Config.WIDTH }
-        every { positionPool.height() } answers { Config.HEIGHT }
+        every { positionPool.width() } answers { Config.width }
+        every { positionPool.height() } answers { Config.height }
         every { field.isMine(any()) } answers { false }
         every { field.isFlag(any()) } answers { false }
         every { eventPublisher.publish(any()) } just Runs
@@ -213,7 +213,7 @@ class GameControllerTest {
     fun testClearEverything() = runTest {
         gameController.maybeCreateGame(0)
         gameController.clearEverything()
-        verify(exactly = Config.HEIGHT * Config.WIDTH) { gameModel.clear(any(), any()) }
+        verify(exactly = Config.height * Config.width) { gameModel.clear(any(), any()) }
     }
 
     @Test

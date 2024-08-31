@@ -25,20 +25,28 @@ class AndroidGameControlStrategy(
         }
         val isMine = game.field().clear(position)
         if (isMine) {
-            gameOver = true
-            listener?.positionExploded(x, y)
-            listener?.gameLost()
+            handleClearExploded(position)
         } else if (!cleared.contains(position)) {
-            val adjacentMines = adjacentMines(position)
-            cleared.add(position)
-            listener?.positionCleared(x, y, adjacentMines)
-            if (adjacentMines == 0) {
-                clearAdjacentTiles(position.x(), position.y())
-            }
-            if (cleared.size == positionPool.size() - numMines) {
-                listener?.gameWon()
-            }
+            handleClearSuccess(position)
         }
+    }
+
+    private fun handleClearSuccess(position: Position) {
+        val adjacentMines = adjacentMines(position)
+        cleared.add(position)
+        listener?.positionCleared(position.x(), position.y(), adjacentMines)
+        if (adjacentMines == 0) {
+            clearAdjacentTiles(position.x(), position.y())
+        }
+        if (cleared.size == positionPool.size() - numMines) {
+            listener?.gameWon()
+        }
+    }
+
+    private fun handleClearExploded(position: Position) {
+        gameOver = true
+        listener?.positionExploded(position.x(), position.y())
+        listener?.gameLost()
     }
 
     enum class AdjacentTile(val transX: Int, val transY: Int) {
@@ -73,10 +81,10 @@ class AndroidGameControlStrategy(
         for (adjacentTile in AdjacentTile.entries) {
             val x = origX + adjacentTile.transX
             val y = origY + adjacentTile.transY
-            if (x >= 0 && x < positionPool.width() && y >= 0 && y < positionPool.height()) {
-                if (game.field()?.isFlag(positionPool.atLocation(x, y))!!) {
-                    result++
-                }
+            if (x >= 0 && x < positionPool.width() && y >= 0 && y < positionPool.height() && game.field()
+                    ?.isFlag(positionPool.atLocation(x, y))!!
+            ) {
+                result++
             }
         }
 

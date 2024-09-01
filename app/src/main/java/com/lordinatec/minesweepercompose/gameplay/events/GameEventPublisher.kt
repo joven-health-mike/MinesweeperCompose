@@ -67,7 +67,6 @@ class GameEventPublisher(
      * @param adjacentMines The number of adjacent mines
      */
     override fun positionCleared(x: Int, y: Int, adjacentMines: Int) {
-        // TODO: remove this dependency on xyToIndex
         val index = xyToIndex(x, y)
         publish(GameEvent.PositionCleared(index, adjacentMines))
     }

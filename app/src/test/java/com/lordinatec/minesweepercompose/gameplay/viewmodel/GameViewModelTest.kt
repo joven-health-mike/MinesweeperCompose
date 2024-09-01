@@ -123,7 +123,7 @@ class GameViewModelTest {
         testFlow.emit(GameEvent.PositionCleared(testIndex, testAdjacent))
         gameViewModel.uiState.first().let {
             assertEquals(TileState.CLEARED, it.tileStates[testIndex])
-            assertEquals(testAdjacent.toString(), it.tileValues[testIndex])
+            assertEquals(testAdjacent.toString(), it.tileValues[testIndex].value)
         }
     }
 
@@ -133,7 +133,7 @@ class GameViewModelTest {
         testFlow.emit(GameEvent.PositionExploded(testIndex))
         gameViewModel.uiState.first().let {
             assertEquals(TileState.EXPLODED, it.tileStates[testIndex])
-            assertEquals("*", it.tileValues[testIndex])
+            assertEquals("*", it.tileValues[testIndex].value)
         }
     }
 
@@ -143,7 +143,7 @@ class GameViewModelTest {
         testFlow.emit(GameEvent.PositionFlagged(testIndex))
         gameViewModel.uiState.first().let {
             assertEquals(TileState.FLAGGED, it.tileStates[testIndex])
-            assertEquals("F", it.tileValues[testIndex])
+            assertEquals("F", it.tileValues[testIndex].value)
         }
     }
 
@@ -153,7 +153,7 @@ class GameViewModelTest {
         testFlow.emit(GameEvent.PositionUnflagged(testIndex))
         gameViewModel.uiState.first().let {
             assertEquals(TileState.COVERED, it.tileStates[testIndex])
-            assertEquals("", it.tileValues[testIndex])
+            assertEquals("", it.tileValues[testIndex].value)
         }
     }
 

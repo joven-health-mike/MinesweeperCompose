@@ -18,14 +18,16 @@ import com.lordinatec.minesweepercompose.gameplay.viewmodel.TileViewClickListene
 import com.lordinatec.minesweepercompose.gameplay.views.animations.rememberShakeable
 import com.lordinatec.minesweepercompose.gameplay.views.animations.shakeable
 
+
 /**
  * The view for the field.
  */
 @Composable
 fun FieldView(
-    gameViewModel: GameViewModel
+    gameViewModel: GameViewModel,
+    clickListener: TileViewClickListener = TileViewClickListener(gameViewModel)
 ) {
-    Field(gameViewModel = gameViewModel)
+    Field(gameViewModel = gameViewModel, clickListener = clickListener)
 }
 
 /**
@@ -34,9 +36,8 @@ fun FieldView(
  * @param gameViewModel the game view model
  */
 @Composable
-private fun Field(gameViewModel: GameViewModel) {
+private fun Field(gameViewModel: GameViewModel, clickListener: TileViewClickListener) {
     val gameUiState by gameViewModel.uiState.collectAsState()
-    val clickListener = TileViewClickListener(gameViewModel)
     val tileViewFactory = TileViewFactory(
         gameViewModel = gameViewModel,
         onClick = { clickListener.onClick(it) },

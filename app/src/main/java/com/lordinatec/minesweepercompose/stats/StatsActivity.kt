@@ -15,10 +15,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat.startActivity
+import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
+import com.lordinatec.minesweepercompose.ui.theme.Typography
 
 /**
  * Activity to display the stats of the game
@@ -28,34 +32,51 @@ class StatsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
-            ) {
-                val statsProvider = StatsUpdater(applicationContext)
-                val wins = statsProvider.getWins()
-                val losses = statsProvider.getLosses()
-                Spacer(modifier = Modifier.fillMaxSize(0.1f))
-                Text("Stats")
-                Text(
-                    "Best Time: ${
-                        formatFloat(
-                            statsProvider.getBestTime() / 1000f,
-                            3
+            MinesweeperComposeTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        val statsProvider = StatsUpdater(applicationContext)
+                        val wins = statsProvider.getWins()
+                        val losses = statsProvider.getLosses()
+                        Spacer(modifier = Modifier.fillMaxSize(0.1f))
+                        Text(
+                            "Stats",
+                            style = Typography.bodyLarge
                         )
-                    } seconds"
-                )
-                Text("Wins: $wins")
-                Text("Losses: $losses")
-                Text(
-                    "Win Rate: ${
-                        if (wins + losses == 0) "0.0" else formatFloat(
-                            wins.toFloat() * 100 / (wins + losses),
-                            1
+                        Text(
+                            "Best Time: ${
+                                formatFloat(
+                                    statsProvider.getBestTime() / 1000f,
+                                    3
+                                )
+                            } seconds",
+                            style = Typography.labelSmall
                         )
-                    }%"
-                )
+                        Text(
+                            "Wins: $wins",
+                            style = Typography.labelSmall
+                        )
+                        Text(
+                            "Losses: $losses",
+                            style = Typography.labelSmall
+                        )
+                        Text(
+                            "Win Rate: ${
+                                if (wins + losses == 0) "0.0" else formatFloat(
+                                    wins.toFloat() * 100 / (wins + losses),
+                                    1
+                                )
+                            }%",
+                            style = Typography.labelSmall
+                        )
+                    }
+                }
             }
         }
     }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
@@ -23,7 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.dimensionResource
 import com.lordinatec.minesweepercompose.gameplay.GameActivity
 import com.lordinatec.minesweepercompose.stats.StatsActivity
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
@@ -59,7 +60,7 @@ class MainActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                AppIcon(200.dp)
+                AppIcon(dimensionResource(id = R.dimen.main_activity_icon_size))
                 MenuButtons()
             }
         }
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                AppIcon(200.dp)
+                AppIcon(dimensionResource(id = R.dimen.main_activity_icon_size))
                 MenuButtons()
             }
         }
@@ -81,20 +82,23 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun MenuButtons() {
-        Column {
+        val buttonWidth = dimensionResource(id = R.dimen.main_activity_button_width)
+        Column(
+            modifier = Modifier.width(buttonWidth)
+        ) {
             Button(
-                modifier = Modifier.width(250.dp),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = { GameActivity.launch(applicationContext) }) {
                 Text("New Game")
             }
             // TODO: make stats activity a NavHost destination instead of new activity
             Button(
-                modifier = Modifier.width(250.dp),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = { StatsActivity.launch(applicationContext) }) {
                 Text("Stats")
             }
             Button(
-                modifier = Modifier.width(250.dp),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = { finish() }) {
                 Text("Exit")
             }

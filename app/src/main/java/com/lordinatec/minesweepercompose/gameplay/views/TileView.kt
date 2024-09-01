@@ -25,15 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.dimensionResource
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.gameplay.views.animations.dropDown
 import com.lordinatec.minesweepercompose.gameplay.views.animations.rememberDropDownAnimation
+import com.lordinatec.minesweepercompose.ui.theme.Typography
 import com.lordinatec.minesweepercompose.views.AppIcon
 
 /**
@@ -95,12 +91,14 @@ fun TileView(
     onClick: ((index: Int) -> Unit)? = null,
     onLongClick: ((index: Int) -> Unit)? = null
 ) {
+    val tileViewSize =
+        dimensionResource(id = com.lordinatec.minesweepercompose.R.dimen.tile_view_size)
     Box(
         modifier = Modifier
             .combinedClickable(
                 onLongClick = { onLongClick?.let { it(index) } },
                 onClick = { onClick?.let { it(index) } })
-            .size(75.dp)
+            .size(tileViewSize)
             .background(
                 brush = Brush.radialGradient(
                     colors = listOf(
@@ -127,25 +125,21 @@ private fun TextTile(value: TileValue) {
     Text(
         text = value.value,
         color = value.textColor,
-        style = TextStyle(
-            fontFamily = FontFamily.Default,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            textAlign = TextAlign.Center
-        )
+        style = Typography.bodyLarge
     )
 }
 
 @Composable
 private fun FlagTile(gameViewModel: GameViewModel, index: Int) {
     val gameUiState = gameViewModel.uiState.collectAsState()
+    val flagSize = dimensionResource(id = com.lordinatec.minesweepercompose.R.dimen.flag_size)
     Icon(
         Icons.Filled.Flag,
         contentDescription = "Flagged tile",
         tint = colorResource(android.R.color.holo_green_dark),
         modifier = Modifier
-            .width(70.dp)
-            .height(70.dp)
+            .width(flagSize)
+            .height(flagSize)
     )
     if (gameUiState.value.gameOver && !gameViewModel.flagIsCorrect(index)
     ) {
@@ -155,18 +149,20 @@ private fun FlagTile(gameViewModel: GameViewModel, index: Int) {
 
 @Composable
 private fun MineTile() {
-    AppIcon(size = 75.dp, tint = Color.Black)
+    val mineSize = dimensionResource(id = com.lordinatec.minesweepercompose.R.dimen.mine_size)
+    AppIcon(size = mineSize, tint = Color.Black)
 }
 
 @Composable
 private fun IncorrectFlagOverlay() {
+    val flagSize = dimensionResource(id = com.lordinatec.minesweepercompose.R.dimen.flag_size)
     Icon(
         Icons.Filled.Close,
         contentDescription = "Flag is wrong",
         tint = colorResource(android.R.color.holo_red_dark),
         modifier = Modifier
-            .width(75.dp)
-            .height(75.dp)
+            .width(flagSize)
+            .height(flagSize)
     )
 }
 

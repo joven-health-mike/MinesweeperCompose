@@ -6,6 +6,7 @@ package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
+import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 
 /**
  * Data class representing the state of the game.
@@ -26,5 +27,5 @@ data class GameState(
     val newGame: Boolean = true,
     val minesRemaining: Int = Config.mines,
     val tileStates: List<TileState> = List(Config.width * Config.height) { TileState.COVERED },
-    val tileValues: List<String> = List(Config.width * Config.height) { "" }
+    val tileValues: List<TileValue> = List(Config.width * Config.height) { TileValue.UNKNOWN }
 )

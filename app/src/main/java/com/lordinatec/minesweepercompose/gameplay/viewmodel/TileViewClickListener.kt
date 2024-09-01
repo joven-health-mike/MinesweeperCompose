@@ -74,7 +74,7 @@ class TileViewClickListener(
         val adjacentFlags = gameViewModel.getAdjacentFlags(index)
         try {
             // if the number of adjacent flags is equal to the value of the tile, clear all adjacent tiles
-            if (adjacentFlags == gameUiState.tileValues[index].toInt()) {
+            if (adjacentFlags == gameUiState.tileValues[index].value.toInt()) {
                 gameViewModel.clearAdjacentTiles(index)
             }
         } catch (e: NumberFormatException) {

@@ -10,6 +10,7 @@ import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
+import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,25 +46,25 @@ class GameViewModel(
                     is GameEvent.PositionCleared -> updatePosition(
                         event.index,
                         TileState.CLEARED,
-                        if (event.adjacentMines == 0) "" else event.adjacentMines.toString()
+                        TileValue.fromValue(event.adjacentMines)
                     )
 
                     is GameEvent.PositionExploded -> updatePosition(
                         event.index,
                         TileState.EXPLODED,
-                        "*"
+                        TileValue.MINE
                     )
 
                     is GameEvent.PositionFlagged -> updatePosition(
                         event.index,
                         TileState.FLAGGED,
-                        "F"
+                        TileValue.FLAG
                     )
 
                     is GameEvent.PositionUnflagged -> updatePosition(
                         event.index,
                         TileState.COVERED,
-                        ""
+                        TileValue.UNKNOWN
                     )
 
                     is GameEvent.GameWon -> gameWon()
@@ -197,7 +198,7 @@ class GameViewModel(
      * @param tileState The new state of the tile.
      * @param value The new value of the tile.
      */
-    private fun updatePosition(index: Int, tileState: TileState, value: String) {
+    private fun updatePosition(index: Int, tileState: TileState, tileValue: TileValue) {
         _uiState.update { state ->
             var newMinesValue = state.minesRemaining
             if (tileState == TileState.FLAGGED) {
@@ -207,7 +208,7 @@ class GameViewModel(
             }
             state.copy(
                 tileStates = state.tileStates.toMutableList().apply { this[index] = tileState },
-                tileValues = state.tileValues.toMutableList().apply { this[index] = value },
+                tileValues = state.tileValues.toMutableList().apply { this[index] = tileValue },
                 minesRemaining = newMinesValue
             )
         }

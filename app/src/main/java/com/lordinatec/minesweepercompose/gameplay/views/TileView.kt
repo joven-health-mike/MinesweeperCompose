@@ -89,7 +89,7 @@ class TileViewFactory(
 @Composable
 fun TileView(
     index: Int,
-    value: String,
+    value: TileValue,
     state: TileState,
     gameViewModel: GameViewModel,
     onClick: ((index: Int) -> Unit)? = null,
@@ -111,9 +111,9 @@ fun TileView(
         contentAlignment = Alignment.Center
     ) {
         if (state == TileState.COVERED) {
-            TextTile("")
+            TextTile(value)
         } else {
-            when (value) {
+            when (value.value) {
                 "F" -> FlagTile(gameViewModel, index)
                 "*" -> MineTile()
                 else -> TextTile(value)
@@ -123,10 +123,10 @@ fun TileView(
 }
 
 @Composable
-private fun TextTile(value: String) {
+private fun TextTile(value: TileValue) {
     Text(
-        text = value,
-        color = Color.White,
+        text = value.value,
+        color = value.textColor,
         style = TextStyle(
             fontFamily = FontFamily.Default,
             fontWeight = FontWeight.Bold,
@@ -178,7 +178,42 @@ private fun IncorrectFlagOverlay() {
  */
 enum class TileState(val primaryColor: Color, val secondaryColor: Color) {
     COVERED(Color.Blue, Color.Gray),
-    CLEARED(Color.Gray, Color.DarkGray),
+    CLEARED(Color(0xFF808080), Color.DarkGray),
     FLAGGED(Color.Blue, Color.Gray),
     EXPLODED(Color.Red, Color.Magenta)
+}
+
+/**
+ * Enum class for the value of a tile.
+ */
+enum class TileValue(val value: String, val textColor: Color) {
+    EMPTY("0", Color.Transparent),
+    ONE("1", Color.Blue),
+    TWO("2", Color.Green),
+    THREE("3", Color.Red),
+    FOUR("4", Color.Magenta),
+    FIVE("5", Color.Cyan),
+    SIX("6", Color.Yellow),
+    SEVEN("7", Color.Gray),
+    EIGHT("8", Color.DarkGray),
+    MINE("*", Color.Transparent),
+    FLAG("F", Color.Transparent),
+    UNKNOWN("", Color.Transparent);
+
+    companion object {
+        fun fromValue(value: Int): TileValue {
+            return when (value) {
+                0 -> EMPTY
+                1 -> ONE
+                2 -> TWO
+                3 -> THREE
+                4 -> FOUR
+                5 -> FIVE
+                6 -> SIX
+                7 -> SEVEN
+                8 -> EIGHT
+                else -> UNKNOWN
+            }
+        }
+    }
 }

@@ -87,16 +87,13 @@ class GameViewModel(
      * This will clear the entire field and stop the timer.
      */
     private val gameWon: () -> Unit = {
-        // this could be called multiple times, so only do anything if the game isn't over
-        if (!uiState.value.gameOver) {
-            gameController.clearEverything()
-            gameController.stopTimer()
-            _uiState.update { state ->
-                state.copy(
-                    gameOver = true,
-                    winner = true,
-                )
-            }
+        gameController.clearEverything()
+        gameController.stopTimer()
+        _uiState.update { state ->
+            state.copy(
+                gameOver = true,
+                winner = true,
+            )
         }
     }
 
@@ -106,16 +103,13 @@ class GameViewModel(
      * This will clear the entire field and stop the timer.
      */
     private val gameLost: () -> Unit = {
-        // this could be called multiple times, so only do anything if the game isn't over
-        if (!uiState.value.gameOver) {
-            gameController.clearEverything()
-            gameController.stopTimer()
-            _uiState.update { state ->
-                state.copy(
-                    gameOver = true,
-                    winner = false,
-                )
-            }
+        gameController.clearEverything()
+        gameController.stopTimer()
+        _uiState.update { state ->
+            state.copy(
+                gameOver = true,
+                winner = false,
+            )
         }
     }
 

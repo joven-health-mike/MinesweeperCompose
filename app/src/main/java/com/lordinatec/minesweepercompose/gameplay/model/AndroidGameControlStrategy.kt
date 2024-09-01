@@ -8,6 +8,14 @@ import com.mikeburke106.mines.api.model.Game
 import com.mikeburke106.mines.api.model.GameControlStrategy
 import com.mikeburke106.mines.api.model.Position
 
+/**
+ * Implementation of GameControlStrategy that is designed to be used in an Android
+ *
+ * @param game the game to control
+ * @param positionPool the pool of positions
+ * @param numMines the number of mines in the game
+ * @param listener the listener to notify of game events
+ */
 class AndroidGameControlStrategy(
     private val game: Game,
     private val positionPool: Position.Pool,
@@ -49,6 +57,7 @@ class AndroidGameControlStrategy(
         listener?.gameLost()
     }
 
+    // TODO: extract this to a separate class
     enum class AdjacentTile(val transX: Int, val transY: Int) {
         TOP_LEFT(-1, -1),
         TOP(0, -1),
@@ -60,6 +69,7 @@ class AndroidGameControlStrategy(
         BOTTOM_RIGHT(1, 1)
     }
 
+    // TODO: extract this to a separate class
     private fun adjacentMines(position: Position): Int {
         var count = 0
         for (adjacent in AdjacentTile.entries) {
@@ -75,6 +85,7 @@ class AndroidGameControlStrategy(
         return count
     }
 
+    // TODO: extract this to a separate class
     fun countAdjacentFlags(origX: Int, origY: Int): Int {
         var result = 0
 
@@ -91,18 +102,20 @@ class AndroidGameControlStrategy(
         return result
     }
 
+    // TODO: extract this to a separate class
     fun clearAdjacentTiles(origX: Int, origY: Int) {
         for (adjacentTile in AdjacentTile.entries) {
             val x = origX + adjacentTile.transX
             val y = origY + adjacentTile.transY
-            if (x >= 0 && x < positionPool.width() && y >= 0 && y < positionPool.height()) {
-                if (!game.field()?.isFlag(positionPool.atLocation(x, y))!!) {
-                    clear(x, y)
-                }
+            if (x >= 0 && x < positionPool.width() && y >= 0 && y < positionPool.height() && !game.field()
+                    ?.isFlag(positionPool.atLocation(x, y))!!
+            ) {
+                clear(x, y)
             }
         }
     }
 
+    // TODO: simplify
     override fun toggleFlag(x: Int, y: Int) {
         val position = positionPool.atLocation(x, y)
         val isFlag = game.field().flag(position)

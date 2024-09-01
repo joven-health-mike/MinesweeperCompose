@@ -26,10 +26,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.lordinatec.minesweepercompose.gameplay.GameActivity
 import com.lordinatec.minesweepercompose.stats.StatsActivity
-import com.lordinatec.minesweepercompose.views.AppIcon
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
+import com.lordinatec.minesweepercompose.views.AppIcon
 
-
+/**
+ * The main activity for the Minesweeper game.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +52,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun PortraitScreen(modifier: Modifier) {
+    private fun PortraitScreen(modifier: Modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = modifier.fillMaxSize(),
@@ -64,7 +66,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun LandscapeScreen(modifier: Modifier) {
+    private fun LandscapeScreen(modifier: Modifier) {
         Box(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = modifier.fillMaxSize(),
@@ -85,6 +87,7 @@ class MainActivity : ComponentActivity() {
                 onClick = { GameActivity.launch(applicationContext) }) {
                 Text("New Game")
             }
+            // TODO: make stats activity a NavHost destination instead of new activity
             Button(
                 modifier = Modifier.width(250.dp),
                 onClick = { StatsActivity.launch(applicationContext) }) {

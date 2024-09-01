@@ -7,15 +7,22 @@ package com.lordinatec.minesweepercompose.gameplay.model
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.Position
 
+/**
+ * Android implementation of the Field interface.
+ *
+ * @param configuration the configuration of the field
+ */
 class AndroidField(private val configuration: Field.Configuration) : Field {
     private val mines = mutableSetOf<Position>()
     private val flags = mutableSetOf<Position>()
 
+    /**
+     * Create the mines for the field.
+     */
     fun createMines() {
         mines.clear()
 
-        val randomPositionPool = configuration.positionPool()
-        for (position in randomPositionPool) {
+        for (position in configuration.positionPool()) {
             mines.add(position)
             if (mines.size == configuration.numMines()) {
                 break
@@ -23,11 +30,18 @@ class AndroidField(private val configuration: Field.Configuration) : Field {
         }
     }
 
+    /**
+     * Create the mines for the field.
+     *
+     * The initial coordinates are guaranteed to NOT be a mine.
+     *
+     * @param initX the initial x position
+     * @param initY the initial y position
+     */
     fun createMines(initX: Int, initY: Int) {
         mines.clear()
 
-        val randomPositionPool = configuration.positionPool()
-        for (position in randomPositionPool) {
+        for (position in configuration.positionPool()) {
             if (position.x() != initX || position.y() != initY) {
                 mines.add(position)
             }
@@ -37,10 +51,20 @@ class AndroidField(private val configuration: Field.Configuration) : Field {
         }
     }
 
+    /**
+     * Get the number of mines placed.
+     *
+     * @return the number of mines placed
+     */
     fun minesPlaced(): Int {
         return mines.size
     }
 
+    /**
+     * Get the number of flags placed.
+     *
+     * @return the number of flags placed
+     */
     fun flagsPlaced(): Int {
         return flags.size
     }

@@ -86,6 +86,7 @@ private fun RegularTileArray(
         for (currHeight in 0 until height) {
             Row {
                 for (currWidth in 0 until width) {
+                    // TODO: simplify
                     val currIndex = xyIndexTranslator.xyToIndex(currWidth, currHeight)
                     var visible by remember { mutableStateOf(true) }
                     if (gameState.newGame) {

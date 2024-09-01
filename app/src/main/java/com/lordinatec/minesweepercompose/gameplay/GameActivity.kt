@@ -32,7 +32,9 @@ import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
-
+/**
+ * The main activity for gameplay.
+ */
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,15 +43,10 @@ class GameActivity : ComponentActivity() {
             val gameEvents = GameEventPublisher(MainScope())
             val gameController = GameController.Factory(GameFactory(), TimerFactory())
                 .createGameController(gameEvents)
-            gameEvents.timeProvider = object : TimeProvider {
-                override fun currentMillis(): Long {
-                    return gameController.timerValue
-                }
-            }
+            gameEvents.timeProvider = TimeProvider { gameController.timerValue }
             val viewModel: GameViewModel = createCustomViewModel(gameController, gameEvents)
             val statsEventConsumer = StatsEventConsumer(gameEvents, StatsUpdater(this))
-            val lifecycleObserver = TimerLifecycleObserver(viewModel)
-            lifecycle.addObserver(lifecycleObserver)
+            lifecycle.addObserver(TimerLifecycleObserver(viewModel))
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     LaunchedEffect(Unit) {
@@ -74,6 +71,11 @@ class GameActivity : ComponentActivity() {
     }
 
     companion object {
+        /**
+         * Launch the game activity as a new task.
+         *
+         * @param context The context to launch the activity from
+         */
         fun launch(context: Context) {
             val intent = Intent(context, GameActivity::class.java)
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK)

@@ -13,6 +13,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import com.lordinatec.minesweepercompose.R
 
+/**
+ * App icon vector composable
+ *
+ * @param size size of the icon (1:1 aspect ratio)
+ */
 @Composable
 fun AppIcon(size: Dp) {
     Icon(

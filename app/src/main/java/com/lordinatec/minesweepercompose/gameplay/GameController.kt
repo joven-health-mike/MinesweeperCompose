@@ -55,6 +55,9 @@ class GameController(
         }
     }
 
+    /**
+     * Clears the entire field.
+     */
     fun clearEverything() {
         if (!gameCreated) return
 
@@ -64,6 +67,11 @@ class GameController(
         }
     }
 
+    /**
+     * Clears adjacent tiles to the given index
+     *
+     * @param index - index of the tile to clear adjacent tiles
+     */
     fun clearAdjacentTiles(index: Int) {
         if (!gameCreated) return
 
@@ -71,6 +79,11 @@ class GameController(
         gameModel?.clearAdjacentTiles(x, y)
     }
 
+    /**
+     * Count the number of adjacent flags to the given index
+     *
+     * @param index - index of the tile to count adjacent flags
+     */
     fun countAdjacentFlags(index: Int): Int {
         if (!gameCreated) return -1
 

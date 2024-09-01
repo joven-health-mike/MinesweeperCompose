@@ -7,10 +7,16 @@ package com.lordinatec.minesweepercompose.stats
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 
+/**
+ * Consumes game events and updates the stats.
+ */
 class StatsEventConsumer(
     private val eventPublisher: EventPublisher,
     private val statsProvider: StatsProvider
 ) {
+    /**
+     * Consumes game events and updates the stats.
+     */
     suspend fun consume() {
         eventPublisher.events.collect { event ->
             when (event) {

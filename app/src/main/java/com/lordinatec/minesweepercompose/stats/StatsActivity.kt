@@ -20,6 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat.startActivity
 
+/**
+ * Activity to display the stats of the game
+ */
 class StatsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +60,7 @@ class StatsActivity : ComponentActivity() {
         }
     }
 
+    // TODO: Make this a Float extension function
     private fun formatFloat(value: Float, padding: Int): String {
         val intValue = value.toInt()
         var decValue = (value - intValue).toString().padEnd(padding, '0')
@@ -67,6 +71,11 @@ class StatsActivity : ComponentActivity() {
     }
 
     companion object {
+        /**
+         * Launches the StatsActivity as a new task.
+         *
+         * @param context The context to launch the activity from
+         */
         fun launch(context: Context) {
             val intent = Intent(context, StatsActivity::class.java)
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK)

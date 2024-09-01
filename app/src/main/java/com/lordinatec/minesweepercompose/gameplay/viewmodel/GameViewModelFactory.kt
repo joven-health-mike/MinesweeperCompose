@@ -22,6 +22,9 @@ class GameViewModelFactory(
     private val gameEvents: GameEventPublisher
 ) :
     ViewModelProvider.Factory {
+    /**
+     * Creates a new instance of the given ViewModel.
+     */
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return GameViewModel(gameController, gameEvents) as T
     }

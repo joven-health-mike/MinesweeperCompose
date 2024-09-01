@@ -16,9 +16,15 @@ import androidx.compose.ui.graphics.graphicsLayer
  * A class that can be used to shake a view.
  */
 class ShakeableAnimation {
+    /**
+     * The current x position of the view.
+     */
     val xPosition = Animatable(0f)
     private val animationSpec: AnimationSpec<Float> = tween(durationMillis = 20)
 
+    /**
+     * Shake the view.
+     */
     suspend fun shake() {
         // move left, center, right, center 3x
         repeat(3) {

@@ -36,7 +36,7 @@ fun FieldView(
 @Composable
 private fun Field(gameViewModel: GameViewModel) {
     val gameUiState by gameViewModel.uiState.collectAsState()
-    val clickListener = TileViewClickListener(gameUiState, gameViewModel)
+    val clickListener = TileViewClickListener(gameViewModel)
     val tileViewFactory = TileViewFactory(
         gameViewModel = gameViewModel,
         onClick = { clickListener.onClick(it) },

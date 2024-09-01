@@ -4,8 +4,6 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import com.lordinatec.minesweepercompose.config.CoordinateTranslator
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.mikeburke106.mines.api.model.Position
 
 /**
@@ -16,8 +14,7 @@ import com.mikeburke106.mines.api.model.Position
  *
  * @param positionPool the pool of positions to shuffle
  */
-class RandomPositionPool(private val positionPool: Position.Pool) : Position.Pool by positionPool,
-    CoordinateTranslator by XYIndexTranslator() {
+class RandomPositionPool(private val positionPool: Position.Pool) : Position.Pool by positionPool {
     private val positions = mutableListOf<Position>()
 
     init {

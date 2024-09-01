@@ -155,7 +155,7 @@ private fun FlagTile(gameViewModel: GameViewModel, index: Int) {
 
 @Composable
 private fun MineTile() {
-    AppIcon(size = 75.dp)
+    AppIcon(size = 75.dp, tint = Color.Black)
 }
 
 @Composable

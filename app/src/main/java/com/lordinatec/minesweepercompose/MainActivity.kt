@@ -25,10 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
+import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.GameActivity
 import com.lordinatec.minesweepercompose.stats.StatsActivity
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.lordinatec.minesweepercompose.views.AppIcon
+import kotlin.math.floor
 
 /**
  * The main activity for the Minesweeper game.
@@ -36,6 +38,7 @@ import com.lordinatec.minesweepercompose.views.AppIcon
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        determineFieldSize()
         enableEdgeToEdge()
         setContent {
             MinesweeperComposeTheme {
@@ -50,6 +53,18 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun determineFieldSize() {
+        val displayMetrics = resources.displayMetrics
+        val screenWidth = displayMetrics.widthPixels
+        val screenHeight = displayMetrics.heightPixels
+        val tileSize = resources.getDimension(R.dimen.tile_view_size)
+        val desiredFieldWidth = floor(screenWidth * 0.9f / tileSize).toInt()
+        val desiredFieldHeight = floor(screenHeight * 0.8f / tileSize).toInt()
+        Config.width = desiredFieldWidth
+        Config.height = desiredFieldHeight
+        Config.mines = desiredFieldWidth * desiredFieldHeight / 6
     }
 
     @Composable

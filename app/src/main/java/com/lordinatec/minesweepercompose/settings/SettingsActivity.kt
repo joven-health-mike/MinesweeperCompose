@@ -49,6 +49,10 @@ class SettingsActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.Top
                     ) {
                         Spacer(modifier = Modifier.fillMaxSize(0.1f))
+                        Text(
+                            "Settings",
+                            style = Typography.bodyLarge
+                        )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -77,6 +81,33 @@ class SettingsActivity : ComponentActivity() {
                                     if (!it) {
                                         Config.factoryResetFieldConfig()
                                     }
+                                })
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            var endGameOnLastFlagPref by sharedPreferences(
+                                "endGameOnLastFlag",
+                                Config.feature_end_game_on_last_flag.toString()
+                            )
+                            var endGameOnLastFlagState by remember {
+                                mutableStateOf(
+                                    endGameOnLastFlagPref.toBoolean()
+                                )
+                            }
+                            Text(
+                                modifier = Modifier.padding(8.dp),
+                                text = "End game on last flag",
+                                style = Typography.labelSmall
+                            )
+                            Switch(
+                                checked = endGameOnLastFlagState,
+                                onCheckedChange = {
+                                    endGameOnLastFlagState = it
+                                    endGameOnLastFlagPref = it.toString()
+                                    Config.feature_end_game_on_last_flag = it
                                 })
                         }
                     }

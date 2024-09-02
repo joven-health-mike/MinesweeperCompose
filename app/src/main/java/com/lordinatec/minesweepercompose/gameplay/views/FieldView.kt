@@ -52,7 +52,6 @@ fun FieldView(
  */
 @Composable
 private fun Field(gameViewModel: GameViewModel, clickListener: TileViewClickListener) {
-    val gameUiState by gameViewModel.uiState.collectAsState()
     val tileViewFactory = TileViewFactory(gameViewModel = gameViewModel,
         onClick = { clickListener.onClick(it) },
         onLongClick = { clickListener.onLongClick(it) })
@@ -90,64 +89,37 @@ fun GameOverHandler(gameViewModel: GameViewModel, shakeable: ShakeableAnimation)
     val gameUiState by gameViewModel.uiState.collectAsState()
     if (gameUiState.gameOver) {
         if (gameUiState.winner) {
-            HandleGameWon()
+            GameOverOverlay(Color.Green.copy(alpha = 0.25f), "You Win!")
         } else {
-            HandleGameLost(shakeable)
+            // shake the field when the game is lost
+            LaunchedEffect(Unit) {
+                shakeable.shake()
+            }
+            GameOverOverlay(Color.Red.copy(alpha = 0.25f), "You Lose.")
         }
     }
 }
 
 /**
- * Displays the game won overlay.
- */
-@Composable
-private fun HandleGameWon() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Color.Green.copy(alpha = 0.25f), shape = RoundedCornerShape(0.dp)
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = "You Win!",
-                style = Typography.bodyLarge.copy(color = Color.White)
-            )
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = "Touch to start a new game",
-                style = Typography.labelSmall.copy(color = Color.White)
-            )
-        }
-    }
-}
-
-/**
- * Displays the game lost overlay.
+ * Displays the game over overlay.
  *
- * @param shakeable the shakeable animation
+ * @param color the color of the overlay
+ * @param text the text to display
  */
 @Composable
-private fun HandleGameLost(shakeable: ShakeableAnimation) {
-    // shake the field when the game is lost
-    LaunchedEffect(Unit) {
-        shakeable.shake()
-    }
+private fun GameOverOverlay(color: Color, text: String) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Color.Red.copy(alpha = 0.25f), shape = RoundedCornerShape(0.dp)
+                color, shape = RoundedCornerShape(0.dp)
             ),
         contentAlignment = Alignment.Center
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = "You Lose!",
+                text = text,
                 style = Typography.bodyLarge.copy(color = Color.White)
             )
             Text(

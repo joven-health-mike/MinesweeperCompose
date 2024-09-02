@@ -32,6 +32,11 @@
             android:exported="true"
             android:label="StatsActivity"
             android:theme="@style/Theme.MinesweeperCompose" />
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:exported="true"
+            android:label="SettingsActivity"
+            android:theme="@style/Theme.MinesweeperCompose" />
     </application>
 
 </manifest>

@@ -4,6 +4,7 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
+import com.lordinatec.minesweepercompose.config.Config
 import com.mikeburke106.mines.api.model.Game
 import com.mikeburke106.mines.api.model.GameControlStrategy
 import com.mikeburke106.mines.api.model.Position
@@ -58,7 +59,7 @@ class AndroidGameControlStrategy(
     }
 
     fun clearAdjacentTiles(origX: Int, origY: Int) {
-        for(adjacentPosition in getAdjacentTiles(origX, origY)) {
+        for (adjacentPosition in getAdjacentTiles(origX, origY)) {
             val x = adjacentPosition.x()
             val y = adjacentPosition.y()
             if (!cleared.contains(adjacentPosition)) {
@@ -67,30 +68,41 @@ class AndroidGameControlStrategy(
         }
     }
 
-    // TODO: simplify
     override fun toggleFlag(x: Int, y: Int) {
         val position = positionPool.atLocation(x, y)
         val isFlag = game.field().flag(position)
         if (isFlag) {
-            listener?.positionUnflagged(x, y)
-            flagged.remove(position)
+            unflag(position)
         } else {
-            listener?.positionFlagged(x, y)
-            flagged.add(position)
-            if (flagged.size == numMines) {
-                var gameWon = true
-                for (flaggedPosition in flagged) {
-                    if (!game.field().isMine(flaggedPosition)) {
-                        gameWon = false
-                    }
-                }
-                if (gameWon) {
-                    listener?.gameWon()
-                } else {
-                    listener?.gameLost()
+            flag(position)
+            maybeEndGame()
+        }
+    }
+
+    private fun maybeEndGame() {
+        if (Config.feature_end_game_on_last_flag && flagged.size == numMines) {
+            var gameWon = true
+            for (flaggedPosition in flagged) {
+                if (!game.field().isMine(flaggedPosition)) {
+                    gameWon = false
                 }
             }
+            if (gameWon) {
+                listener?.gameWon()
+            } else {
+                listener?.gameLost()
+            }
         }
+    }
+
+    private fun flag(position: Position) {
+        listener?.positionFlagged(position.x(), position.y())
+        flagged.add(position)
+    }
+
+    private fun unflag(position: Position) {
+        listener?.positionUnflagged(position.x(), position.y())
+        flagged.remove(position)
     }
 
     override fun saveGame(fileName: String?) {

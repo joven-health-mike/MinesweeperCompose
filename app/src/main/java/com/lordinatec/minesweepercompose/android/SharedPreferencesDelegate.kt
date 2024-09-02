@@ -40,4 +40,5 @@ class SharedPreferencesDelegate(
  *
  * @return The shared preference delegate.
  */
-fun Context.sharedPreferences(name: String) = SharedPreferencesDelegate(this, name)
+fun Context.sharedPreferences(name: String, defaultValue: String = "") =
+    SharedPreferencesDelegate(this, name, defaultValue)

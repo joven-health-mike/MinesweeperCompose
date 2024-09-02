@@ -25,12 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
-import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.GameActivity
+import com.lordinatec.minesweepercompose.settings.SettingsActivity
 import com.lordinatec.minesweepercompose.stats.StatsActivity
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.lordinatec.minesweepercompose.views.AppIcon
-import kotlin.math.floor
 
 /**
  * The main activity for the Minesweeper game.
@@ -44,7 +43,6 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val isPortraitMode =
                         LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
-                    determineFieldSize(isPortraitMode)
                     if (isPortraitMode) {
                         PortraitScreen(modifier = Modifier.padding(innerPadding))
                     } else {
@@ -53,19 +51,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun determineFieldSize(isPortraitMode: Boolean) {
-        val screenWidth = resources.displayMetrics.widthPixels
-        val screenHeight = resources.displayMetrics.heightPixels
-        val tileSize = resources.getDimension(R.dimen.tile_view_size)
-        val fieldWidthPadding = if (isPortraitMode) 0.9f else 0.75f
-        val fieldHeightPadding = if (isPortraitMode) 0.8f else 0.9f
-        val desiredFieldWidth = floor(screenWidth * fieldWidthPadding / tileSize).toInt()
-        val desiredFieldHeight = floor(screenHeight * fieldHeightPadding / tileSize).toInt()
-        Config.width = if (isPortraitMode) desiredFieldWidth else desiredFieldHeight
-        Config.height = if (isPortraitMode) desiredFieldHeight else desiredFieldWidth
-        Config.mines = desiredFieldWidth * desiredFieldHeight / 6
     }
 
     @Composable
@@ -112,6 +97,11 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { StatsActivity.launch(applicationContext) }) {
                 Text("Stats")
+            }
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { SettingsActivity.launch(applicationContext) }) {
+                Text("Settings")
             }
             Button(
                 modifier = Modifier.fillMaxWidth(),

@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 /**
  * A class that can be move a view from up to it's intended position.
  */
-class DropDownAnimation(private val startPosition: Float) {
+class DropDownAnimation(startPosition: Float) {
     /**
      * The current y position of the view.
      */

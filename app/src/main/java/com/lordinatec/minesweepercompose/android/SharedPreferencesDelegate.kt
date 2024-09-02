@@ -8,6 +8,13 @@ import android.content.Context
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
+/**
+ * Delegate for reading and writing to shared preferences.
+ *
+ * @param context The context.
+ * @param name The name of the shared preference.
+ * @param defaultValue The default value.
+ */
 class SharedPreferencesDelegate(
     private val context: Context,
     private val name: String,
@@ -26,4 +33,11 @@ class SharedPreferencesDelegate(
     }
 }
 
+/**
+ * Extension function for getting shared preferences.
+ *
+ * @param name The name of the shared preference.
+ *
+ * @return The shared preference delegate.
+ */
 fun Context.sharedPreferences(name: String) = SharedPreferencesDelegate(this, name)

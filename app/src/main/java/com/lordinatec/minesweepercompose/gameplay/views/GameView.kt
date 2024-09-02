@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.lordinatec.minesweepercompose.extensions.formatString
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.ui.theme.Typography
 
@@ -119,13 +120,10 @@ private fun LeftSection(remainingMines: Int, gameTimer: Long) {
  */
 @Composable
 private fun GameTimerView(time: Long) {
-    val floatTime = time.toFloat() / 1000
-    val timeInt = floatTime.toInt()
-    var timeDec = (floatTime - timeInt).toString().padEnd(3, '0')
-    timeDec = timeDec.substring(2, if (timeDec.length > 5) 5 else timeDec.length)
+    val timeString = (time.toFloat() / 1000).formatString(3)
     Box(contentAlignment = Alignment.Center) {
         Text(
-            text = "Time: $timeInt.$timeDec s",
+            text = "Time: $timeString s",
             style = Typography.labelSmall,
         )
     }

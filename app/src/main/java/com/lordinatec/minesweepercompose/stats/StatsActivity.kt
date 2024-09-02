@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat.startActivity
+import com.lordinatec.minesweepercompose.extensions.formatString
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.lordinatec.minesweepercompose.ui.theme.Typography
 
@@ -51,10 +52,7 @@ class StatsActivity : ComponentActivity() {
                         )
                         Text(
                             "Best Time: ${
-                                formatFloat(
-                                    statsProvider.getBestTime() / 1000f,
-                                    3
-                                )
+                                (statsProvider.getBestTime() / 1000f).formatString(3)
                             } seconds",
                             style = Typography.labelSmall
                         )
@@ -68,10 +66,9 @@ class StatsActivity : ComponentActivity() {
                         )
                         Text(
                             "Win Rate: ${
-                                if (wins + losses == 0) "0.0" else formatFloat(
-                                    wins.toFloat() * 100 / (wins + losses),
+                                if (wins + losses == 0) "0.0" else ((wins.toFloat() * 100 / (wins + losses)).formatString(
                                     1
-                                )
+                                ))
                             }%",
                             style = Typography.labelSmall
                         )
@@ -79,16 +76,6 @@ class StatsActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    // TODO: Make this a Float extension function
-    private fun formatFloat(value: Float, padding: Int): String {
-        val intValue = value.toInt()
-        var decValue = (value - intValue).toString().padEnd(padding, '0')
-        val maxLength = 2 + padding
-        decValue =
-            decValue.substring(2, if (decValue.length > maxLength) maxLength else decValue.length)
-        return "$intValue.$decValue"
     }
 
     companion object {

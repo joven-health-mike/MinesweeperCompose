@@ -38,13 +38,13 @@ import kotlin.math.floor
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        determineFieldSize()
         enableEdgeToEdge()
         setContent {
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val isPortraitMode =
                         LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+                    determineFieldSize(isPortraitMode)
                     if (isPortraitMode) {
                         PortraitScreen(modifier = Modifier.padding(innerPadding))
                     } else {
@@ -55,15 +55,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun determineFieldSize() {
+    private fun determineFieldSize(isPortraitMode: Boolean) {
         val displayMetrics = resources.displayMetrics
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
         val tileSize = resources.getDimension(R.dimen.tile_view_size)
-        val desiredFieldWidth = floor(screenWidth * 0.9f / tileSize).toInt()
-        val desiredFieldHeight = floor(screenHeight * 0.8f / tileSize).toInt()
-        Config.width = desiredFieldWidth
-        Config.height = desiredFieldHeight
+        val fieldWidthPadding = if (isPortraitMode) 0.9f else 0.75f
+        val fieldHeightPadding = if (isPortraitMode) 0.8f else 0.9f
+        val desiredFieldWidth = floor(screenWidth * fieldWidthPadding / tileSize).toInt()
+        val desiredFieldHeight = floor(screenHeight * fieldHeightPadding / tileSize).toInt()
+        Config.width = if (isPortraitMode) desiredFieldWidth else desiredFieldHeight
+        Config.height = if (isPortraitMode) desiredFieldHeight else desiredFieldWidth
         Config.mines = desiredFieldWidth * desiredFieldHeight / 6
     }
 

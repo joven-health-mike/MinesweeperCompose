@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.lordinatec.minesweepercompose.R
+import com.lordinatec.minesweepercompose.android.sharedPreferences
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.timer.TimeProvider
@@ -45,6 +46,7 @@ class GameActivity : ComponentActivity() {
         enableEdgeToEdge()
         val isPortraitMode =
             resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+        loadConfigFromPrefs()
         if (Config.feature_adjust_field_to_screen_size) {
             determineFieldSize(isPortraitMode)
         }
@@ -68,6 +70,19 @@ class GameActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun loadConfigFromPrefs() {
+        val adjustFieldSizeToScreenSize by sharedPreferences(
+            "adjustToScreenSize",
+            Config.feature_adjust_field_to_screen_size.toString()
+        )
+        Config.feature_adjust_field_to_screen_size = adjustFieldSizeToScreenSize.toBoolean()
+        val endGameOnLastFlag by sharedPreferences(
+            "endGameOnLastFlag",
+            Config.feature_end_game_on_last_flag.toString()
+        )
+        Config.feature_end_game_on_last_flag = endGameOnLastFlag.toBoolean()
     }
 
     private fun determineFieldSize(isPortraitMode: Boolean) {

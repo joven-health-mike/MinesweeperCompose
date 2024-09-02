@@ -48,11 +48,10 @@ class TileViewFactory(
      * Create a TileView with the given index.
      */
     @Composable
-    fun CreateTileView(
-        currIndex: Int,
-    ) {
+    fun CreateTileView(currIndex: Int) {
         val gameUiState by gameViewModel.uiState.collectAsState()
-        val dropDownAnimation = rememberDropDownAnimation()
+        val startPosition = if(gameUiState.newGame) -80f else 0f
+        val dropDownAnimation = rememberDropDownAnimation(startPosition)
         Box(modifier = Modifier.dropDown(dropDownAnimation)) {
             if (!gameUiState.gameOver) {
                 LaunchedEffect(Unit) {

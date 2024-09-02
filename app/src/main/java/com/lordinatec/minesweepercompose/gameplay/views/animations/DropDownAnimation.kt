@@ -15,11 +15,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 /**
  * A class that can be move a view from up to it's intended position.
  */
-class DropDownAnimation {
+class DropDownAnimation(private val startPosition: Float) {
     /**
      * The current y position of the view.
      */
-    val yPosition = Animatable(-80f)
+    val yPosition = Animatable(startPosition)
     private val animationSpec: AnimationSpec<Float> = tween(durationMillis = 20)
 
     /**
@@ -37,8 +37,8 @@ class DropDownAnimation {
  * A composable that creates & remembers a [DropDownAnimation] instance.
  */
 @Composable
-fun rememberDropDownAnimation(): DropDownAnimation {
-    return remember { DropDownAnimation() }
+fun rememberDropDownAnimation(startPosition: Float): DropDownAnimation {
+    return remember { DropDownAnimation(startPosition) }
 }
 
 /**

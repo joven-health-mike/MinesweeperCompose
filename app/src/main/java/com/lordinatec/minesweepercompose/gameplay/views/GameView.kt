@@ -16,8 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -32,31 +30,6 @@ import com.lordinatec.minesweepercompose.ui.theme.Typography
  */
 @Composable
 fun GameView(viewModel: GameViewModel = viewModel()) {
-    val gameUiState by viewModel.uiState.collectAsState()
-    val (snackbarVisibleState, setSnackBarState) = remember { mutableStateOf(false) }
-
-    // TODO: snackbar doesn't show in landscape mode or after device rotation
-    setSnackBarState(gameUiState.gameOver)
-
-    // display the game view with the field and the bottom sections
-    Column {
-        MainGameDisplay(viewModel)
-        if (snackbarVisibleState) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-                GameOverSnackbar(winner = gameUiState.winner) {
-                    viewModel.resetGame()
-                    setSnackBarState(false)
-                }
-            }
-        }
-    }
-}
-
-/**
- * The main game display
- */
-@Composable
-private fun MainGameDisplay(viewModel: GameViewModel) {
     val gameUiState by viewModel.uiState.collectAsState()
     val isPortraitMode =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT

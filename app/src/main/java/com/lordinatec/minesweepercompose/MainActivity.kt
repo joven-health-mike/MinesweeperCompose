@@ -56,9 +56,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun determineFieldSize(isPortraitMode: Boolean) {
-        val displayMetrics = resources.displayMetrics
-        val screenWidth = displayMetrics.widthPixels
-        val screenHeight = displayMetrics.heightPixels
+        val screenWidth = resources.displayMetrics.widthPixels
+        val screenHeight = resources.displayMetrics.heightPixels
         val tileSize = resources.getDimension(R.dimen.tile_view_size)
         val fieldWidthPadding = if (isPortraitMode) 0.9f else 0.75f
         val fieldHeightPadding = if (isPortraitMode) 0.8f else 0.9f

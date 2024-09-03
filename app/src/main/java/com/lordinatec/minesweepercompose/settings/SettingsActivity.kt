@@ -40,7 +40,8 @@ class SettingsActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MinesweeperComposeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    Modifier.padding(innerPadding)
                     Column(
                         modifier = Modifier
                             .fillMaxSize()

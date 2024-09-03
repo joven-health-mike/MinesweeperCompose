@@ -57,7 +57,7 @@ interface StatsProvider {
 /**
  * Implementation of [StatsProvider] that uses shared preferences to store the stats.
  */
-class StatsUpdater(private val context: Context) : StatsProvider {
+class StatsUpdater(context: Context) : StatsProvider {
     private var bestTime by context.sharedPreferences("bestTime")
     private var wins by context.sharedPreferences("wins")
     private var losses by context.sharedPreferences("losses")

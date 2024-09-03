@@ -49,7 +49,7 @@ class ShakeableAnimation {
 }
 
 /**
- * A composable that creates & remembers a [Shakeable] instance.
+ * A composable that creates & remembers a [ShakeableAnimation] instance.
  */
 @Composable
 fun rememberShakeable(): ShakeableAnimation {

@@ -196,7 +196,7 @@ class GameViewModel(
      *
      * @param index The index of the tile to update.
      * @param tileState The new state of the tile.
-     * @param value The new value of the tile.
+     * @param tileValue The new value of the tile.
      */
     private fun updatePosition(index: Int, tileState: TileState, tileValue: TileValue) {
         _uiState.update { state ->

@@ -34,9 +34,6 @@ import kotlin.test.assertTrue
 
 class GameViewModelTest {
     @MockK
-    private lateinit var application: Application
-
-    @MockK
     private lateinit var gameController: GameController
 
     @MockK

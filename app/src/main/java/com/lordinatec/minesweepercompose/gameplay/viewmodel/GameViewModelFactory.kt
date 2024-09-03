@@ -17,6 +17,7 @@ import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
  *
  * @constructor Creates a GameViewModelFactory
  */
+@Suppress("UNCHECKED_CAST")
 class GameViewModelFactory(
     private val gameController: GameController,
     private val gameEvents: GameEventPublisher

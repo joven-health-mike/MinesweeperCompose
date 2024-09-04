@@ -50,7 +50,7 @@ class TileViewFactory(
     @Composable
     fun CreateTileView(currIndex: Int) {
         val gameUiState by gameViewModel.uiState.collectAsState()
-        val startPosition = if(gameUiState.newGame) -80f else 0f
+        val startPosition = if (gameUiState.newGame) -80f else 0f
         val dropDownAnimation = rememberDropDownAnimation(startPosition)
         Box(modifier = Modifier.dropDown(dropDownAnimation)) {
             if (!gameUiState.gameOver) {
@@ -196,6 +196,13 @@ enum class TileValue(val value: String, val textColor: Color) {
     UNKNOWN("", Color.Transparent);
 
     companion object {
+        /**
+         * Get the TileValue from the given value.
+         *
+         * @param value The value of the tile
+         *
+         * @return The TileValue
+         */
         fun fromValue(value: Int): TileValue {
             return when (value) {
                 0 -> EMPTY

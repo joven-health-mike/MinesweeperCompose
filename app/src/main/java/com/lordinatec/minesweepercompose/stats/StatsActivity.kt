@@ -13,17 +13,21 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import com.lordinatec.minesweepercompose.extensions.formatString
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.lordinatec.minesweepercompose.ui.theme.Typography
+import com.lordinatec.minesweepercompose.views.TopBar
+import com.lordinatec.minesweepercompose.views.topBarPadding
 
 /**
  * Activity to display the stats of the game
@@ -34,22 +38,23 @@ class StatsActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MinesweeperComposeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = { TopBar("Stats") }) { innerPadding ->
+                    Modifier.padding(innerPadding)
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(innerPadding),
+                            .padding(32.dp)
+                            .navigationBarsPadding()
+                            .statusBarsPadding()
+                            .topBarPadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Top
                     ) {
                         val statsProvider = StatsUpdater(applicationContext)
                         val wins = statsProvider.getWins()
                         val losses = statsProvider.getLosses()
-                        Spacer(modifier = Modifier.fillMaxSize(0.1f))
-                        Text(
-                            "Stats",
-                            style = Typography.bodyLarge
-                        )
                         Text(
                             "Best Time: ${
                                 (statsProvider.getBestTime() / 1000f).formatString(3)

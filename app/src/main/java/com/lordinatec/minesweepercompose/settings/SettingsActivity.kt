@@ -14,10 +14,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -33,6 +34,8 @@ import com.lordinatec.minesweepercompose.android.sharedPreferences
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.lordinatec.minesweepercompose.ui.theme.Typography
+import com.lordinatec.minesweepercompose.views.TopBar
+import com.lordinatec.minesweepercompose.views.topBarPadding
 
 class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,20 +43,20 @@ class SettingsActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MinesweeperComposeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = { TopBar("Settings") }) { innerPadding ->
                     Modifier.padding(innerPadding)
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp),
+                            .padding(16.dp)
+                            .navigationBarsPadding()
+                            .statusBarsPadding()
+                            .topBarPadding(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Top
                     ) {
-                        Spacer(modifier = Modifier.fillMaxSize(0.1f))
-                        Text(
-                            "Settings",
-                            style = Typography.bodyLarge
-                        )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -73,16 +76,14 @@ class SettingsActivity : ComponentActivity() {
                                 text = "Adjust field size to screen size",
                                 style = Typography.labelSmall
                             )
-                            Switch(
-                                checked = adjustToScreenSizeState,
-                                onCheckedChange = {
-                                    adjustToScreenSizeState = it
-                                    adjustToScreenSizePref = it.toString()
-                                    Config.feature_adjust_field_to_screen_size = it
-                                    if (!it) {
-                                        Config.factoryResetFieldConfig()
-                                    }
-                                })
+                            Switch(checked = adjustToScreenSizeState, onCheckedChange = {
+                                adjustToScreenSizeState = it
+                                adjustToScreenSizePref = it.toString()
+                                Config.feature_adjust_field_to_screen_size = it
+                                if (!it) {
+                                    Config.factoryResetFieldConfig()
+                                }
+                            })
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -90,8 +91,7 @@ class SettingsActivity : ComponentActivity() {
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             var endGameOnLastFlagPref by sharedPreferences(
-                                "endGameOnLastFlag",
-                                Config.feature_end_game_on_last_flag.toString()
+                                "endGameOnLastFlag", Config.feature_end_game_on_last_flag.toString()
                             )
                             var endGameOnLastFlagState by remember {
                                 mutableStateOf(
@@ -103,13 +103,11 @@ class SettingsActivity : ComponentActivity() {
                                 text = "End game on last flag",
                                 style = Typography.labelSmall
                             )
-                            Switch(
-                                checked = endGameOnLastFlagState,
-                                onCheckedChange = {
-                                    endGameOnLastFlagState = it
-                                    endGameOnLastFlagPref = it.toString()
-                                    Config.feature_end_game_on_last_flag = it
-                                })
+                            Switch(checked = endGameOnLastFlagState, onCheckedChange = {
+                                endGameOnLastFlagState = it
+                                endGameOnLastFlagPref = it.toString()
+                                Config.feature_end_game_on_last_flag = it
+                            })
                         }
                     }
                 }

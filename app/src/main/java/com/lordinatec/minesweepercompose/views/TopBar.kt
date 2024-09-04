@@ -18,6 +18,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,5 +35,7 @@ fun TopBar(text: String) {
         })
 }
 
-fun Modifier.topBarPadding() = windowInsetsPadding(WindowInsets(top = 80.dp))
+// TODO: How to determine top bar height?
+fun Modifier.topBarPadding(statusBarBottom: Dp) =
+    windowInsetsPadding(WindowInsets(top = statusBarBottom + 32.dp))
 

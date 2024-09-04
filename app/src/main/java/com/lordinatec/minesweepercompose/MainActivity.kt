@@ -13,9 +13,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
@@ -25,12 +29,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import com.lordinatec.minesweepercompose.gameplay.GameActivity
 import com.lordinatec.minesweepercompose.settings.SettingsActivity
 import com.lordinatec.minesweepercompose.stats.StatsActivity
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.lordinatec.minesweepercompose.views.AppIcon
 import com.lordinatec.minesweepercompose.views.TopBar
+import com.lordinatec.minesweepercompose.views.topBarPadding
 
 /**
  * The main activity for the Minesweeper game.
@@ -42,7 +49,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MinesweeperComposeTheme {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize(),
                     topBar = { TopBar(resources.getString(R.string.app_name)) }) { innerPadding ->
                     Modifier.padding(innerPadding)
                     val isPortraitMode =
@@ -59,9 +67,15 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun PortraitScreen() {
+        val systemBarBottom = WindowInsets.systemBars.getBottom(Density(this)).dp
+        println("systemBarBottom: $systemBarBottom")
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding()
+                    .statusBarsPadding()
+                    .topBarPadding(systemBarBottom),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -73,7 +87,13 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun LandscapeScreen() {
-        Box(modifier = Modifier.fillMaxSize()) {
+        val systemBarBottom = WindowInsets.systemBars.getBottom(Density(this)).dp
+        println("systemBarBottom: $systemBarBottom")
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .topBarPadding(systemBarBottom)
+        ) {
             Row(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically,

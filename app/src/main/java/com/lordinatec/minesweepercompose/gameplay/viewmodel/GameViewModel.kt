@@ -4,14 +4,13 @@
 
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
-import com.lordinatec.minesweepercompose.stats.Stats
+import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +26,6 @@ import kotlinx.coroutines.launch
  * @return A ViewModel for the Game screen.
  */
 class GameViewModel(
-    private val application: Application,
     private val gameController: GameController,
     private val gameEvents: EventPublisher
 ) : ViewModel() {
@@ -48,25 +46,25 @@ class GameViewModel(
                     is GameEvent.PositionCleared -> updatePosition(
                         event.index,
                         TileState.CLEARED,
-                        if (event.adjacentMines == 0) "" else event.adjacentMines.toString()
+                        TileValue.fromValue(event.adjacentMines)
                     )
 
                     is GameEvent.PositionExploded -> updatePosition(
                         event.index,
                         TileState.EXPLODED,
-                        "*"
+                        TileValue.MINE
                     )
 
                     is GameEvent.PositionFlagged -> updatePosition(
                         event.index,
                         TileState.FLAGGED,
-                        "F"
+                        TileValue.FLAG
                     )
 
                     is GameEvent.PositionUnflagged -> updatePosition(
                         event.index,
                         TileState.COVERED,
-                        ""
+                        TileValue.UNKNOWN
                     )
 
                     is GameEvent.GameWon -> gameWon()
@@ -90,18 +88,13 @@ class GameViewModel(
      * This will clear the entire field and stop the timer.
      */
     private val gameWon: () -> Unit = {
-        // this could be called multiple times, so only do anything if the game isn't over
-        if (!uiState.value.gameOver) {
-            gameController.clearEverything()
-            gameController.stopTimer()
-            _uiState.update { state ->
-                state.copy(
-                    gameOver = true,
-                    winner = true,
-                )
-            }
-            saveWin()
-            maybeSaveBestTime(uiState.value.timeValue)
+        gameController.clearEverything()
+        gameController.stopTimer()
+        _uiState.update { state ->
+            state.copy(
+                gameOver = true,
+                winner = true,
+            )
         }
     }
 
@@ -111,34 +104,13 @@ class GameViewModel(
      * This will clear the entire field and stop the timer.
      */
     private val gameLost: () -> Unit = {
-        // this could be called multiple times, so only do anything if the game isn't over
-        if (!uiState.value.gameOver) {
-            gameController.clearEverything()
-            gameController.stopTimer()
-            _uiState.update { state ->
-                state.copy(
-                    gameOver = true,
-                    winner = false,
-                )
-            }
-            saveLoss()
-        }
-    }
-
-    private fun saveLoss() {
-        val losses = Stats.getLosses(application)
-        Stats.setLosses(application, losses + 1)
-    }
-
-    private fun saveWin() {
-        val wins = Stats.getWins(application)
-        Stats.setWins(application, wins + 1)
-    }
-
-    private fun maybeSaveBestTime(timeValue: Long) {
-        val bestTime = Stats.getBestTime(application)
-        if (timeValue < bestTime || bestTime == 0L) {
-            Stats.setBestTime(application, timeValue)
+        gameController.clearEverything()
+        gameController.stopTimer()
+        _uiState.update { state ->
+            state.copy(
+                gameOver = true,
+                winner = false,
+            )
         }
     }
 
@@ -224,9 +196,9 @@ class GameViewModel(
      *
      * @param index The index of the tile to update.
      * @param tileState The new state of the tile.
-     * @param value The new value of the tile.
+     * @param tileValue The new value of the tile.
      */
-    private fun updatePosition(index: Int, tileState: TileState, value: String) {
+    private fun updatePosition(index: Int, tileState: TileState, tileValue: TileValue) {
         _uiState.update { state ->
             var newMinesValue = state.minesRemaining
             if (tileState == TileState.FLAGGED) {
@@ -236,7 +208,7 @@ class GameViewModel(
             }
             state.copy(
                 tileStates = state.tileStates.toMutableList().apply { this[index] = tileState },
-                tileValues = state.tileValues.toMutableList().apply { this[index] = value },
+                tileValues = state.tileValues.toMutableList().apply { this[index] = tileValue },
                 minesRemaining = newMinesValue
             )
         }

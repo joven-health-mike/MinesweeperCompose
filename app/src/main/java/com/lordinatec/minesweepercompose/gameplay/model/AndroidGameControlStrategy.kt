@@ -4,16 +4,25 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
+import com.lordinatec.minesweepercompose.config.Config
 import com.mikeburke106.mines.api.model.Game
 import com.mikeburke106.mines.api.model.GameControlStrategy
 import com.mikeburke106.mines.api.model.Position
 
+/**
+ * Implementation of GameControlStrategy that is designed to be used in an Android
+ *
+ * @param game the game to control
+ * @param positionPool the pool of positions
+ * @param numMines the number of mines in the game
+ * @param listener the listener to notify of game events
+ */
 class AndroidGameControlStrategy(
     private val game: Game,
     private val positionPool: Position.Pool,
     private val numMines: Int,
     private var listener: GameControlStrategy.Listener? = null
-) : GameControlStrategy {
+) : GameControlStrategy, AdjacentHelper by AdjacentHelperImpl(game.field(), positionPool) {
     private var gameOver = false
     private var cleared = mutableSetOf<Position>()
     private var flagged = mutableSetOf<Position>()
@@ -25,72 +34,36 @@ class AndroidGameControlStrategy(
         }
         val isMine = game.field().clear(position)
         if (isMine) {
-            gameOver = true
-            listener?.positionExploded(x, y)
-            listener?.gameLost()
+            handleClearExploded(position)
         } else if (!cleared.contains(position)) {
-            val adjacentMines = adjacentMines(position)
-            cleared.add(position)
-            listener?.positionCleared(x, y, adjacentMines)
-            if (adjacentMines == 0) {
-                clearAdjacentTiles(position.x(), position.y())
-            }
-            if (cleared.size == positionPool.size() - numMines) {
-                listener?.gameWon()
-            }
+            handleClearSuccess(position)
         }
     }
 
-    enum class AdjacentTile(val transX: Int, val transY: Int) {
-        TOP_LEFT(-1, -1),
-        TOP(0, -1),
-        TOP_RIGHT(1, -1),
-        LEFT(-1, 0),
-        RIGHT(1, 0),
-        BOTTOM_LEFT(-1, 1),
-        BOTTOM(0, 1),
-        BOTTOM_RIGHT(1, 1)
+    private fun handleClearSuccess(position: Position) {
+        val adjacentMines = countAdjacentMines(position)
+        cleared.add(position)
+        listener?.positionCleared(position.x(), position.y(), adjacentMines)
+        if (adjacentMines == 0) {
+            clearAdjacentTiles(position.x(), position.y())
+        }
+        if (cleared.size == positionPool.size() - numMines) {
+            listener?.gameWon()
+        }
     }
 
-    private fun adjacentMines(position: Position): Int {
-        var count = 0
-        for (adjacent in AdjacentTile.entries) {
-            val x = position.x() + adjacent.transX
-            val y = position.y() + adjacent.transY
-            if (x >= 0 && x < positionPool.width() && y >= 0 && y < positionPool.height()) {
-                val newPosition = positionPool.atLocation(x, y)
-                if (game.field().isMine(newPosition)) {
-                    count++
-                }
-            }
-        }
-        return count
-    }
-
-    fun countAdjacentFlags(origX: Int, origY: Int): Int {
-        var result = 0
-
-        for (adjacentTile in AdjacentTile.entries) {
-            val x = origX + adjacentTile.transX
-            val y = origY + adjacentTile.transY
-            if (x >= 0 && x < positionPool.width() && y >= 0 && y < positionPool.height()) {
-                if (game.field()?.isFlag(positionPool.atLocation(x, y))!!) {
-                    result++
-                }
-            }
-        }
-
-        return result
+    private fun handleClearExploded(position: Position) {
+        gameOver = true
+        listener?.positionExploded(position.x(), position.y())
+        listener?.gameLost()
     }
 
     fun clearAdjacentTiles(origX: Int, origY: Int) {
-        for (adjacentTile in AdjacentTile.entries) {
-            val x = origX + adjacentTile.transX
-            val y = origY + adjacentTile.transY
-            if (x >= 0 && x < positionPool.width() && y >= 0 && y < positionPool.height()) {
-                if (!game.field()?.isFlag(positionPool.atLocation(x, y))!!) {
-                    clear(x, y)
-                }
+        for (adjacentPosition in getAdjacentTiles(origX, origY)) {
+            val x = adjacentPosition.x()
+            val y = adjacentPosition.y()
+            if (!cleared.contains(adjacentPosition)) {
+                clear(x, y)
             }
         }
     }
@@ -99,25 +72,37 @@ class AndroidGameControlStrategy(
         val position = positionPool.atLocation(x, y)
         val isFlag = game.field().flag(position)
         if (isFlag) {
-            listener?.positionUnflagged(x, y)
-            flagged.remove(position)
+            unflag(position)
         } else {
-            listener?.positionFlagged(x, y)
-            flagged.add(position)
-            if (flagged.size == numMines) {
-                var gameWon = true
-                for (flaggedPosition in flagged) {
-                    if (!game.field().isMine(flaggedPosition)) {
-                        gameWon = false
-                    }
-                }
-                if (gameWon) {
-                    listener?.gameWon()
-                } else {
-                    listener?.gameLost()
+            flag(position)
+            maybeEndGame()
+        }
+    }
+
+    private fun maybeEndGame() {
+        if (Config.feature_end_game_on_last_flag && flagged.size == numMines) {
+            var gameWon = true
+            for (flaggedPosition in flagged) {
+                if (!game.field().isMine(flaggedPosition)) {
+                    gameWon = false
                 }
             }
+            if (gameWon) {
+                listener?.gameWon()
+            } else {
+                listener?.gameLost()
+            }
         }
+    }
+
+    private fun flag(position: Position) {
+        listener?.positionFlagged(position.x(), position.y())
+        flagged.add(position)
+    }
+
+    private fun unflag(position: Position) {
+        listener?.positionUnflagged(position.x(), position.y())
+        flagged.remove(position)
     }
 
     override fun saveGame(fileName: String?) {

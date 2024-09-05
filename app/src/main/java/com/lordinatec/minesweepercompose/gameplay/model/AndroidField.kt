@@ -7,28 +7,66 @@ package com.lordinatec.minesweepercompose.gameplay.model
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.Position
 
+/**
+ * Android implementation of the Field interface.
+ *
+ * @param configuration the configuration of the field
+ */
 class AndroidField(private val configuration: Field.Configuration) : Field {
     private val mines = mutableSetOf<Position>()
     private val flags = mutableSetOf<Position>()
 
+    /**
+     * Create the mines for the field.
+     */
     fun createMines() {
-        val randomPositionPool = RandomPositionPool(configuration.positionPool())
-        for (i in 0 until configuration.numMines()) {
-            val position = randomPositionPool.next()
+        mines.clear()
+
+        for (position in configuration.positionPool()) {
             mines.add(position)
+            if (mines.size == configuration.numMines()) {
+                break
+            }
         }
     }
 
+    /**
+     * Create the mines for the field.
+     *
+     * The initial coordinates are guaranteed to NOT be a mine.
+     *
+     * @param initX the initial x position
+     * @param initY the initial y position
+     */
     fun createMines(initX: Int, initY: Int) {
-        val randomPositionPool = RandomPositionPool(configuration.positionPool())
-        var minesAdded = 0
-        while (minesAdded < configuration.numMines()) {
-            val position = randomPositionPool.next()
-            if (position.x() != initX && position.y() != initY) {
+        mines.clear()
+
+        for (position in configuration.positionPool()) {
+            if (position.x() != initX || position.y() != initY) {
                 mines.add(position)
-                minesAdded++
+            }
+            if (mines.size == configuration.numMines()) {
+                break
             }
         }
+    }
+
+    /**
+     * Get the number of mines placed.
+     *
+     * @return the number of mines placed
+     */
+    fun minesPlaced(): Int {
+        return mines.size
+    }
+
+    /**
+     * Get the number of flags placed.
+     *
+     * @return the number of flags placed
+     */
+    fun flagsPlaced(): Int {
+        return flags.size
     }
 
     override fun configuration(): Field.Configuration {

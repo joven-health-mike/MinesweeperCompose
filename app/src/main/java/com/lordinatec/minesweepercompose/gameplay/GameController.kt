@@ -5,7 +5,8 @@
 package com.lordinatec.minesweepercompose.gameplay
 
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.config.Config.indexToXY
+import com.lordinatec.minesweepercompose.config.CoordinateTranslator
+import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
@@ -28,14 +29,14 @@ class GameController(
     private val gameFactory: GameFactory,
     private val timerFactory: TimerFactory,
     private val eventPublisher: GameEventPublisher
-) {
+) : CoordinateTranslator by XYIndexTranslator() {
     // TODO: reduce dependencies
     private var gameCreated: Boolean = false
     private var gameModel: AndroidGameControlStrategy? = null
     private var gameField: Field? = null
     private var positionPool: Position.Pool? = null
     private var timer: CountUpTimer? = null
-    private var timerValue = 0L
+    var timerValue = 0L
 
     /**
      * Create a game. Mine will never occur at the given index.
@@ -54,15 +55,23 @@ class GameController(
         }
     }
 
+    /**
+     * Clears the entire field.
+     */
     fun clearEverything() {
         if (!gameCreated) return
 
-        for (i in 0 until Config.WIDTH * Config.HEIGHT) {
+        for (i in 0 until Config.width * Config.height) {
             val (x, y) = indexToXY(i)
             gameModel?.clear(x, y)
         }
     }
 
+    /**
+     * Clears adjacent tiles to the given index
+     *
+     * @param index - index of the tile to clear adjacent tiles
+     */
     fun clearAdjacentTiles(index: Int) {
         if (!gameCreated) return
 
@@ -70,6 +79,11 @@ class GameController(
         gameModel?.clearAdjacentTiles(x, y)
     }
 
+    /**
+     * Count the number of adjacent flags to the given index
+     *
+     * @param index - index of the tile to count adjacent flags
+     */
     fun countAdjacentFlags(index: Int): Int {
         if (!gameCreated) return -1
 

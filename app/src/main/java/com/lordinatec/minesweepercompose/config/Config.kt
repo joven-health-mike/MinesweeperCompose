@@ -8,19 +8,21 @@ package com.lordinatec.minesweepercompose.config
  * Configuration for the Minesweeper game
  */
 object Config {
-    // TODO: make these changeable based on screen size and user preferences
-    const val WIDTH = 5
-    const val HEIGHT = 7
-    const val MINES = 7
+    private const val DEFAULT_WIDTH = 5
+    private const val DEFAULT_HEIGHT = 7
+    private const val DEFAULT_MINES = 7
 
-    // TODO: Move these functions somewhere more appropriate
-    fun indexToXY(index: Int): Pair<Int, Int> {
-        val xVal = index % WIDTH
-        val yVal = index / WIDTH
-        return Pair(xVal, yVal)
+    var width = DEFAULT_WIDTH
+    var height = DEFAULT_HEIGHT
+    var mines = DEFAULT_MINES
+
+    fun factoryResetFieldConfig() {
+        width = DEFAULT_WIDTH
+        height = DEFAULT_HEIGHT
+        mines = DEFAULT_MINES
     }
 
-    fun xyToIndex(x: Int, y: Int): Int {
-        return y * WIDTH + x
-    }
+    // feature flags
+    var feature_adjust_field_to_screen_size = true
+    var feature_end_game_on_last_flag = true
 }

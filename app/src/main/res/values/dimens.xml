@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+~ Copyright Lordinatec LLC 2024
+-->
+
+<resources>
+    <dimen name="main_activity_icon_size">200dp</dimen>
+    <dimen name="main_activity_button_width">250dp</dimen>
+    <dimen name="tile_view_size">75dp</dimen>
+    <dimen name="flag_size">70dp</dimen>
+    <dimen name="mine_size">75dp</dimen>
+</resources>

@@ -9,11 +9,9 @@ import com.lordinatec.minesweepercompose.gameplay.views.TileState
 /**
  * Handles click events on the tile views.
  *
- * @param gameUiState the current game state
  * @param gameViewModel the view model for the game
  */
 class TileViewClickListener(
-    private val gameUiState: GameState,
     private val gameViewModel: GameViewModel
 ) {
     /**
@@ -28,6 +26,7 @@ class TileViewClickListener(
      * @param index the index of the tile that was clicked
      */
     fun onClick(index: Int) {
+        val gameUiState = gameViewModel.uiState.value
         // any clicks after game over should reset the game
         if (gameUiState.gameOver) {
             gameViewModel.resetGame()
@@ -51,6 +50,7 @@ class TileViewClickListener(
      * @param index the index of the tile that was clicked
      */
     fun onLongClick(index: Int) {
+        val gameUiState = gameViewModel.uiState.value
         // any clicks after game over should reset the game
         if (gameUiState.gameOver) {
             gameViewModel.resetGame()
@@ -71,10 +71,11 @@ class TileViewClickListener(
      * @param index the index of the tile
      */
     private fun tryToClearAdjacentTiles(index: Int) {
+        val gameUiState = gameViewModel.uiState.value
         val adjacentFlags = gameViewModel.getAdjacentFlags(index)
         try {
             // if the number of adjacent flags is equal to the value of the tile, clear all adjacent tiles
-            if (adjacentFlags == gameUiState.tileValues[index].toInt()) {
+            if (adjacentFlags == gameUiState.tileValues[index].value.toInt()) {
                 gameViewModel.clearAdjacentTiles(index)
             }
         } catch (e: NumberFormatException) {

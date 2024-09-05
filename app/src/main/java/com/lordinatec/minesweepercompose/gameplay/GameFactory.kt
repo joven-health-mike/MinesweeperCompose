@@ -7,6 +7,7 @@ package com.lordinatec.minesweepercompose.gameplay
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidFieldFactory
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
+import com.lordinatec.minesweepercompose.gameplay.model.RandomPositionPool
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.GameControlStrategy.Listener
 import com.mikeburke106.mines.api.model.Position
@@ -60,8 +61,9 @@ class GameFactory {
      * @return the game info holder
      */
     fun createGame(x: Int, y: Int, listener: Listener): GameInfoHolder {
-        val positionPool = BasicPositionPool(BasicPosition.Factory(), Config.WIDTH, Config.HEIGHT)
-        val config: Field.Configuration = BasicConfiguration(positionPool, Config.MINES)
+        val positionPool = BasicPositionPool(BasicPosition.Factory(), Config.width, Config.height)
+        val randomPool = RandomPositionPool(positionPool)
+        val config: Field.Configuration = BasicConfiguration(randomPool, Config.mines)
         val field = fieldFactory.newInstance(config, x, y)
         val game = BasicGame(System.currentTimeMillis(), field, RegularIntervalTimingStrategy(1L))
         return object : GameInfoHolder {

@@ -25,15 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.dimensionResource
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.gameplay.views.animations.dropDown
 import com.lordinatec.minesweepercompose.gameplay.views.animations.rememberDropDownAnimation
+import com.lordinatec.minesweepercompose.ui.theme.Typography
 import com.lordinatec.minesweepercompose.views.AppIcon
 
 /**
@@ -52,11 +48,10 @@ class TileViewFactory(
      * Create a TileView with the given index.
      */
     @Composable
-    fun CreateTileView(
-        currIndex: Int,
-    ) {
+    fun CreateTileView(currIndex: Int) {
         val gameUiState by gameViewModel.uiState.collectAsState()
-        val dropDownAnimation = rememberDropDownAnimation()
+        val startPosition = if (gameUiState.newGame) -80f else 0f
+        val dropDownAnimation = rememberDropDownAnimation(startPosition)
         Box(modifier = Modifier.dropDown(dropDownAnimation)) {
             if (!gameUiState.gameOver) {
                 LaunchedEffect(Unit) {
@@ -89,18 +84,20 @@ class TileViewFactory(
 @Composable
 fun TileView(
     index: Int,
-    value: String,
+    value: TileValue,
     state: TileState,
     gameViewModel: GameViewModel,
     onClick: ((index: Int) -> Unit)? = null,
     onLongClick: ((index: Int) -> Unit)? = null
 ) {
+    val tileViewSize =
+        dimensionResource(id = com.lordinatec.minesweepercompose.R.dimen.tile_view_size)
     Box(
         modifier = Modifier
             .combinedClickable(
                 onLongClick = { onLongClick?.let { it(index) } },
                 onClick = { onClick?.let { it(index) } })
-            .size(75.dp)
+            .size(tileViewSize)
             .background(
                 brush = Brush.radialGradient(
                     colors = listOf(
@@ -111,9 +108,9 @@ fun TileView(
         contentAlignment = Alignment.Center
     ) {
         if (state == TileState.COVERED) {
-            TextTile("")
+            TextTile(value)
         } else {
-            when (value) {
+            when (value.value) {
                 "F" -> FlagTile(gameViewModel, index)
                 "*" -> MineTile()
                 else -> TextTile(value)
@@ -123,29 +120,25 @@ fun TileView(
 }
 
 @Composable
-private fun TextTile(value: String) {
+private fun TextTile(value: TileValue) {
     Text(
-        text = value,
-        color = Color.White,
-        style = TextStyle(
-            fontFamily = FontFamily.Default,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            textAlign = TextAlign.Center
-        )
+        text = value.value,
+        color = value.textColor,
+        style = Typography.bodyLarge
     )
 }
 
 @Composable
 private fun FlagTile(gameViewModel: GameViewModel, index: Int) {
     val gameUiState = gameViewModel.uiState.collectAsState()
+    val flagSize = dimensionResource(id = com.lordinatec.minesweepercompose.R.dimen.flag_size)
     Icon(
         Icons.Filled.Flag,
         contentDescription = "Flagged tile",
         tint = colorResource(android.R.color.holo_green_dark),
         modifier = Modifier
-            .width(70.dp)
-            .height(70.dp)
+            .width(flagSize)
+            .height(flagSize)
     )
     if (gameUiState.value.gameOver && !gameViewModel.flagIsCorrect(index)
     ) {
@@ -155,18 +148,20 @@ private fun FlagTile(gameViewModel: GameViewModel, index: Int) {
 
 @Composable
 private fun MineTile() {
-    AppIcon(size = 75.dp)
+    val mineSize = dimensionResource(id = com.lordinatec.minesweepercompose.R.dimen.mine_size)
+    AppIcon(size = mineSize, tint = Color.Black)
 }
 
 @Composable
 private fun IncorrectFlagOverlay() {
+    val flagSize = dimensionResource(id = com.lordinatec.minesweepercompose.R.dimen.flag_size)
     Icon(
         Icons.Filled.Close,
         contentDescription = "Flag is wrong",
         tint = colorResource(android.R.color.holo_red_dark),
         modifier = Modifier
-            .width(75.dp)
-            .height(75.dp)
+            .width(flagSize)
+            .height(flagSize)
     )
 }
 
@@ -178,7 +173,49 @@ private fun IncorrectFlagOverlay() {
  */
 enum class TileState(val primaryColor: Color, val secondaryColor: Color) {
     COVERED(Color.Blue, Color.Gray),
-    CLEARED(Color.Gray, Color.DarkGray),
+    CLEARED(Color(0xFF808080), Color.DarkGray),
     FLAGGED(Color.Blue, Color.Gray),
     EXPLODED(Color.Red, Color.Magenta)
+}
+
+/**
+ * Enum class for the value of a tile.
+ */
+enum class TileValue(val value: String, val textColor: Color) {
+    EMPTY("0", Color.Transparent),
+    ONE("1", Color.Blue),
+    TWO("2", Color.Green),
+    THREE("3", Color.Red),
+    FOUR("4", Color.Magenta),
+    FIVE("5", Color.Cyan),
+    SIX("6", Color.Yellow),
+    SEVEN("7", Color.Gray),
+    EIGHT("8", Color.DarkGray),
+    MINE("*", Color.Transparent),
+    FLAG("F", Color.Transparent),
+    UNKNOWN("", Color.Transparent);
+
+    companion object {
+        /**
+         * Get the TileValue from the given value.
+         *
+         * @param value The value of the tile
+         *
+         * @return The TileValue
+         */
+        fun fromValue(value: Int): TileValue {
+            return when (value) {
+                0 -> EMPTY
+                1 -> ONE
+                2 -> TWO
+                3 -> THREE
+                4 -> FOUR
+                5 -> FIVE
+                6 -> SIX
+                7 -> SEVEN
+                8 -> EIGHT
+                else -> UNKNOWN
+            }
+        }
+    }
 }

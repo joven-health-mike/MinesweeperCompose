@@ -35,7 +35,13 @@ fun TopBar(text: String) {
         })
 }
 
-// TODO: How to determine top bar height?
+/**
+ * Add padding to the top of the screen to account for the status bar and top app bar.
+ *
+ * @param statusBarBottom The height of the status bar.
+ *
+ * @return A modifier that adds padding to the top of the screen.
+ */
 fun Modifier.topBarPadding(statusBarBottom: Dp) =
     windowInsetsPadding(WindowInsets(top = statusBarBottom + 32.dp))
 

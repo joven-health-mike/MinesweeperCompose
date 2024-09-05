@@ -1,9 +1,12 @@
-package com.lordinatec.minesweepercompose
+/*
+ * Copyright Lordinatec LLC 2024
+ */
+
+package com.lordinatec.minesweepercompose.stats
 
 import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.lordinatec.minesweepercompose.stats.StatsUpdater
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -22,7 +25,6 @@ class StatsUpdaterTest {
 
     @Before
     fun setUp() {
-        // Context of the app under test.
         context = InstrumentationRegistry.getInstrumentation().targetContext
         context.getSharedPreferences("MinesweeperComposePrefs", Context.MODE_PRIVATE).edit().clear()
             .apply()

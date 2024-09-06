@@ -83,6 +83,21 @@ class GameActivity : ComponentActivity() {
             Config.feature_end_game_on_last_flag.toString()
         )
         Config.feature_end_game_on_last_flag = endGameOnLastFlag.toBoolean()
+        val width by sharedPreferences(
+            "width",
+            Config.width.toString()
+        )
+        Config.width = width.toInt()
+        val height by sharedPreferences(
+            "height",
+            Config.height.toString()
+        )
+        Config.height = height.toInt()
+        val mines by sharedPreferences(
+            "mines",
+            Config.mines.toString()
+        )
+        Config.mines = mines.toInt()
     }
 
     private fun determineFieldSize(isPortraitMode: Boolean) {

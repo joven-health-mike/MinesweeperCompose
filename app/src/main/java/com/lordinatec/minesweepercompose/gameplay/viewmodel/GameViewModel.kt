@@ -11,21 +11,21 @@ import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import com.lordinatec.minesweepercompose.gameplay.views.TileValue
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel for the Game screen.
  *
- * @param gameController The GameController to use.
- * @param gameEvents The GameEventPublisher to use.
- *
  * @return A ViewModel for the Game screen.
  */
-class GameViewModel(
+@HiltViewModel
+class GameViewModel @Inject constructor(
     private val gameController: GameController,
     private val gameEvents: EventPublisher
 ) : ViewModel() {
@@ -188,6 +188,10 @@ class GameViewModel(
     fun resumeTimer() {
         if (uiState.value.gameOver) return
         gameController.resumeTimer()
+    }
+
+    fun getCurrentTime(): Long {
+        return gameController.timerValue
     }
 
     /* PRIVATE FUNCTIONS */

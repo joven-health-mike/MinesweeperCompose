@@ -22,7 +22,6 @@ import kotlinx.coroutines.withContext
  */
 class GameEventPublisher(
     private val publisherScope: CoroutineScope,
-    var timeProvider: TimeProvider? = null
 ) :
     GameControlStrategy.Listener, EventPublisher, CoordinateTranslator by XYIndexTranslator() {
     private val _events = MutableSharedFlow<Event>()
@@ -111,7 +110,8 @@ class GameEventPublisher(
      */
     override fun gameWon() {
         if (!gameOver) {
-            publish(GameEvent.GameWon(timeProvider?.currentMillis() ?: Long.MAX_VALUE))
+            // TODO: how to get game time without circular dependency...
+            publish(GameEvent.GameWon(Long.MAX_VALUE))
             gameOver = true
         }
     }

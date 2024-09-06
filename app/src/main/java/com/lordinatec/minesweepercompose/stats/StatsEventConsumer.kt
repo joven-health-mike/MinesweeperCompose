@@ -6,11 +6,12 @@ package com.lordinatec.minesweepercompose.stats
 
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import javax.inject.Inject
 
 /**
  * Consumes game events and updates the stats.
  */
-class StatsEventConsumer(
+class StatsEventConsumer @Inject constructor(
     private val eventPublisher: EventPublisher,
     private val statsProvider: StatsProvider
 ) {

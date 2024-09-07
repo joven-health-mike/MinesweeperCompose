@@ -4,13 +4,10 @@
 
 package com.lordinatec.minesweepercompose.gameplay
 
-import android.os.CountDownTimer
+import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
-import com.lordinatec.minesweepercompose.gameplay.timer.CountUpTimer
-import com.lordinatec.minesweepercompose.gameplay.timer.TimerFactory
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.Position
 import io.mockk.MockKAnnotations
@@ -35,16 +32,7 @@ class GameControllerTest {
     private lateinit var gameFactory: GameFactory
 
     @MockK
-    private lateinit var timerFactory: TimerFactory
-
-    @MockK
     private lateinit var eventPublisher: GameEventPublisher
-
-    @MockK
-    private lateinit var timer: CountUpTimer
-
-    @MockK
-    private lateinit var countDownTimer: CountDownTimer
 
     @MockK
     private lateinit var gameModel: AndroidGameControlStrategy
@@ -76,9 +64,6 @@ class GameControllerTest {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
         every { gameFactory.createGame(any(), any(), any()) } answers { gameInfoHolder }
-        every { timerFactory.create(any(), any()) } answers { timer }
-        every { timer.start() } answers { countDownTimer }
-        every { timer.cancel() } just Runs
         every { gameModel.clear(any(), any()) } just Runs
         every { gameModel.toggleFlag(any(), any()) } just Runs
         every { gameModel.clearAdjacentTiles(any(), any()) } just Runs
@@ -89,7 +74,7 @@ class GameControllerTest {
         every { field.isMine(any()) } answers { false }
         every { field.isFlag(any()) } answers { false }
         every { eventPublisher.publish(any()) } just Runs
-        gameController = GameController(gameFactory, timerFactory, eventPublisher)
+        gameController = GameController(gameFactory, eventPublisher)
     }
 
     @Test
@@ -118,14 +103,6 @@ class GameControllerTest {
     }
 
     @Test
-    fun testResetGame() = runTest {
-        gameController.maybeCreateGame(0)
-        gameController.startTimer()
-        gameController.resetGame()
-        verify(exactly = 1) { timer.cancel() }
-    }
-
-    @Test
     fun testClearOnGameStarted() = runTest {
         gameController.maybeCreateGame(0)
         gameController.clear(0)
@@ -149,51 +126,6 @@ class GameControllerTest {
     fun testToggleFlagOnGameNotStarted() = runTest {
         gameController.toggleFlag(0)
         verify(exactly = 0) { gameModel.toggleFlag(any(), any()) }
-    }
-
-    @Test
-    fun testStartTimer() = runTest {
-        gameController.maybeCreateGame(0)
-        gameController.startTimer()
-        verify(exactly = 1) { timerFactory.create(any(), any()) }
-        verify(exactly = 1) { timer.start() }
-    }
-
-    @Test
-    fun testPauseTimerAfterStarted() = runTest {
-        gameController.maybeCreateGame(0)
-        gameController.startTimer()
-        gameController.pauseTimer()
-        verify(exactly = 1) { timer.cancel() }
-    }
-
-    @Test
-    fun testPauseTimerBeforeStarted() = runTest {
-        gameController.pauseTimer()
-        verify(exactly = 0) { timer.cancel() }
-    }
-
-    @Test
-    fun testStopTimerAfterStarted() = runTest {
-        gameController.maybeCreateGame(0)
-        gameController.startTimer()
-        gameController.stopTimer()
-        verify(exactly = 1) { timer.cancel() }
-    }
-
-    @Test
-    fun testStopTimerBeforeStarted() = runTest {
-        gameController.maybeCreateGame(0)
-        gameController.stopTimer()
-        verify(exactly = 0) { timer.cancel() }
-    }
-
-    @Test
-    fun testResumeTimer() = runTest {
-        gameController.maybeCreateGame(0)
-        gameController.resumeTimer()
-        verify(exactly = 1) { timerFactory.create(any(), any()) }
-        verify(exactly = 1) { timer.start() }
     }
 
     @Test

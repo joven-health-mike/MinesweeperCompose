@@ -6,7 +6,7 @@ package com.lordinatec.minesweepercompose.gameplay.events
 
 import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
-import com.lordinatec.minesweepercompose.gameplay.timer.TimeProvider
+import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.mikeburke106.mines.api.model.GameControlStrategy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +22,7 @@ import kotlinx.coroutines.withContext
  */
 class GameEventPublisher(
     private val publisherScope: CoroutineScope,
-    var timeProvider: TimeProvider? = null
+    private val timer: Timer
 ) :
     GameControlStrategy.Listener, EventPublisher, CoordinateTranslator by XYIndexTranslator() {
     private val _events = MutableSharedFlow<Event>()
@@ -111,7 +111,7 @@ class GameEventPublisher(
      */
     override fun gameWon() {
         if (!gameOver) {
-            publish(GameEvent.GameWon(timeProvider?.currentMillis() ?: Long.MAX_VALUE))
+            publish(GameEvent.GameWon(timer.time))
             gameOver = true
         }
     }

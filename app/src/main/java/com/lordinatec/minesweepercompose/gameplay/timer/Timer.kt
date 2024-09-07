@@ -11,6 +11,19 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Definition of timer functionality
+ *
+ * @property isRunning true if the timer is running
+ * @property isPaused true if the timer is paused
+ * @property time the current time of the timer
+ * @property interval the interval at which the timer ticks
+ * @property onTickListener the listener that is called when the timer ticks
+ * @property start starts the timer
+ * @property pause pauses the timer
+ * @property resume resumes the timer
+ * @property stop stops the timer
+ */
 interface Timer {
     var isRunning: Boolean
     var isPaused: Boolean
@@ -22,15 +35,36 @@ interface Timer {
     fun resume()
     fun stop()
 
+    /**
+     * Listener for when the timer ticks
+     *
+     * @property onTick the function that is called when the timer ticks
+     */
     fun interface OnTickListener {
         fun onTick(newTime: Long)
     }
 
+    /**
+     * Default implementation of the OnTickListener interface
+     *
+     * @property onTick the function that is called when the timer ticks
+     */
     class DefaultOnTickListener : OnTickListener {
-        override fun onTick(newTime: Long) {}
+        override fun onTick(newTime: Long) {
+            // do nothing
+        }
     }
 }
 
+/**
+ * Implementation of the Timer interface using coroutines
+ *
+ * @property interval the interval at which the timer ticks
+ * @property scope the coroutine scope in which the timer runs
+ * @property onTickListener the listener that is called when the timer ticks
+ *
+ * @constructor creates a new CoroutineTimer
+ */
 class CoroutineTimer @Inject constructor(
     override val interval: Long,
     private val scope: CoroutineScope,

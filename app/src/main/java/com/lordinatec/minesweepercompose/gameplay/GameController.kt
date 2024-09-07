@@ -10,8 +10,6 @@ import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
-import com.lordinatec.minesweepercompose.gameplay.timer.CountUpTimer
-import com.lordinatec.minesweepercompose.gameplay.timer.TimerFactory
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.Position
 
@@ -19,7 +17,7 @@ import com.mikeburke106.mines.api.model.Position
  * GameController - wraps functionality of the game model from the mines-java engine
  *
  * @param gameFactory - Create games
- * @param timerFactory - Creates timers
+ * @param eventPublisher - Listener for game events
  *
  * @property gameCreated - flag to indicate if a game has been created
  *
@@ -27,16 +25,12 @@ import com.mikeburke106.mines.api.model.Position
  */
 class GameController(
     private val gameFactory: GameFactory,
-    private val timerFactory: TimerFactory,
     private val eventPublisher: GameEventPublisher
 ) : CoordinateTranslator by XYIndexTranslator() {
-    // TODO: reduce dependencies
     private var gameCreated: Boolean = false
     private var gameModel: AndroidGameControlStrategy? = null
     private var gameField: Field? = null
     private var positionPool: Position.Pool? = null
-    private var timer: CountUpTimer? = null
-    var timerValue = 0L
 
     /**
      * Create a game. Mine will never occur at the given index.
@@ -98,7 +92,6 @@ class GameController(
         if (!gameCreated) return
 
         gameCreated = false
-        stopTimer()
     }
 
     /**
@@ -126,50 +119,6 @@ class GameController(
     }
 
     /**
-     * Starts the timer at the given start time.
-     *
-     * @param startTime - start time of the timer (default = 0L)
-     */
-    fun startTimer(startTime: Long = 0L) {
-        if (!gameCreated) return
-
-        stopTimer()
-        timer = timerFactory.create(startTime) { time ->
-            eventPublisher.publish(GameEvent.TimeUpdate(time))
-            timerValue = time
-        }.apply { start() }
-    }
-
-    /**
-     * Pauses the timer
-     */
-    fun pauseTimer() {
-        if (!gameCreated) return
-
-        stopTimer()
-    }
-
-    /**
-     * Resumes the timer
-     */
-    fun resumeTimer() {
-        if (!gameCreated) return
-
-        stopTimer()
-        timer = timerFactory.create(timerValue) { time ->
-            eventPublisher.publish(GameEvent.TimeUpdate(time))
-            timerValue = time
-        }.apply { start() }
-    }
-
-    /**
-     * Cancels the timer
-     */
-    fun stopTimer() {
-        timer?.cancel()
-    }
-
-    /**
      * Checks if a flag is correct at the given index
      *
      * @param index - index of the tile to check
@@ -186,13 +135,11 @@ class GameController(
      * Factory for creating GameController
      *
      * @param gameFactory - Create games
-     * @param timerFactory - Creates timers
      *
      * @constructor Create a game controller factory
      */
     class Factory(
         private val gameFactory: GameFactory,
-        private val timerFactory: TimerFactory,
     ) {
         /**
          * Create a GameController
@@ -200,7 +147,7 @@ class GameController(
          * @param eventPublisher - Listener for game events
          */
         fun createGameController(eventPublisher: GameEventPublisher): GameController {
-            return GameController(gameFactory, timerFactory, eventPublisher)
+            return GameController(gameFactory, eventPublisher)
         }
     }
 }

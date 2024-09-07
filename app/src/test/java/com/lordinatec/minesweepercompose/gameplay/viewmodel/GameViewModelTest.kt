@@ -6,11 +6,11 @@
 
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
-import android.app.Application
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.Event
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
@@ -37,6 +37,9 @@ class GameViewModelTest {
     private lateinit var gameController: GameController
 
     @MockK
+    private lateinit var timer: Timer
+
+    @MockK
     private lateinit var eventPublisher: EventPublisher
 
     private lateinit var testFlow: MutableSharedFlow<Event>
@@ -49,17 +52,18 @@ class GameViewModelTest {
         testFlow = MutableSharedFlow()
         MockKAnnotations.init(this)
         every { gameController.maybeCreateGame(any()) } just Runs
-        every { gameController.startTimer(any()) } just Runs
         every { gameController.clear(any()) } just Runs
         every { gameController.resetGame() } just Runs
         every { gameController.flagIsCorrect(any()) } answers { false }
         every { gameController.toggleFlag(any()) } just Runs
-        every { gameController.pauseTimer() } just Runs
-        every { gameController.resumeTimer() } just Runs
-        every { gameController.stopTimer() } just Runs
         every { gameController.clearEverything() } just Runs
+        every { timer.start() } just Runs
+        every { timer.resume() } just Runs
+        every { timer.pause() } just Runs
+        every { timer.stop() } just Runs
+        every { timer.onTickListener = any() } just Runs
         every { eventPublisher.events } answers { testFlow.asSharedFlow() }
-        gameViewModel = GameViewModel(gameController, eventPublisher)
+        gameViewModel = GameViewModel(gameController, eventPublisher, timer)
     }
 
     @Test
@@ -83,13 +87,13 @@ class GameViewModelTest {
     @Test
     fun testPauseTimer() = runTest {
         gameViewModel.pauseTimer()
-        verify { gameController.pauseTimer() }
+        verify { timer.pause() }
     }
 
     @Test
     fun testResumeTimer() = runTest {
         gameViewModel.resumeTimer()
-        verify { gameController.resumeTimer() }
+        verify { timer.resume() }
     }
 
     @Test

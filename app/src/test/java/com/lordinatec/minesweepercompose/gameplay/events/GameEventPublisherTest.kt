@@ -6,6 +6,12 @@
 
 package com.lordinatec.minesweepercompose.gameplay.events
 
+import com.lordinatec.minesweepercompose.gameplay.timer.Timer
+import io.mockk.MockKAnnotations
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.just
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -18,12 +24,20 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class GameEventPublisherTest {
+    @MockK
+    private lateinit var timer: Timer
+
     private lateinit var gameEventPublisher: GameEventPublisher
 
     @BeforeTest
-    fun setUp() = runTest {
+    fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
-        gameEventPublisher = GameEventPublisher(TestScope())
+        MockKAnnotations.init(this)
+        every { timer.start() } just Runs
+        every { timer.resume() } just Runs
+        every { timer.pause() } just Runs
+        every { timer.stop() } just Runs
+        gameEventPublisher = GameEventPublisher(TestScope(), timer)
     }
 
     @Test
@@ -88,6 +102,8 @@ class GameEventPublisherTest {
 
     @Test
     fun testGameWon() = runTest {
+        val winTime = 100L
+        every { timer.time } returns winTime
         gameEventPublisher.gameWon()
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.GameWon)

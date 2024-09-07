@@ -2,7 +2,7 @@
  * Copyright Lordinatec LLC 2024
  */
 
-package com.lordinatec.minesweepercompose.gameplay.viewmodel
+package com.lordinatec.minesweepercompose.di
 
 import android.app.Application
 import android.content.Context
@@ -10,9 +10,9 @@ import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.GameFactory
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.timer.DefaultTimeProvider
-import com.lordinatec.minesweepercompose.gameplay.timer.TimeProvider
-import com.lordinatec.minesweepercompose.gameplay.timer.TimerFactory
+import com.lordinatec.minesweepercompose.gameplay.timer.CoroutineTimer
+import com.lordinatec.minesweepercompose.gameplay.timer.Timer
+import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.stats.StatsEventConsumer
 import com.lordinatec.minesweepercompose.stats.StatsProvider
 import com.lordinatec.minesweepercompose.stats.StatsUpdater
@@ -34,22 +34,13 @@ class GameViewModelModule {
     @Singleton
     fun provideViewModel(
         gameController: GameController,
-        gameEventPublisher: GameEventPublisher
-    ): GameViewModel = GameViewModel(gameController, gameEventPublisher)
-
-    @Provides
-    @Singleton
-    fun provideDefaultTimeProvider(
-        viewModel: GameViewModel
-    ): DefaultTimeProvider = DefaultTimeProvider(viewModel)
+        gameEventPublisher: GameEventPublisher,
+        timer: Timer
+    ): GameViewModel = GameViewModel(gameController, gameEventPublisher, timer)
 
     @Provides
     @Singleton
     fun provideGameFactory(): GameFactory = GameFactory()
-
-    @Provides
-    @Singleton
-    fun provideTimerFactory(): TimerFactory = TimerFactory()
 
     @Provides
     @Singleton
@@ -66,16 +57,33 @@ class GameViewModelModule {
     @Singleton
     fun provideGameEventPublisher(
         scope: CoroutineScope,
-    ): GameEventPublisher = GameEventPublisher(scope)
+        timer: Timer
+    ): GameEventPublisher = GameEventPublisher(scope, timer)
+
+    @Provides
+    @Singleton
+    fun provideTimerInterval(): Long = 10L
+
+    @Provides
+    @Singleton
+    fun provideTimerDefaultOnTickListener(): Timer.DefaultOnTickListener =
+        Timer.DefaultOnTickListener()
+
+    @Provides
+    @Singleton
+    fun provideCoroutineTimer(
+        interval: Long,
+        scope: CoroutineScope,
+        onTickListener: Timer.OnTickListener
+    ): CoroutineTimer = CoroutineTimer(interval, scope, onTickListener)
 
     @Provides
     @Singleton
     fun provideGameController(
         gameFactory: GameFactory,
-        timerFactory: TimerFactory,
         eventPublisher: GameEventPublisher,
     ): GameController =
-        GameController.Factory(gameFactory, timerFactory)
+        GameController.Factory(gameFactory)
             .createGameController(eventPublisher)
 
     @Provides
@@ -98,12 +106,15 @@ abstract class InterfaceModule {
     ): EventPublisher
 
     @Binds
-    abstract fun provideTimeProvider(
-        defaultTimeProvider: DefaultTimeProvider
-    ): TimeProvider
-
-    @Binds
     abstract fun provideStatsProvider(
         statsUpdater: StatsUpdater
     ): StatsProvider
+
+    @Binds
+    abstract fun provideTimer(
+        timer: CoroutineTimer
+    ): Timer
+
+    @Binds
+    abstract fun provideTimerOnTickListener(defaultOnTickListener: Timer.DefaultOnTickListener): Timer.OnTickListener
 }

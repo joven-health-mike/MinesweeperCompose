@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,50 +28,46 @@ import javax.inject.Inject
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val gameController: GameController,
-    private val gameEvents: EventPublisher
+    private val gameEvents: EventPublisher,
+    private val timer: Timer
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
     init {
+        timer.onTickListener =
+
+            Timer.OnTickListener { newTime -> gameEvents.publish(GameEvent.TimeUpdate(newTime)) }
+
         viewModelScope.launch {
             gameEvents.events.collect { event ->
                 when (event) {
-                    is GameEvent.TimeUpdate ->
-                        _uiState.update { state ->
-                            state.copy(
-                                timeValue = event.newTime
-                            )
-                        }
+                    is GameEvent.TimeUpdate -> _uiState.update { state ->
+                        state.copy(
+                            timeValue = event.newTime
+                        )
+                    }
 
                     is GameEvent.PositionCleared -> updatePosition(
-                        event.index,
-                        TileState.CLEARED,
-                        TileValue.fromValue(event.adjacentMines)
+                        event.index, TileState.CLEARED, TileValue.fromValue(event.adjacentMines)
                     )
 
                     is GameEvent.PositionExploded -> updatePosition(
-                        event.index,
-                        TileState.EXPLODED,
-                        TileValue.MINE
+                        event.index, TileState.EXPLODED, TileValue.MINE
                     )
 
                     is GameEvent.PositionFlagged -> updatePosition(
-                        event.index,
-                        TileState.FLAGGED,
-                        TileValue.FLAG
+                        event.index, TileState.FLAGGED, TileValue.FLAG
                     )
 
                     is GameEvent.PositionUnflagged -> updatePosition(
-                        event.index,
-                        TileState.COVERED,
-                        TileValue.UNKNOWN
+                        event.index, TileState.COVERED, TileValue.UNKNOWN
                     )
 
                     is GameEvent.GameWon -> gameWon()
                     is GameEvent.GameLost -> gameLost()
                     is GameEvent.GameCreated -> {
-                        gameController.startTimer()
+                        timer.start()
                         _uiState.update { state ->
                             state.copy(
                                 newGame = false
@@ -89,7 +86,7 @@ class GameViewModel @Inject constructor(
      */
     private val gameWon: () -> Unit = {
         gameController.clearEverything()
-        gameController.stopTimer()
+        timer.stop()
         _uiState.update { state ->
             state.copy(
                 gameOver = true,
@@ -105,7 +102,7 @@ class GameViewModel @Inject constructor(
      */
     private val gameLost: () -> Unit = {
         gameController.clearEverything()
-        gameController.stopTimer()
+        timer.stop()
         _uiState.update { state ->
             state.copy(
                 gameOver = true,
@@ -179,7 +176,7 @@ class GameViewModel @Inject constructor(
      * Pauses the timer.
      */
     fun pauseTimer() {
-        gameController.pauseTimer()
+        timer.pause()
     }
 
     /**
@@ -187,11 +184,11 @@ class GameViewModel @Inject constructor(
      */
     fun resumeTimer() {
         if (uiState.value.gameOver) return
-        gameController.resumeTimer()
+        timer.resume()
     }
 
     fun getCurrentTime(): Long {
-        return gameController.timerValue
+        return timer.time
     }
 
     /* PRIVATE FUNCTIONS */

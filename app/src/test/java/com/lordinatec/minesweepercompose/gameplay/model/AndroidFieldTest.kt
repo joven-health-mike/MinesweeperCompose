@@ -7,7 +7,6 @@ package com.lordinatec.minesweepercompose.gameplay.model
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
-import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.Position
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -26,7 +25,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class AndroidFieldTest {
     @MockK
-    private lateinit var configuration: Field.Configuration
+    private lateinit var configuration: AndroidConfiguration
 
     private val inOrderPositionPool =
         object : Position.Pool, CoordinateTranslator by XYIndexTranslator() {

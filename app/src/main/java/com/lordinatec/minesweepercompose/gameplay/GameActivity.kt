@@ -23,6 +23,7 @@ import androidx.lifecycle.lifecycleScope
 import com.lordinatec.minesweepercompose.R
 import com.lordinatec.minesweepercompose.android.sharedPreferences
 import com.lordinatec.minesweepercompose.config.Config
+import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.gameplay.views.GameView
@@ -42,18 +43,21 @@ class GameActivity : ComponentActivity() {
     @Inject
     lateinit var statsEventConsumer: StatsEventConsumer
 
+    @Inject
+    lateinit var xyIndexTranslator: XYIndexTranslator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val isPortraitMode =
             resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-        loadConfigFromPrefs()
-        if (Config.feature_adjust_field_to_screen_size) {
-            determineFieldSize(isPortraitMode)
-        }
         setContent {
             val viewModel: GameViewModel = hiltViewModel()
             lifecycle.addObserver(TimerLifecycleObserver(viewModel))
+            loadConfigFromPrefs()
+            if (Config.feature_adjust_field_to_screen_size) {
+                determineFieldSize(viewModel, isPortraitMode)
+            }
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     LaunchedEffect(Unit) {
@@ -81,7 +85,7 @@ class GameActivity : ComponentActivity() {
         Config.feature_end_game_on_last_flag = endGameOnLastFlag.toBoolean()
     }
 
-    private fun determineFieldSize(isPortraitMode: Boolean) {
+    private fun determineFieldSize(viewModel: GameViewModel, isPortraitMode: Boolean) {
         val screenWidth = resources.displayMetrics.widthPixels
         val screenHeight = resources.displayMetrics.heightPixels
         val tileSize = resources.getDimension(R.dimen.tile_view_size)
@@ -92,6 +96,8 @@ class GameActivity : ComponentActivity() {
         Config.width = if (isPortraitMode) desiredFieldWidth else desiredFieldHeight
         Config.height = if (isPortraitMode) desiredFieldHeight else desiredFieldWidth
         Config.mines = desiredFieldWidth * desiredFieldHeight / 6
+        xyIndexTranslator.updateSize(Config.width, Config.height)
+        viewModel.updateSize()
     }
 
     companion object {

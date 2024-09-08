@@ -6,13 +6,14 @@ package com.lordinatec.minesweepercompose.gameplay.model
 
 import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.Position
+import javax.inject.Inject
 
 /**
  * Android implementation of the Field interface.
  *
  * @param configuration the configuration of the field
  */
-class AndroidField(private val configuration: Field.Configuration) : Field {
+class AndroidField @Inject constructor(private val configuration: AndroidConfiguration) : Field {
     private val mines = mutableSetOf<Position>()
     private val flags = mutableSetOf<Position>()
 
@@ -21,6 +22,7 @@ class AndroidField(private val configuration: Field.Configuration) : Field {
      */
     fun createMines() {
         mines.clear()
+        flags.clear()
 
         for (position in configuration.positionPool()) {
             mines.add(position)
@@ -40,6 +42,7 @@ class AndroidField(private val configuration: Field.Configuration) : Field {
      */
     fun createMines(initX: Int, initY: Int) {
         mines.clear()
+        flags.clear()
 
         for (position in configuration.positionPool()) {
             if (position.x() != initX || position.y() != initY) {

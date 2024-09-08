@@ -5,13 +5,14 @@
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
+import javax.inject.Inject
 
 /**
  * Handles click events on the tile views.
  *
  * @param gameViewModel the view model for the game
  */
-class TileViewClickListener(
+class TileViewClickListener @Inject constructor(
     private val gameViewModel: GameViewModel
 ) {
     /**

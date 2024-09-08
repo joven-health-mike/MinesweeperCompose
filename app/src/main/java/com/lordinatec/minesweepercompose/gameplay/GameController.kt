@@ -9,9 +9,10 @@ import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
-import com.mikeburke106.mines.api.model.Field
-import com.mikeburke106.mines.api.model.Position
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidPositionPool
+import javax.inject.Inject
 
 /**
  * GameController - wraps functionality of the game model from the mines-java engine
@@ -23,14 +24,16 @@ import com.mikeburke106.mines.api.model.Position
  *
  * @constructor Create empty Game controller
  */
-class GameController(
+class GameController @Inject constructor(
     private val gameFactory: GameFactory,
-    private val eventPublisher: GameEventPublisher
-) : CoordinateTranslator by XYIndexTranslator() {
+    private val eventPublisher: GameEventPublisher,
+    private val gameField: AndroidField,
+    private val positionPool: AndroidPositionPool,
+    private val xyIndexTranslator: XYIndexTranslator
+) {
+
     private var gameCreated: Boolean = false
     private var gameModel: AndroidGameControlStrategy? = null
-    private var gameField: Field? = null
-    private var positionPool: Position.Pool? = null
 
     /**
      * Create a game. Mine will never occur at the given index.
@@ -40,11 +43,8 @@ class GameController(
     fun maybeCreateGame(index: Int) {
         if (!gameCreated) {
             gameCreated = true
-            val (x, y) = indexToXY(index)
-            val gameInfoHolder = gameFactory.createGame(x, y, eventPublisher)
-            gameModel = gameInfoHolder.getGameController()
-            gameField = gameInfoHolder.getField()
-            positionPool = gameInfoHolder.getPositionPool()
+            val (x, y) = xyIndexTranslator.indexToXY(index)
+            gameModel = gameFactory.createGame(x, y)
             eventPublisher.publish(GameEvent.GameCreated)
         }
     }
@@ -56,7 +56,7 @@ class GameController(
         if (!gameCreated) return
 
         for (i in 0 until Config.width * Config.height) {
-            val (x, y) = indexToXY(i)
+            val (x, y) = xyIndexTranslator.indexToXY(i)
             gameModel?.clear(x, y)
         }
     }
@@ -69,7 +69,7 @@ class GameController(
     fun clearAdjacentTiles(index: Int) {
         if (!gameCreated) return
 
-        val (x, y) = indexToXY(index)
+        val (x, y) = xyIndexTranslator.indexToXY(index)
         gameModel?.clearAdjacentTiles(x, y)
     }
 
@@ -81,7 +81,7 @@ class GameController(
     fun countAdjacentFlags(index: Int): Int {
         if (!gameCreated) return -1
 
-        val (x, y) = indexToXY(index)
+        val (x, y) = xyIndexTranslator.indexToXY(index)
         return gameModel?.countAdjacentFlags(x, y) ?: 0
     }
 
@@ -102,7 +102,7 @@ class GameController(
     fun clear(index: Int) {
         if (!gameCreated) return
 
-        val (x, y) = indexToXY(index)
+        val (x, y) = xyIndexTranslator.indexToXY(index)
         gameModel?.clear(x, y)
     }
 
@@ -114,7 +114,7 @@ class GameController(
     fun toggleFlag(index: Int) {
         if (!gameCreated) return
 
-        val (x, y) = indexToXY(index)
+        val (x, y) = xyIndexTranslator.indexToXY(index)
         gameModel?.toggleFlag(x, y)
     }
 
@@ -126,28 +126,8 @@ class GameController(
     fun flagIsCorrect(index: Int): Boolean {
         if (!gameCreated) return false
 
-        val (x, y) = indexToXY(index)
-        val position = positionPool?.atLocation(x, y)
-        return gameField?.isMine(position) ?: false
-    }
-
-    /**
-     * Factory for creating GameController
-     *
-     * @param gameFactory - Create games
-     *
-     * @constructor Create a game controller factory
-     */
-    class Factory(
-        private val gameFactory: GameFactory,
-    ) {
-        /**
-         * Create a GameController
-         *
-         * @param eventPublisher - Listener for game events
-         */
-        fun createGameController(eventPublisher: GameEventPublisher): GameController {
-            return GameController(gameFactory, eventPublisher)
-        }
+        val (x, y) = xyIndexTranslator.indexToXY(index)
+        val position = positionPool.atLocation(x, y)
+        return gameField.isMine(position)
     }
 }

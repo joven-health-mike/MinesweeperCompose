@@ -31,17 +31,21 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.lordinatec.minesweepercompose.gameplay.GameActivity
+import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.settings.SettingsActivity
 import com.lordinatec.minesweepercompose.stats.StatsActivity
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.lordinatec.minesweepercompose.views.AppIcon
 import com.lordinatec.minesweepercompose.views.TopBar
 import com.lordinatec.minesweepercompose.views.topBarPadding
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * The main activity for the Minesweeper game.
  */
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,12 +111,16 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun MenuButtons() {
+        val viewModel: GameViewModel = hiltViewModel()
         val buttonWidth = dimensionResource(id = R.dimen.main_activity_button_width)
         Column(
             modifier = Modifier.width(buttonWidth)
         ) {
             Button(modifier = Modifier.fillMaxWidth(),
-                onClick = { GameActivity.launch(applicationContext) }) {
+                onClick = {
+                    GameActivity.launch(applicationContext)
+                    viewModel.resetGame()
+                }) {
                 Text("New Game")
             }
             // TODO: make stats activity a NavHost destination instead of new activity

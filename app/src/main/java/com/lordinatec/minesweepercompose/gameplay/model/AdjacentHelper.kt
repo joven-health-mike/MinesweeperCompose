@@ -4,8 +4,8 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import com.mikeburke106.mines.api.model.Field
 import com.mikeburke106.mines.api.model.Position
+import javax.inject.Inject
 
 interface AdjacentHelper {
     fun countAdjacentMines(position: Position): Int
@@ -13,7 +13,10 @@ interface AdjacentHelper {
     fun getAdjacentTiles(origX: Int, origY: Int): List<Position>
 }
 
-class AdjacentHelperImpl(private val field: Field, private val positionPool: Position.Pool) :
+class AdjacentHelperImpl @Inject constructor(
+    private val field: AndroidField,
+    private val positionPool: AndroidPositionPool
+) :
     AdjacentHelper {
     override fun countAdjacentMines(position: Position): Int {
         var count = 0

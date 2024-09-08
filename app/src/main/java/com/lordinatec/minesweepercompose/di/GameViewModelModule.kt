@@ -6,10 +6,13 @@ package com.lordinatec.minesweepercompose.di
 
 import android.app.Application
 import android.content.Context
+import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.GameFactory
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidPositionPool
 import com.lordinatec.minesweepercompose.gameplay.timer.CoroutineTimer
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
@@ -40,10 +43,6 @@ class GameViewModelModule {
 
     @Provides
     @Singleton
-    fun provideGameFactory(): GameFactory = GameFactory()
-
-    @Provides
-    @Singleton
     fun provideIOCoroutineScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Provides
@@ -57,8 +56,8 @@ class GameViewModelModule {
     @Singleton
     fun provideGameEventPublisher(
         scope: CoroutineScope,
-        timer: Timer
-    ): GameEventPublisher = GameEventPublisher(scope, timer)
+        xyIndexTranslator: XYIndexTranslator
+    ): GameEventPublisher = GameEventPublisher(scope, xyIndexTranslator)
 
     @Provides
     @Singleton
@@ -82,9 +81,11 @@ class GameViewModelModule {
     fun provideGameController(
         gameFactory: GameFactory,
         eventPublisher: GameEventPublisher,
+        gameField: AndroidField,
+        positionPool: AndroidPositionPool,
+        xyIndexTranslator: XYIndexTranslator
     ): GameController =
-        GameController.Factory(gameFactory)
-            .createGameController(eventPublisher)
+        GameController(gameFactory, eventPublisher, gameField, positionPool, xyIndexTranslator)
 
     @Provides
     @Singleton
@@ -99,7 +100,7 @@ class GameViewModelModule {
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class InterfaceModule {
+abstract class GameViewModelInterfaceModule {
     @Binds
     abstract fun provideEventPublisher(
         gameEventPublisher: GameEventPublisher

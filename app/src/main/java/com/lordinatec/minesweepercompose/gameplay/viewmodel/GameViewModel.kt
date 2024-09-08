@@ -6,6 +6,7 @@ package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
@@ -36,7 +37,6 @@ class GameViewModel @Inject constructor(
 
     init {
         timer.onTickListener =
-
             Timer.OnTickListener { newTime -> gameEvents.publish(GameEvent.TimeUpdate(newTime)) }
 
         viewModelScope.launch {
@@ -70,7 +70,9 @@ class GameViewModel @Inject constructor(
                         timer.start()
                         _uiState.update { state ->
                             state.copy(
-                                newGame = false
+                                newGame = false,
+                                tileStates = List(Config.width * Config.height) { TileState.COVERED },
+                                tileValues = List(Config.width * Config.height) { TileValue.UNKNOWN }
                             )
                         }
                     }
@@ -118,6 +120,17 @@ class GameViewModel @Inject constructor(
     fun resetGame() {
         _uiState.update { GameState() }
         gameController.resetGame()
+    }
+
+    fun updateSize() {
+        if (uiState.value.tileStates.size != Config.width * Config.height) {
+            _uiState.update { state ->
+                state.copy(
+                    tileStates = List(Config.width * Config.height) { TileState.COVERED },
+                    tileValues = List(Config.width * Config.height) { TileValue.UNKNOWN }
+                )
+            }
+        }
     }
 
     /**
@@ -185,10 +198,6 @@ class GameViewModel @Inject constructor(
     fun resumeTimer() {
         if (uiState.value.gameOver) return
         timer.resume()
-    }
-
-    fun getCurrentTime(): Long {
-        return timer.time
     }
 
     /* PRIVATE FUNCTIONS */

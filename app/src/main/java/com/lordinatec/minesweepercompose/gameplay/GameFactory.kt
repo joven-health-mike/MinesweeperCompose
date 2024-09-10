@@ -13,13 +13,20 @@ import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrate
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidPositionPool
 import com.lordinatec.minesweepercompose.gameplay.model.RandomPositionPool
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
-import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import javax.inject.Inject
 
 /**
  * GameFactory creates a game
  *
- * @constructor Create a game factory
+ * @property orderedPositionPool - Pool of positions
+ * @property randomPositionPool - Pool of random positions
+ * @property field - Field
+ * @property configuration - Configuration
+ * @property eventPublisher - Event publisher
+ * @property timer - Timer
+ * @property adjacentHelper - Adjacent helper
+ *
+ * @constructor Create a game factory that can create games
  */
 class GameFactory @Inject constructor(
     private val orderedPositionPool: AndroidPositionPool,
@@ -35,17 +42,14 @@ class GameFactory @Inject constructor(
      *
      * @param x the x coordinate of the tile that will not be a mine
      * @param y the y coordinate of the tile that will not be a mine
-     * @param eventPublisher the event publisher
      *
-     * @return the game info holder
+     * @return AndroidGameControlStrategy
      */
     fun createGame(x: Int, y: Int): AndroidGameControlStrategy {
         orderedPositionPool.setDimensions(Config.width, Config.height)
         randomPositionPool.reset()
         configuration.numMines = Config.mines
         field.createMines(x, y)
-        timer.stop()
-        timer.start()
         return AndroidGameControlStrategy(
             field,
             orderedPositionPool,

@@ -6,11 +6,9 @@ package com.lordinatec.minesweepercompose.gameplay.events
 
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -34,13 +32,11 @@ class GameEventPublisher @Inject constructor(
      */
     override fun publish(event: Event) {
         publisherScope.launch {
-            withContext(Dispatchers.IO) {
-                val gameEvent = event as GameEvent
-                if (gameEvent is GameEvent.GameCreated) {
-                    gameOver = false
-                }
-                publishEvent(gameEvent)
+            val gameEvent = event as GameEvent
+            if (gameEvent is GameEvent.GameCreated) {
+                gameOver = false
             }
+            publishEvent(gameEvent)
         }
     }
 

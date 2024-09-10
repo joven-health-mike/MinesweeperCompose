@@ -5,7 +5,6 @@
 package com.lordinatec.minesweepercompose.gameplay
 
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
@@ -15,12 +14,13 @@ import com.lordinatec.minesweepercompose.gameplay.model.AndroidPositionPool
 import javax.inject.Inject
 
 /**
- * GameController - wraps functionality of the game model from the mines-java engine
+ * GameController - handles all interactions between the view model and the model
  *
- * @param gameFactory - Create games
- * @param eventPublisher - Listener for game events
- *
- * @property gameCreated - flag to indicate if a game has been created
+ * @param gameFactory - factory to create a game
+ * @param eventPublisher - publisher to publish game events
+ * @param gameField - field to store game state
+ * @param positionPool - pool to store positions
+ * @param xyIndexTranslator - translator to convert between index and x,y coordinates
  *
  * @constructor Create empty Game controller
  */
@@ -40,13 +40,15 @@ class GameController @Inject constructor(
      *
      * @param index - index of the initial clicked tile
      */
-    fun maybeCreateGame(index: Int) {
+    fun maybeCreateGame(index: Int): Boolean {
         if (!gameCreated) {
             gameCreated = true
             val (x, y) = xyIndexTranslator.indexToXY(index)
             gameModel = gameFactory.createGame(x, y)
             eventPublisher.publish(GameEvent.GameCreated)
+            return true
         }
+        return false
     }
 
     /**
@@ -90,8 +92,8 @@ class GameController @Inject constructor(
      */
     fun resetGame() {
         if (!gameCreated) return
-
         gameCreated = false
+        gameModel?.resetGame()
     }
 
     /**

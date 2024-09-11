@@ -121,4 +121,13 @@ class GameEventPublisher @Inject constructor(
             gameOver = true
         }
     }
+
+    /**
+     * Converts a GameControlStrategy.Listener gameLost to a GameLost event.
+     *
+     * This function will only publish the event once.
+     */
+    fun resetField() {
+        publish(GameEvent.FieldReset)
+    }
 }

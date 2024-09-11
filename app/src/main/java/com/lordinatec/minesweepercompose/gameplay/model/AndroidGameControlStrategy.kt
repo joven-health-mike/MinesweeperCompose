@@ -106,6 +106,7 @@ class AndroidGameControlStrategy @Inject constructor(
         cleared.clear()
         flagged.clear()
         gameOver = false
+        eventListener.resetField()
     }
 
     /**

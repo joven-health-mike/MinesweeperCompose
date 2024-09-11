@@ -43,9 +43,9 @@ class GameController @Inject constructor(
     fun maybeCreateGame(index: Int): Boolean {
         if (!gameCreated) {
             gameCreated = true
+            eventPublisher.publish(GameEvent.GameCreated)
             val (x, y) = xyIndexTranslator.indexToXY(index)
             gameModel = gameFactory.createGame(x, y)
-            eventPublisher.publish(GameEvent.GameCreated)
             return true
         }
         return false

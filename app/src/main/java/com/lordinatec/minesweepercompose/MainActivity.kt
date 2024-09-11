@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.lordinatec.minesweepercompose.gameplay.GameActivity
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
+import com.lordinatec.minesweepercompose.logger.LogcatLogger
 import com.lordinatec.minesweepercompose.settings.SettingsActivity
 import com.lordinatec.minesweepercompose.stats.StatsActivity
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
@@ -41,12 +42,16 @@ import com.lordinatec.minesweepercompose.views.AppIcon
 import com.lordinatec.minesweepercompose.views.TopBar
 import com.lordinatec.minesweepercompose.views.topBarPadding
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /**
  * The main activity for the Minesweeper game.
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var logcatLogger: LogcatLogger
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

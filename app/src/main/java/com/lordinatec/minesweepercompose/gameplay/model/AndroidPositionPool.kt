@@ -5,7 +5,6 @@
 package com.lordinatec.minesweepercompose.gameplay.model
 
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
-import com.mikeburke106.mines.api.model.Position
 import javax.inject.Inject
 
 /**
@@ -17,18 +16,24 @@ import javax.inject.Inject
 class AndroidPositionPool @Inject constructor(
     private val positionFactory: PositionFactory,
     private val xyIndexTranslator: XYIndexTranslator
-) :
-    Position.Pool {
+) : Collection<AndroidPosition> {
 
     private val positions = mutableListOf<AndroidPosition>()
+    override val size: Int
+        get() = positions.size
 
+    override fun isEmpty() = positions.isEmpty()
+    override fun containsAll(elements: Collection<AndroidPosition>) =
+        positions.containsAll(elements)
+
+    override fun contains(element: AndroidPosition) = positions.contains(element)
     override fun iterator(): MutableIterator<AndroidPosition> = positions.iterator()
-    override fun atLocation(x: Int, y: Int): AndroidPosition =
+
+    fun atLocation(x: Int, y: Int): AndroidPosition =
         positions[xyIndexTranslator.xyToIndex(x, y)]
 
-    override fun size(): Int = positions.size
-    override fun width(): Int = xyIndexTranslator.indexToXY(positions.size - 1).first + 1
-    override fun height(): Int = xyIndexTranslator.indexToXY(positions.size - 1).second + 1
+    fun width(): Int = xyIndexTranslator.indexToXY(positions.size - 1).first + 1
+    fun height(): Int = xyIndexTranslator.indexToXY(positions.size - 1).second + 1
 
     /**
      * Set the dimensions of the pool to the given width and height.

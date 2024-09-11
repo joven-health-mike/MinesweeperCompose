@@ -9,7 +9,6 @@ import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
-import com.mikeburke106.mines.api.model.Position
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every
@@ -86,13 +85,13 @@ class AndroidGameControlStrategyTest : CoordinateTranslator by XYIndexTranslator
     @Test
     fun testClearSuccessGameWon() = runTest {
         every { timer.time } answers { 100L }
-        val minePositionSlot = slot<Position>()
+        val minePositionSlot = slot<AndroidPosition>()
         every { field.isMine(capture(minePositionSlot)) } answers {
             val index = xyToIndex(minePositionSlot.captured.x(), minePositionSlot.captured.y())
             index < Config.mines
         }
         every { field.isFlag(any()) } answers { false }
-        val clearPositionSlot = slot<Position>()
+        val clearPositionSlot = slot<AndroidPosition>()
         every { field.clear(capture(clearPositionSlot)) } answers {
             val index = xyToIndex(clearPositionSlot.captured.x(), clearPositionSlot.captured.y())
             index < Config.mines

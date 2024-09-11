@@ -4,13 +4,12 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import com.mikeburke106.mines.api.model.Position
 import javax.inject.Inject
 
 interface AdjacentHelper {
-    fun countAdjacentMines(position: Position): Int
+    fun countAdjacentMines(position: AndroidPosition): Int
     fun countAdjacentFlags(origX: Int, origY: Int): Int
-    fun getAdjacentTiles(origX: Int, origY: Int): List<Position>
+    fun getAdjacentTiles(origX: Int, origY: Int): List<AndroidPosition>
 }
 
 class AdjacentHelperImpl @Inject constructor(
@@ -18,11 +17,11 @@ class AdjacentHelperImpl @Inject constructor(
     private val positionPool: AndroidPositionPool
 ) :
     AdjacentHelper {
-    override fun countAdjacentMines(position: Position): Int {
+    override fun countAdjacentMines(position: AndroidPosition): Int {
         var count = 0
         for (adjacent in AdjacentTile.entries) {
-            val x = position.x() + adjacent.transX
-            val y = position.y() + adjacent.transY
+            val x = position.x + adjacent.transX
+            val y = position.y + adjacent.transY
             if (x >= 0 && x < positionPool.width() && y >= 0 && y < positionPool.height()) {
                 val newPosition = positionPool.atLocation(x, y)
                 if (field.isMine(newPosition)) {
@@ -50,8 +49,8 @@ class AdjacentHelperImpl @Inject constructor(
         return result
     }
 
-    override fun getAdjacentTiles(origX: Int, origY: Int): List<Position> {
-        val result = mutableListOf<Position>()
+    override fun getAdjacentTiles(origX: Int, origY: Int): List<AndroidPosition> {
+        val result = mutableListOf<AndroidPosition>()
         for (adjacentTile in AdjacentTile.entries) {
             val x = origX + adjacentTile.transX
             val y = origY + adjacentTile.transY

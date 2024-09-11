@@ -4,7 +4,6 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import com.mikeburke106.mines.api.model.Position
 import javax.inject.Inject
 
 /**
@@ -16,20 +15,29 @@ import javax.inject.Inject
  * @param positionPool the pool of positions to shuffle
  */
 class RandomPositionPool @Inject constructor(private val positionPool: AndroidPositionPool) :
-    Position.Pool by positionPool {
-    private var positions: MutableList<Position>? = null
+    Collection<AndroidPosition> {
+    private var positions: MutableList<AndroidPosition>? = null
 
     /**
      * Resets the pool to its initial state (reshuffles the positions).
      */
     fun reset() {
-        positions = mutableListOf<Position>().apply {
+        positions = mutableListOf<AndroidPosition>().apply {
             addAll(positionPool)
             shuffle()
         }
     }
 
-    override fun iterator(): MutableIterator<Position> {
-        return positions?.iterator() ?: emptyList<Position>().toMutableList().iterator()
-    }
+    override val size: Int
+        get() = positionPool.size
+
+    override fun isEmpty(): Boolean = positions?.isEmpty() ?: true
+
+    override fun containsAll(elements: Collection<AndroidPosition>): Boolean =
+        positions?.containsAll(elements) ?: false
+
+    override fun contains(element: AndroidPosition): Boolean = positions?.contains(element) ?: false
+
+    override fun iterator(): MutableIterator<AndroidPosition> =
+        positions?.iterator() ?: emptyList<AndroidPosition>().toMutableList().iterator()
 }

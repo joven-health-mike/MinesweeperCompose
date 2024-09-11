@@ -4,8 +4,6 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import com.mikeburke106.mines.api.model.Field
-import com.mikeburke106.mines.api.model.Position
 import javax.inject.Inject
 
 /**
@@ -13,10 +11,10 @@ import javax.inject.Inject
  *
  * @param configuration the configuration of the field
  */
-class AndroidField @Inject constructor(private val configuration: AndroidConfiguration) : Field {
-    private val _mines = mutableSetOf<Position>()
+class AndroidField @Inject constructor(private val configuration: AndroidConfiguration) {
+    private val _mines = mutableSetOf<AndroidPosition>()
     val mines = _mines.toSet()
-    private val _flags = mutableSetOf<Position>()
+    private val _flags = mutableSetOf<AndroidPosition>()
     val flags = _flags.toSet()
 
     /**
@@ -47,7 +45,7 @@ class AndroidField @Inject constructor(private val configuration: AndroidConfigu
         _flags.clear()
 
         for (position in configuration.positionPool()) {
-            if (position.x() != initX || position.y() != initY) {
+            if (position.x != initX || position.y != initY) {
                 _mines.add(position)
             }
             if (_mines.size == configuration.numMines()) {
@@ -74,15 +72,15 @@ class AndroidField @Inject constructor(private val configuration: AndroidConfigu
         return _flags.size
     }
 
-    override fun configuration(): Field.Configuration {
+    fun configuration(): AndroidConfiguration {
         return configuration
     }
 
-    override fun clear(position: Position?): Boolean {
+    fun clear(position: AndroidPosition?): Boolean {
         return _mines.contains(position)
     }
 
-    override fun flag(position: Position?): Boolean {
+    fun flag(position: AndroidPosition?): Boolean {
         val result = isFlag(position)
 
         if (result) {
@@ -94,11 +92,11 @@ class AndroidField @Inject constructor(private val configuration: AndroidConfigu
         return result
     }
 
-    override fun isFlag(position: Position?): Boolean {
+    fun isFlag(position: AndroidPosition?): Boolean {
         return _flags.contains(position)
     }
 
-    override fun isMine(position: Position?): Boolean {
+    fun isMine(position: AndroidPosition?): Boolean {
         return _mines.contains(position)
     }
 }

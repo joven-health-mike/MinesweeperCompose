@@ -7,7 +7,6 @@ package com.lordinatec.minesweepercompose.gameplay.model
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
-import com.mikeburke106.mines.api.model.Position
 import javax.inject.Inject
 
 /**
@@ -31,8 +30,8 @@ class AndroidGameControlStrategy @Inject constructor(
     private val adjacentHelper: AdjacentHelper
 ) {
     private var gameOver = false
-    private var cleared = mutableSetOf<Position>()
-    private var flagged = mutableSetOf<Position>()
+    private var cleared = mutableSetOf<AndroidPosition>()
+    private var flagged = mutableSetOf<AndroidPosition>()
 
     /**
      * Clear a tile at the given x,y coordinates.
@@ -60,11 +59,11 @@ class AndroidGameControlStrategy @Inject constructor(
      * @param origY - the y coordinate of the tile to clear adjacent tiles
      */
     fun clearAdjacentTiles(origX: Int, origY: Int) {
-        for (adjacentPosition in adjacentHelper.getAdjacentTiles(origX, origY)) {
-            val x = adjacentPosition.x()
-            val y = adjacentPosition.y()
-            val translatedPosition = positionPool.atLocation(x, y)
-            if (!cleared.contains(translatedPosition)) {
+        for (adjacentAndroidPosition in adjacentHelper.getAdjacentTiles(origX, origY)) {
+            val x = adjacentAndroidPosition.x
+            val y = adjacentAndroidPosition.y
+            val translatedAndroidPosition = positionPool.atLocation(x, y)
+            if (!cleared.contains(translatedAndroidPosition)) {
                 clear(x, y)
             }
         }
@@ -114,14 +113,14 @@ class AndroidGameControlStrategy @Inject constructor(
      *
      * @param position - the position of the cleared tile
      */
-    private fun handleClearSuccess(position: Position) {
+    private fun handleClearSuccess(position: AndroidPosition) {
         val adjacentMines = adjacentHelper.countAdjacentMines(position)
         cleared.add(position)
-        eventListener.positionCleared(position.x(), position.y(), adjacentMines)
+        eventListener.positionCleared(position.x, position.y, adjacentMines)
         if (adjacentMines == 0) {
-            clearAdjacentTiles(position.x(), position.y())
+            clearAdjacentTiles(position.x, position.y)
         }
-        if (cleared.size == positionPool.size() - numMines) {
+        if (cleared.size == positionPool.size - numMines) {
             gameOver = true
             eventListener.gameWon(timer.time)
         }
@@ -132,9 +131,9 @@ class AndroidGameControlStrategy @Inject constructor(
      *
      * @param position - the position of the exploded mine
      */
-    private fun handleClearExploded(position: Position) {
+    private fun handleClearExploded(position: AndroidPosition) {
         gameOver = true
-        eventListener.positionExploded(position.x(), position.y())
+        eventListener.positionExploded(position.x, position.y)
         eventListener.gameLost()
     }
 
@@ -145,8 +144,8 @@ class AndroidGameControlStrategy @Inject constructor(
         if (Config.feature_end_game_on_last_flag && flagged.size == numMines) {
             gameOver = true
             var gameWon = true
-            for (flaggedPosition in flagged) {
-                if (!field.isMine(flaggedPosition)) {
+            for (flaggedAndroidPosition in flagged) {
+                if (!field.isMine(flaggedAndroidPosition)) {
                     gameWon = false
                 }
             }
@@ -163,8 +162,8 @@ class AndroidGameControlStrategy @Inject constructor(
      *
      * @param position - the position to flag
      */
-    private fun flag(position: Position) {
-        eventListener.positionFlagged(position.x(), position.y())
+    private fun flag(position: AndroidPosition) {
+        eventListener.positionFlagged(position.x, position.y)
         flagged.add(position)
     }
 
@@ -173,8 +172,8 @@ class AndroidGameControlStrategy @Inject constructor(
      *
      * @param position - the position to unflag
      */
-    private fun unflag(position: Position) {
-        eventListener.positionUnflagged(position.x(), position.y())
+    private fun unflag(position: AndroidPosition) {
+        eventListener.positionUnflagged(position.x, position.y)
         flagged.remove(position)
     }
 }

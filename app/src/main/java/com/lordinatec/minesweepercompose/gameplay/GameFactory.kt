@@ -5,84 +5,58 @@
 package com.lordinatec.minesweepercompose.gameplay
 
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidFieldFactory
+import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
+import com.lordinatec.minesweepercompose.gameplay.model.AdjacentHelper
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidConfiguration
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidPositionPool
 import com.lordinatec.minesweepercompose.gameplay.model.RandomPositionPool
-import com.mikeburke106.mines.api.model.Field
-import com.mikeburke106.mines.api.model.GameControlStrategy.Listener
-import com.mikeburke106.mines.api.model.Position
-import com.mikeburke106.mines.basic.model.BasicConfiguration
-import com.mikeburke106.mines.basic.model.BasicGame
-import com.mikeburke106.mines.basic.model.BasicPosition
-import com.mikeburke106.mines.basic.model.BasicPositionPool
-import com.mikeburke106.mines.basic.model.RegularIntervalTimingStrategy
-
-private val fieldFactory = AndroidFieldFactory()
-
-/**
- * GameInfoHolder holds objects to return from the factory
- */
-interface GameInfoHolder {
-    /**
-     * Get the game controller
-     *
-     * @return the game controller
-     */
-    fun getGameController(): AndroidGameControlStrategy
-
-    /**
-     * Get the field
-     *
-     * @return the field
-     */
-    fun getField(): Field
-
-    /**
-     * Get the position pool
-     *
-     * @return the position pool
-     */
-    fun getPositionPool(): Position.Pool
-}
+import com.lordinatec.minesweepercompose.gameplay.timer.Timer
+import javax.inject.Inject
 
 /**
  * GameFactory creates a game
  *
- * @constructor Create a game factory
+ * @property orderedPositionPool - Pool of positions
+ * @property randomPositionPool - Pool of random positions
+ * @property field - Field
+ * @property configuration - Configuration
+ * @property eventPublisher - Event publisher
+ * @property timer - Timer
+ * @property adjacentHelper - Adjacent helper
+ *
+ * @constructor Create a game factory that can create games
  */
-class GameFactory {
+class GameFactory @Inject constructor(
+    private val orderedPositionPool: AndroidPositionPool,
+    private val randomPositionPool: RandomPositionPool,
+    private val field: AndroidField,
+    private val configuration: AndroidConfiguration,
+    private val eventPublisher: GameEventPublisher,
+    private val timer: Timer,
+    private val adjacentHelper: AdjacentHelper
+) {
     /**
      * Create a game. The tile at (x,y) will NOT be a mine.
      *
      * @param x the x coordinate of the tile that will not be a mine
      * @param y the y coordinate of the tile that will not be a mine
-     * @param listener the listener for the game controller
      *
-     * @return the game info holder
+     * @return AndroidGameControlStrategy
      */
-    fun createGame(x: Int, y: Int, listener: Listener): GameInfoHolder {
-        val positionPool = BasicPositionPool(BasicPosition.Factory(), Config.width, Config.height)
-        val randomPool = RandomPositionPool(positionPool)
-        val config: Field.Configuration = BasicConfiguration(randomPool, Config.mines)
-        val field = fieldFactory.newInstance(config, x, y)
-        val game = BasicGame(System.currentTimeMillis(), field, RegularIntervalTimingStrategy(1L))
-        return object : GameInfoHolder {
-            override fun getGameController(): AndroidGameControlStrategy {
-                return AndroidGameControlStrategy(
-                    game,
-                    positionPool,
-                    config.numMines(),
-                    null
-                ).also { it.setListener(listener) }
-            }
-
-            override fun getField(): Field {
-                return field
-            }
-
-            override fun getPositionPool(): Position.Pool {
-                return positionPool
-            }
-        }
+    fun createGame(x: Int, y: Int): AndroidGameControlStrategy {
+        orderedPositionPool.setDimensions(Config.width, Config.height)
+        randomPositionPool.reset()
+        configuration.numMines = Config.mines
+        field.createMines(x, y)
+        return AndroidGameControlStrategy(
+            field,
+            orderedPositionPool,
+            configuration.numMines(),
+            timer,
+            eventPublisher,
+            adjacentHelper
+        )
     }
 }

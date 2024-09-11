@@ -5,10 +5,10 @@
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.GameController
-import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import com.lordinatec.minesweepercompose.gameplay.views.TileValue
@@ -23,31 +23,34 @@ import javax.inject.Inject
 /**
  * ViewModel for the Game screen.
  *
+ * @param gameController The controller for the game.
+ * @param gameEvents The event publisher for the game.
+ * @param timer The timer for the game.
+ *
  * @return A ViewModel for the Game screen.
  */
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val gameController: GameController,
-    private val gameEvents: EventPublisher,
+    private val gameEvents: GameEventPublisher,
     private val timer: Timer
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
     init {
-        timer.onTickListener =
+        timer.onTickListener = Timer.OnTickListener { newTime ->
+            _uiState.update { state ->
+                state.copy(
+                    timeValue = newTime
+                )
+            }
+        }
 
-            Timer.OnTickListener { newTime -> gameEvents.publish(GameEvent.TimeUpdate(newTime)) }
-
-        viewModelScope.launch {
+        // listen for game events
+        gameEvents.publisherScope.launch {
             gameEvents.events.collect { event ->
                 when (event) {
-                    is GameEvent.TimeUpdate -> _uiState.update { state ->
-                        state.copy(
-                            timeValue = event.newTime
-                        )
-                    }
-
                     is GameEvent.PositionCleared -> updatePosition(
                         event.index, TileState.CLEARED, TileValue.fromValue(event.adjacentMines)
                     )
@@ -70,44 +73,14 @@ class GameViewModel @Inject constructor(
                         timer.start()
                         _uiState.update { state ->
                             state.copy(
-                                newGame = false
+                                newGame = false,
+                                tileStates = List(Config.width * Config.height) { TileState.COVERED },
+                                tileValues = List(Config.width * Config.height) { TileValue.UNKNOWN }
                             )
                         }
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Update the game state when the game is won.
-     *
-     * This will clear the entire field and stop the timer.
-     */
-    private val gameWon: () -> Unit = {
-        gameController.clearEverything()
-        timer.stop()
-        _uiState.update { state ->
-            state.copy(
-                gameOver = true,
-                winner = true,
-            )
-        }
-    }
-
-    /**
-     * Update the game state when the game is lost.
-     *
-     * This will clear the entire field and stop the timer.
-     */
-    private val gameLost: () -> Unit = {
-        gameController.clearEverything()
-        timer.stop()
-        _uiState.update { state ->
-            state.copy(
-                gameOver = true,
-                winner = false,
-            )
         }
     }
 
@@ -118,6 +91,20 @@ class GameViewModel @Inject constructor(
     fun resetGame() {
         _uiState.update { GameState() }
         gameController.resetGame()
+    }
+
+    /**
+     * Update the size of the game.
+     */
+    fun updateSize() {
+        if (uiState.value.tileStates.size != Config.width * Config.height) {
+            _uiState.update { state ->
+                state.copy(
+                    tileStates = List(Config.width * Config.height) { TileState.COVERED },
+                    tileValues = List(Config.width * Config.height) { TileValue.UNKNOWN }
+                )
+            }
+        }
     }
 
     /**
@@ -138,7 +125,11 @@ class GameViewModel @Inject constructor(
      */
     fun clear(index: Int) {
         // lazily create the game when the user makes their first move
-        gameController.maybeCreateGame(index)
+        val newGame = gameController.maybeCreateGame(index)
+        if (newGame) {
+            timer.stop()
+            timer.start()
+        }
         gameController.clear(index)
     }
 
@@ -187,10 +178,6 @@ class GameViewModel @Inject constructor(
         timer.resume()
     }
 
-    fun getCurrentTime(): Long {
-        return timer.time
-    }
-
     /* PRIVATE FUNCTIONS */
     /**
      * Updates the position at the given index.
@@ -211,6 +198,38 @@ class GameViewModel @Inject constructor(
                 tileStates = state.tileStates.toMutableList().apply { this[index] = tileState },
                 tileValues = state.tileValues.toMutableList().apply { this[index] = tileValue },
                 minesRemaining = newMinesValue
+            )
+        }
+    }
+
+    /**
+     * Update the game state when the game is won.
+     *
+     * This will clear the entire field and stop the timer.
+     */
+    private val gameWon: () -> Unit = {
+        gameController.clearEverything()
+        timer.stop()
+        _uiState.update { state ->
+            state.copy(
+                gameOver = true,
+                winner = true,
+            )
+        }
+    }
+
+    /**
+     * Update the game state when the game is lost.
+     *
+     * This will clear the entire field and stop the timer.
+     */
+    private val gameLost: () -> Unit = {
+        gameController.clearEverything()
+        timer.stop()
+        _uiState.update { state ->
+            state.copy(
+                gameOver = true,
+                winner = false,
             )
         }
     }

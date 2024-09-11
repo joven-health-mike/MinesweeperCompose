@@ -21,6 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+/**
+ * A top app bar with a title.
+ *
+ * @param text The title of the top app bar.
+ *
+ * @return A top app bar with the given title.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(text: String) {
@@ -44,4 +51,3 @@ fun TopBar(text: String) {
  */
 fun Modifier.topBarPadding(statusBarBottom: Dp) =
     windowInsetsPadding(WindowInsets(top = statusBarBottom + 32.dp))
-

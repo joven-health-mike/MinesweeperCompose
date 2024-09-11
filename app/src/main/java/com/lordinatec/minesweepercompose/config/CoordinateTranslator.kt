@@ -4,8 +4,6 @@
 
 package com.lordinatec.minesweepercompose.config
 
-import com.lordinatec.minesweepercompose.config.Config.width
-
 /**
  * Interface for translating between XY coordinates and a single index.
  */
@@ -28,12 +26,17 @@ interface CoordinateTranslator {
      * @return The XY coordinates as a Pair.
      */
     fun indexToXY(index: Int): Pair<Int, Int>
+
+    fun updateSize(width: Int, height: Int)
 }
 
 /**
  * A simple XY index translator.
  */
 class XYIndexTranslator : CoordinateTranslator {
+    var width = Config.width
+    var height = Config.height
+
     override fun xyToIndex(x: Int, y: Int): Int {
         return y * width + x
     }
@@ -42,5 +45,10 @@ class XYIndexTranslator : CoordinateTranslator {
         val xVal = index % width
         val yVal = index / width
         return Pair(xVal, yVal)
+    }
+
+    override fun updateSize(width: Int, height: Int) {
+        this.width = width
+        this.height = height
     }
 }

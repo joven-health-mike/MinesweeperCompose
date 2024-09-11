@@ -8,8 +8,8 @@ package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.Event
-import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import io.mockk.MockKAnnotations
@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.BeforeTest
@@ -40,18 +41,17 @@ class GameViewModelTest {
     private lateinit var timer: Timer
 
     @MockK
-    private lateinit var eventPublisher: EventPublisher
+    private lateinit var eventPublisher: GameEventPublisher
 
-    private lateinit var testFlow: MutableSharedFlow<Event>
+    private val testFlow = MutableSharedFlow<Event>()
 
     private lateinit var gameViewModel: GameViewModel
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
-        testFlow = MutableSharedFlow()
         MockKAnnotations.init(this)
-        every { gameController.maybeCreateGame(any()) } just Runs
+        every { gameController.maybeCreateGame(any()) } answers { true }
         every { gameController.clear(any()) } just Runs
         every { gameController.resetGame() } just Runs
         every { gameController.flagIsCorrect(any()) } answers { false }
@@ -63,6 +63,7 @@ class GameViewModelTest {
         every { timer.stop() } just Runs
         every { timer.onTickListener = any() } just Runs
         every { eventPublisher.events } answers { testFlow.asSharedFlow() }
+        every { eventPublisher.publisherScope } answers { TestScope() }
         gameViewModel = GameViewModel(gameController, eventPublisher, timer)
     }
 
@@ -106,15 +107,6 @@ class GameViewModelTest {
     fun testResetGame() = runTest {
         gameViewModel.resetGame()
         verify { gameController.resetGame() }
-    }
-
-    @Test
-    fun testTimeUpdate() = runTest {
-        val testTimeValue = 1000L
-        testFlow.emit(GameEvent.TimeUpdate(testTimeValue))
-        gameViewModel.uiState.first().let {
-            assertEquals(testTimeValue, it.timeValue)
-        }
     }
 
     @Test
@@ -171,9 +163,9 @@ class GameViewModelTest {
     @Test
     fun testGameLost() = runTest {
         testFlow.emit(GameEvent.GameLost)
-        gameViewModel.uiState.first().let {
-            assertTrue(it.gameOver)
-            assertFalse(it.winner)
+        gameViewModel.uiState.first().let { state ->
+            assertTrue(state.gameOver)
+            assertFalse(state.winner)
         }
     }
 

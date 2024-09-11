@@ -7,9 +7,8 @@ package com.lordinatec.minesweepercompose.gameplay.model
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
-import com.mikeburke106.mines.api.model.Field
-import com.mikeburke106.mines.api.model.Game
-import com.mikeburke106.mines.api.model.GameControlStrategy
+import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
+import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.mikeburke106.mines.api.model.Position
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
@@ -29,57 +28,16 @@ import kotlin.test.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class AndroidGameControlStrategyTest : CoordinateTranslator by XYIndexTranslator() {
     @MockK
-    private lateinit var game: Game
+    private lateinit var field: AndroidField
 
     @MockK
-    private lateinit var field: Field
+    private lateinit var timer: Timer
 
     @MockK
-    private lateinit var listener: GameControlStrategy.Listener
+    private lateinit var eventPublisher: GameEventPublisher
 
-    private val inOrderPositionPool =
-        object : Position.Pool, CoordinateTranslator by XYIndexTranslator() {
-            private val positions = mutableListOf<Position>()
-
-            init {
-                for (i in 0 until size()) {
-                    val (x, y) = indexToXY(i)
-                    positions.add(object : Position {
-                        override fun x(): Int {
-                            return x
-                        }
-
-                        override fun y(): Int {
-                            return y
-                        }
-
-                    })
-                }
-            }
-
-            override fun iterator(): MutableIterator<Position> {
-                return positions.iterator()
-            }
-
-            override fun atLocation(x: Int, y: Int): Position? {
-                xyToIndex(x, y).let { index ->
-                    return positions.getOrNull(index)
-                }
-            }
-
-            override fun size(): Int {
-                return Config.width * Config.height
-            }
-
-            override fun width(): Int {
-                return Config.width
-            }
-
-            override fun height(): Int {
-                return Config.height
-            }
-
-        }
+    private lateinit var adjacentHelper: AdjacentHelperImpl
+    private val inOrderPositionPool = AndroidPositionPool(PositionFactory(), XYIndexTranslator())
 
     private lateinit var androidGameControlStrategy: AndroidGameControlStrategy
 
@@ -87,15 +45,23 @@ class AndroidGameControlStrategyTest : CoordinateTranslator by XYIndexTranslator
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
-        every { game.field() } answers { field }
-        every { listener.positionExploded(any(), any()) } just Runs
-        every { listener.positionFlagged(any(), any()) } just Runs
-        every { listener.positionCleared(any(), any(), any()) } just Runs
-        every { listener.positionUnflagged(any(), any()) } just Runs
-        every { listener.gameWon() } just Runs
-        every { listener.gameLost() } just Runs
+        every { eventPublisher.positionCleared(any(), any(), any()) } just Runs
+        every { eventPublisher.positionFlagged(any(), any()) } just Runs
+        every { eventPublisher.positionUnflagged(any(), any()) } just Runs
+        every { eventPublisher.positionExploded(any(), any()) } just Runs
+        every { eventPublisher.gameWon(any()) } just Runs
+        every { eventPublisher.gameLost() } just Runs
+        inOrderPositionPool.setDimensions(Config.width, Config.height)
+        adjacentHelper = AdjacentHelperImpl(field, inOrderPositionPool)
         androidGameControlStrategy =
-            AndroidGameControlStrategy(game, inOrderPositionPool, Config.mines, listener)
+            AndroidGameControlStrategy(
+                field,
+                inOrderPositionPool,
+                Config.mines,
+                timer,
+                eventPublisher,
+                adjacentHelper
+            )
     }
 
     @Test
@@ -104,8 +70,8 @@ class AndroidGameControlStrategyTest : CoordinateTranslator by XYIndexTranslator
         every { field.isFlag(any()) } answers { false }
         every { field.clear(any()) } answers { true }
         androidGameControlStrategy.clear(0, 0)
-        verify { listener.positionExploded(0, 0) }
-        verify { listener.gameLost() }
+        verify { eventPublisher.positionExploded(0, 0) }
+        verify { eventPublisher.gameLost() }
     }
 
     @Test
@@ -114,11 +80,12 @@ class AndroidGameControlStrategyTest : CoordinateTranslator by XYIndexTranslator
         every { field.isFlag(any()) } answers { false }
         every { field.clear(any()) } answers { false }
         androidGameControlStrategy.clear(0, 0)
-        verify { listener.positionCleared(0, 0, any()) }
+        verify { eventPublisher.positionCleared(0, 0, any()) }
     }
 
     @Test
     fun testClearSuccessGameWon() = runTest {
+        every { timer.time } answers { 100L }
         val minePositionSlot = slot<Position>()
         every { field.isMine(capture(minePositionSlot)) } answers {
             val index = xyToIndex(minePositionSlot.captured.x(), minePositionSlot.captured.y())
@@ -133,8 +100,8 @@ class AndroidGameControlStrategyTest : CoordinateTranslator by XYIndexTranslator
         for (i in Config.mines..<inOrderPositionPool.size() - Config.mines) {
             val (x, y) = indexToXY(i)
             androidGameControlStrategy.clear(x, y)
-            verify { listener.positionCleared(x, y, any()) }
+            verify { eventPublisher.positionCleared(x, y, any()) }
         }
-        verify { listener.gameWon() }
+        verify { eventPublisher.gameWon(100L) }
     }
 }

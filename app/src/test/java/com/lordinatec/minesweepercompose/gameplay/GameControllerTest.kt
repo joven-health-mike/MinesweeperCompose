@@ -5,11 +5,12 @@
 package com.lordinatec.minesweepercompose.gameplay
 
 import com.lordinatec.minesweepercompose.config.Config
+import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
-import com.mikeburke106.mines.api.model.Field
-import com.mikeburke106.mines.api.model.Position
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidPositionPool
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every
@@ -32,30 +33,19 @@ class GameControllerTest {
     private lateinit var gameFactory: GameFactory
 
     @MockK
+    private lateinit var positionPool: AndroidPositionPool
+
+
+    @MockK
     private lateinit var eventPublisher: GameEventPublisher
 
     @MockK
     private lateinit var gameModel: AndroidGameControlStrategy
 
     @MockK
-    private lateinit var field: Field
+    private lateinit var field: AndroidField
 
-    @MockK
-    private lateinit var positionPool: Position.Pool
-
-    private val gameInfoHolder = object : GameInfoHolder {
-        override fun getGameController(): AndroidGameControlStrategy {
-            return gameModel
-        }
-
-        override fun getField(): Field {
-            return field
-        }
-
-        override fun getPositionPool(): Position.Pool {
-            return positionPool
-        }
-    }
+    private val xyIndexTranslator = XYIndexTranslator()
 
     private lateinit var gameController: GameController
 
@@ -63,10 +53,11 @@ class GameControllerTest {
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
-        every { gameFactory.createGame(any(), any(), any()) } answers { gameInfoHolder }
+        every { gameFactory.createGame(any(), any()) } answers { gameModel }
         every { gameModel.clear(any(), any()) } just Runs
         every { gameModel.toggleFlag(any(), any()) } just Runs
         every { gameModel.clearAdjacentTiles(any(), any()) } just Runs
+        every { gameModel.resetGame() } just Runs
         every { gameModel.countAdjacentFlags(any(), any()) } answers { 0 }
         every { positionPool.atLocation(any(), any()) } answers { mockk() }
         every { positionPool.width() } answers { Config.width }
@@ -74,13 +65,14 @@ class GameControllerTest {
         every { field.isMine(any()) } answers { false }
         every { field.isFlag(any()) } answers { false }
         every { eventPublisher.publish(any()) } just Runs
-        gameController = GameController(gameFactory, eventPublisher)
+        gameController =
+            GameController(gameFactory, eventPublisher, field, positionPool, xyIndexTranslator)
     }
 
     @Test
     fun testMaybeCreateGame() = runTest {
         gameController.maybeCreateGame(0)
-        verify(exactly = 1) { gameFactory.createGame(any(), any(), any()) }
+        verify(exactly = 1) { gameFactory.createGame(any(), any()) }
         verify(exactly = 1) { eventPublisher.publish(GameEvent.GameCreated) }
     }
 
@@ -88,7 +80,7 @@ class GameControllerTest {
     fun testMaybeCreateGameWhenGameStarted() = runTest {
         repeat(2) {
             gameController.maybeCreateGame(0)
-            verify(exactly = 1) { gameFactory.createGame(any(), any(), any()) }
+            verify(exactly = 1) { gameFactory.createGame(any(), any()) }
             verify(exactly = 1) { eventPublisher.publish(GameEvent.GameCreated) }
         }
     }
@@ -96,10 +88,10 @@ class GameControllerTest {
     @Test
     fun testMaybeCreateGameAfterReset() = runTest {
         gameController.maybeCreateGame(0)
-        verify(exactly = 1) { gameFactory.createGame(any(), any(), any()) }
+        verify(exactly = 1) { gameFactory.createGame(any(), any()) }
         gameController.resetGame()
         gameController.maybeCreateGame(1)
-        verify(exactly = 2) { gameFactory.createGame(any(), any(), any()) }
+        verify(exactly = 2) { gameFactory.createGame(any(), any()) }
     }
 
     @Test

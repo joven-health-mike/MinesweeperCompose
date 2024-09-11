@@ -17,7 +17,7 @@ import javax.inject.Inject
  * @constructor Creates a new GameEventPublisher
  */
 class GameEventPublisher @Inject constructor(
-    private val publisherScope: CoroutineScope,
+    val publisherScope: CoroutineScope,
     private val xyIndexTranslator: XYIndexTranslator
 ) :
     EventPublisher {

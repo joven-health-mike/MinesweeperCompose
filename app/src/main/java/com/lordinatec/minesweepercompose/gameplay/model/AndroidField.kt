@@ -14,19 +14,21 @@ import javax.inject.Inject
  * @param configuration the configuration of the field
  */
 class AndroidField @Inject constructor(private val configuration: AndroidConfiguration) : Field {
-    private val mines = mutableSetOf<Position>()
-    private val flags = mutableSetOf<Position>()
+    private val _mines = mutableSetOf<Position>()
+    val mines = _mines.toSet()
+    private val _flags = mutableSetOf<Position>()
+    val flags = _flags.toSet()
 
     /**
      * Create the mines for the field.
      */
     fun createMines() {
-        mines.clear()
-        flags.clear()
+        _mines.clear()
+        _flags.clear()
 
         for (position in configuration.positionPool()) {
-            mines.add(position)
-            if (mines.size == configuration.numMines()) {
+            _mines.add(position)
+            if (_mines.size == configuration.numMines()) {
                 break
             }
         }
@@ -41,14 +43,14 @@ class AndroidField @Inject constructor(private val configuration: AndroidConfigu
      * @param initY the initial y position
      */
     fun createMines(initX: Int, initY: Int) {
-        mines.clear()
-        flags.clear()
+        _mines.clear()
+        _flags.clear()
 
         for (position in configuration.positionPool()) {
             if (position.x() != initX || position.y() != initY) {
-                mines.add(position)
+                _mines.add(position)
             }
-            if (mines.size == configuration.numMines()) {
+            if (_mines.size == configuration.numMines()) {
                 break
             }
         }
@@ -60,7 +62,7 @@ class AndroidField @Inject constructor(private val configuration: AndroidConfigu
      * @return the number of mines placed
      */
     fun minesPlaced(): Int {
-        return mines.size
+        return _mines.size
     }
 
     /**
@@ -69,7 +71,7 @@ class AndroidField @Inject constructor(private val configuration: AndroidConfigu
      * @return the number of flags placed
      */
     fun flagsPlaced(): Int {
-        return flags.size
+        return _flags.size
     }
 
     override fun configuration(): Field.Configuration {
@@ -77,26 +79,26 @@ class AndroidField @Inject constructor(private val configuration: AndroidConfigu
     }
 
     override fun clear(position: Position?): Boolean {
-        return mines.contains(position)
+        return _mines.contains(position)
     }
 
     override fun flag(position: Position?): Boolean {
         val result = isFlag(position)
 
         if (result) {
-            flags.remove(position)
+            _flags.remove(position)
         } else {
-            flags.add(position!!)
+            _flags.add(position!!)
         }
 
         return result
     }
 
     override fun isFlag(position: Position?): Boolean {
-        return flags.contains(position)
+        return _flags.contains(position)
     }
 
     override fun isMine(position: Position?): Boolean {
-        return mines.contains(position)
+        return _mines.contains(position)
     }
 }

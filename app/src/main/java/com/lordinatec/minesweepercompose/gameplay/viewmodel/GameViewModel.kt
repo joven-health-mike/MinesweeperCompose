@@ -13,9 +13,6 @@ import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,7 +48,7 @@ class GameViewModel @Inject constructor(
         }
 
         // listen for game events
-        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+        gameEvents.publisherScope.launch {
             gameEvents.events.collect { event ->
                 when (event) {
                     is GameEvent.PositionCleared -> updatePosition(

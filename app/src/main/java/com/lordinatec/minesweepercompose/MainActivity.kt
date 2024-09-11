@@ -72,7 +72,6 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun PortraitScreen() {
         val systemBarBottom = WindowInsets.systemBars.getBottom(Density(this)).dp
-        println("systemBarBottom: $systemBarBottom")
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
@@ -92,7 +91,6 @@ class MainActivity : ComponentActivity() {
     @Composable
     private fun LandscapeScreen() {
         val systemBarBottom = WindowInsets.systemBars.getBottom(Density(this)).dp
-        println("systemBarBottom: $systemBarBottom")
         Box(
             modifier = Modifier
                 .fillMaxSize()

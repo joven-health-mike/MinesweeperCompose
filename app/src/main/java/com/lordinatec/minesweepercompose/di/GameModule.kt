@@ -80,4 +80,3 @@ abstract class InterfaceGameModule {
     @Binds
     abstract fun bindCoordinateTranslator(xyIndexTranslator: XYIndexTranslator): CoordinateTranslator
 }
-

@@ -19,6 +19,9 @@ class RandomPositionPool @Inject constructor(private val positionPool: AndroidPo
     Position.Pool by positionPool {
     private var positions: MutableList<Position>? = null
 
+    /**
+     * Resets the pool to its initial state (reshuffles the positions).
+     */
     fun reset() {
         positions = mutableListOf<Position>().apply {
             addAll(positionPool)

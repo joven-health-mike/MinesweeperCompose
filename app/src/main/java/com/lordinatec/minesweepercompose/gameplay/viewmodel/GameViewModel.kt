@@ -6,7 +6,6 @@ package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
@@ -27,7 +26,7 @@ import javax.inject.Inject
  *
  * @param gameController The controller for the game.
  * @param gameEvents The event publisher for the game.
- * @param timer The timer for the game.
+ * @param field The field for the game.
  *
  * @return A ViewModel for the Game screen.
  */
@@ -36,7 +35,6 @@ class GameViewModel @Inject constructor(
     private val gameController: GameController,
     private val gameEvents: GameEventPublisher,
     private val field: AndroidField,
-    private val xyIndexTranslator: XYIndexTranslator
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()

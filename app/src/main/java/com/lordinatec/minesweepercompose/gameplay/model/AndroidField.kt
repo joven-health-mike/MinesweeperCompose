@@ -18,7 +18,7 @@ import javax.inject.Inject
  */
 class AndroidField @Inject constructor(
     private val coordinateFactory: CoordinateFactory,
-    override val configuration: AndroidConfiguration,
+    override val configuration: Configuration,
     override val xyIndexTranslator: XYIndexTranslator
 ) : Field {
     private val _fieldList = mutableListOf<Coordinate>()
@@ -61,14 +61,6 @@ class AndroidField @Inject constructor(
         }
     }
 
-    /**
-     * Create the mines for the field.
-     *
-     * The initial coordinates are guaranteed to NOT be a mine.
-     *
-     * @param x the initial x position
-     * @param y the initial y position
-     */
     override fun createMines(x: Int, y: Int) {
         reset()
 

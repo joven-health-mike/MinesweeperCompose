@@ -13,6 +13,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * Dagger module for providing logger dependencies.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 class LoggerModule {

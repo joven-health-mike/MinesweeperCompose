@@ -28,6 +28,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
+/**
+ * Module for providing GameViewModel and its dependencies
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 class GameViewModelModule {
@@ -38,8 +41,7 @@ class GameViewModelModule {
         gameController: GameController,
         gameEventPublisher: GameEventPublisher,
         field: AndroidField,
-        xyIndexTranslator: XYIndexTranslator
-    ): GameViewModel = GameViewModel(gameController, gameEventPublisher, field, xyIndexTranslator)
+    ): GameViewModel = GameViewModel(gameController, gameEventPublisher, field)
 
     @Provides
     @Singleton

@@ -7,10 +7,11 @@ package com.lordinatec.minesweepercompose.di
 import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.GameController
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactoryImpl
+import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
 import dagger.Binds
@@ -21,6 +22,9 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Named
 import javax.inject.Singleton
 
+/**
+ * Module for providing game related dependencies
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 class GameModule {
@@ -29,18 +33,18 @@ class GameModule {
     @Singleton
     fun provideAndroidField(
         coordinateFactory: CoordinateFactory,
-        configuration: AndroidConfiguration,
+        configuration: Configuration,
         xyIndexTranslator: XYIndexTranslator
     ): AndroidField =
         AndroidField(coordinateFactory, configuration, xyIndexTranslator)
 
     @Provides
     @Singleton
-    fun provideAndroidConfiguration(
+    fun provideDefaultConfiguration(
         @Named("numRows") numRows: Int,
         @Named("numCols") numCols: Int,
         @Named("numMines") numMines: Int
-    ): AndroidConfiguration = AndroidConfiguration(numRows, numCols, numMines)
+    ): DefaultConfiguration = DefaultConfiguration(numRows, numCols, numMines)
 
     @Provides
     @Singleton
@@ -75,6 +79,9 @@ class GameModule {
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class InterfaceGameModule {
+
+    @Binds
+    abstract fun bindConfiguration(defaultConfiguration: DefaultConfiguration): Configuration
 
     @Binds
     abstract fun bindCoordinateTranslator(xyIndexTranslator: XYIndexTranslator): CoordinateTranslator

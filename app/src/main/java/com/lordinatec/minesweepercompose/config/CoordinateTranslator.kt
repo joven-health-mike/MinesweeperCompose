@@ -27,6 +27,12 @@ interface CoordinateTranslator {
      */
     fun indexToXY(index: Int): Pair<Int, Int>
 
+    /**
+     * Updates the size of the grid.
+     *
+     * @param width The new width.
+     * @param height The new height.
+     */
     fun updateSize(width: Int, height: Int)
 }
 

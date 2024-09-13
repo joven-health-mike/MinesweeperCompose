@@ -7,16 +7,13 @@ package com.lordinatec.minesweepercompose.gameplay.model.apis
 import com.lordinatec.minesweepercompose.config.Config
 
 interface Configuration {
-    val numRows: Int
-    val numCols: Int
-    val numMines: Int
+    var numRows: Int
+    var numCols: Int
+    var numMines: Int
 }
 
-class DefaultConfiguration : Configuration {
-    override val numRows: Int
-        get() = Config.width
-    override val numCols: Int
-        get() = Config.height
-    override val numMines: Int
-        get() = Config.mines
-}
+class DefaultConfiguration(
+    override var numRows: Int = Config.width,
+    override var numCols: Int = Config.height,
+    override var numMines: Int = Config.mines
+) : Configuration

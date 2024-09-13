@@ -9,6 +9,9 @@ import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Game event logger - logs game events to system.out. Logger starts immediately on creation.
+ */
 class GameEventLogger @Inject constructor(
     val eventPublisher: GameEventPublisher
 ) {

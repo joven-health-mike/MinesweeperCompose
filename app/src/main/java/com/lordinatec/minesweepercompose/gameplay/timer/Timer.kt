@@ -19,10 +19,6 @@ import javax.inject.Inject
  * @property time the current time of the timer
  * @property interval the interval at which the timer ticks
  * @property onTickListener the listener that is called when the timer ticks
- * @property start starts the timer
- * @property pause pauses the timer
- * @property resume resumes the timer
- * @property stop stops the timer
  */
 interface Timer {
     var isRunning: Boolean
@@ -30,9 +26,25 @@ interface Timer {
     var time: Long
     val interval: Long
     var onTickListener: OnTickListener
+
+    /**
+     * Starts the timer
+     */
     fun start()
+
+    /**
+     * Pauses a timer that has already been started.
+     */
     fun pause()
+
+    /**
+     * Resumes a timer after it has already been started.
+     */
     fun resume()
+
+    /**
+     * Stops the timer
+     */
     fun stop()
 
     /**

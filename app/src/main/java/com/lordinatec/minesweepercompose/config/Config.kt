@@ -16,6 +16,9 @@ object Config {
     var height = DEFAULT_HEIGHT
     var mines = DEFAULT_MINES
 
+    /**
+     * Reset the field configuration to the default values
+     */
     fun factoryResetFieldConfig() {
         width = DEFAULT_WIDTH
         height = DEFAULT_HEIGHT

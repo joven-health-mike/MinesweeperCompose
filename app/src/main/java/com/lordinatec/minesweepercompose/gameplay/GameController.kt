@@ -65,7 +65,6 @@ class GameController @Inject constructor(
      * Clears the entire field.
      */
     fun clearEverything() {
-        println("Clearing everything")
         if (!gameCreated) return
         for ((index, coordinate) in gameField.fieldList.withIndex()) {
             if (!gameField.cleared.contains(coordinate)) {
@@ -101,12 +100,8 @@ class GameController @Inject constructor(
      * @param index - index of the tile to clear adjacent tiles
      */
     fun clearAdjacentTiles(index: Int) {
-        println("Clearing adjacent tiles")
         if (!gameCreated) return
-        val position = gameField.fieldList[index]
-        val adjacentCoordinates = gameField.adjacentCoordinates(
-            position, coordinateFactory
-        ).filter { !gameField.isFlag(it.index) }
+        val adjacentCoordinates = getAdjacent(index).filter { !gameField.isFlag(it.index) }
         for (adjacentCoordinate in adjacentCoordinates) {
             if (!gameField.cleared.contains(adjacentCoordinate)) {
                 clear(adjacentCoordinate.index)

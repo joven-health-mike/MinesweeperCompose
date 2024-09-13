@@ -10,7 +10,7 @@ import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.Event
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.timer.Timer
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
@@ -38,7 +38,7 @@ class GameViewModelTest {
     private lateinit var gameController: GameController
 
     @MockK
-    private lateinit var timer: Timer
+    private lateinit var field: Field
 
     @MockK
     private lateinit var eventPublisher: GameEventPublisher
@@ -51,20 +51,18 @@ class GameViewModelTest {
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
+        every { field.updateConfiguration(any()) } just Runs
         every { gameController.maybeCreateGame(any()) } answers { true }
         every { gameController.clear(any()) } just Runs
         every { gameController.resetGame() } just Runs
         every { gameController.flagIsCorrect(any()) } answers { false }
         every { gameController.toggleFlag(any()) } just Runs
         every { gameController.clearEverything() } just Runs
-        every { timer.start() } just Runs
-        every { timer.resume() } just Runs
-        every { timer.pause() } just Runs
-        every { timer.stop() } just Runs
-        every { timer.onTickListener = any() } just Runs
         every { eventPublisher.events } answers { testFlow.asSharedFlow() }
         every { eventPublisher.publisherScope } answers { TestScope() }
-        gameViewModel = GameViewModel(gameController, eventPublisher, timer)
+        gameViewModel = GameViewModel(gameController, eventPublisher, field).apply {
+            updateSize()
+        }
     }
 
     @Test
@@ -83,18 +81,6 @@ class GameViewModelTest {
     fun testToggleFlag() = runTest {
         gameViewModel.toggleFlag(0)
         verify { gameController.toggleFlag(0) }
-    }
-
-    @Test
-    fun testPauseTimer() = runTest {
-        gameViewModel.pauseTimer()
-        verify { timer.pause() }
-    }
-
-    @Test
-    fun testResumeTimer() = runTest {
-        gameViewModel.resumeTimer()
-        verify { timer.resume() }
     }
 
     @Test

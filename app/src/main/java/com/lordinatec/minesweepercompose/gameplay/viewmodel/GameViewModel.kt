@@ -9,8 +9,8 @@ import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
 import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +34,7 @@ import javax.inject.Inject
 class GameViewModel @Inject constructor(
     private val gameController: GameController,
     private val gameEvents: GameEventPublisher,
-    private val field: AndroidField,
+    private val field: Field,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()

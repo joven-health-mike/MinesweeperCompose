@@ -8,13 +8,17 @@ import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
+import com.lordinatec.minesweepercompose.gameplay.model.apis.AdjacentTranslations
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateImpl
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
+import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.just
-import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,24 +30,22 @@ import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GameControllerTest {
-    // TODO: reduce dependencies
-    @MockK
-    private lateinit var gameFactory: GameFactory
-
-    @MockK
-    private lateinit var positionPool: AndroidPositionPool
-
-
     @MockK
     private lateinit var eventPublisher: GameEventPublisher
 
     @MockK
-    private lateinit var gameModel: AndroidGameControlStrategy
+    private lateinit var field: Field
 
     @MockK
-    private lateinit var field: AndroidField
+    private lateinit var timer: Timer
 
-    private val xyIndexTranslator = XYIndexTranslator()
+    @MockK
+    private lateinit var coordinateFactory: CoordinateFactory
+
+    private val xyIndexTranslator = XYIndexTranslator().apply {
+        updateSize(Config.width, Config.height)
+    }
+    private val fieldList = mutableListOf<Coordinate>()
 
     private lateinit var gameController: GameController
 
@@ -51,26 +53,46 @@ class GameControllerTest {
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
-        every { gameFactory.createGame(any(), any()) } answers { gameModel }
-        every { gameModel.clear(any(), any()) } just Runs
-        every { gameModel.toggleFlag(any(), any()) } just Runs
-        every { gameModel.clearAdjacentTiles(any(), any()) } just Runs
-        every { gameModel.resetGame() } just Runs
-        every { gameModel.countAdjacentFlags(any(), any()) } answers { 0 }
-        every { positionPool.atLocation(any(), any()) } answers { mockk() }
-        every { positionPool.width() } answers { Config.width }
-        every { positionPool.height() } answers { Config.height }
+        every { timer.onTickListener = any() } just Runs
+        every { timer.start() } just Runs
+        every { timer.stop() } just Runs
+        every { timer.pause() } just Runs
+        every { timer.resume() } just Runs
+        every { timer.time } answers { 0 }
+        every { field.fieldList } answers { fieldList }
         every { field.isMine(any()) } answers { false }
         every { field.isFlag(any()) } answers { false }
+        every { field.reset() } just Runs
+        every { field.createMines(any(), any()) } just Runs
+        every { field.clear(any()) } answers { false }
+        every { field.flag(any()) } answers { false }
+        every { field.flaggedAllMines() } answers { false }
         every { eventPublisher.publish(any()) } just Runs
+        every { eventPublisher.resetField() } just Runs
+        every { eventPublisher.gameWon(any()) } just Runs
+        every { coordinateFactory.createCoordinate(any(), any(), any()) } answers {
+            val x = firstArg<Int>()
+            val y = secondArg<Int>()
+            val index = thirdArg<Int>()
+            CoordinateImpl(x to y, index)
+        }
+        for (y in 0 until Config.height) {
+            for (x in 0 until Config.width) {
+                fieldList.add(
+                    coordinateFactory.createCoordinate(
+                        x, y, xyIndexTranslator.xyToIndex(x, y)
+                    )
+                )
+            }
+        }
         gameController =
-            GameController(gameFactory, eventPublisher, field, positionPool, xyIndexTranslator)
+            GameController(field, timer, eventPublisher, xyIndexTranslator, coordinateFactory)
     }
 
     @Test
     fun testMaybeCreateGame() = runTest {
         gameController.maybeCreateGame(0)
-        verify(exactly = 1) { gameFactory.createGame(any(), any()) }
+        verify(exactly = 1) { field.createMines(any(), any()) }
         verify(exactly = 1) { eventPublisher.publish(GameEvent.GameCreated) }
     }
 
@@ -78,7 +100,7 @@ class GameControllerTest {
     fun testMaybeCreateGameWhenGameStarted() = runTest {
         repeat(2) {
             gameController.maybeCreateGame(0)
-            verify(exactly = 1) { gameFactory.createGame(any(), any()) }
+            verify(exactly = 1) { field.createMines(any(), any()) }
             verify(exactly = 1) { eventPublisher.publish(GameEvent.GameCreated) }
         }
     }
@@ -86,36 +108,49 @@ class GameControllerTest {
     @Test
     fun testMaybeCreateGameAfterReset() = runTest {
         gameController.maybeCreateGame(0)
-        verify(exactly = 1) { gameFactory.createGame(any(), any()) }
+        verify(exactly = 1) { field.createMines(any(), any()) }
         gameController.resetGame()
         gameController.maybeCreateGame(1)
-        verify(exactly = 2) { gameFactory.createGame(any(), any()) }
+        verify(exactly = 2) { field.createMines(any(), any()) }
     }
 
     @Test
     fun testClearOnGameStarted() = runTest {
+        every { field.adjacentCoordinates(any(), coordinateFactory) } answers { emptyList() }
+        val clearedList = mutableListOf<Coordinate>()
+        every { field.clear(any()) } answers {
+            val index = firstArg<Int>()
+            val (x, y) = xyIndexTranslator.indexToXY(index)
+            val coordinate = coordinateFactory.createCoordinate(x, y, index)
+            if (!clearedList.contains(coordinate)) {
+                clearedList.add(coordinateFactory.createCoordinate(x, y, index))
+            }
+            false
+        }
+        every { field.allClear() } answers { clearedList.size == Config.width * Config.height }
+        every { field.cleared } answers { clearedList }
         gameController.maybeCreateGame(0)
         gameController.clear(0)
-        verify(exactly = 1) { gameModel.clear(any(), any()) }
+        verify(exactly = 1) { field.clear(any()) }
     }
 
     @Test
     fun testClearOnGameNotStarted() = runTest {
         gameController.clear(0)
-        verify(exactly = 0) { gameModel.clear(any(), any()) }
+        verify(exactly = 0) { field.clear(any()) }
     }
 
     @Test
     fun testToggleFlagOnGameStarted() = runTest {
         gameController.maybeCreateGame(0)
         gameController.toggleFlag(0)
-        verify(exactly = 1) { gameModel.toggleFlag(any(), any()) }
+        verify(exactly = 1) { field.flag(any()) }
     }
 
     @Test
     fun testToggleFlagOnGameNotStarted() = runTest {
         gameController.toggleFlag(0)
-        verify(exactly = 0) { gameModel.toggleFlag(any(), any()) }
+        verify(exactly = 0) { field.flag(any()) }
     }
 
     @Test
@@ -133,22 +168,85 @@ class GameControllerTest {
 
     @Test
     fun testClearEverything() = runTest {
+        every { field.adjacentCoordinates(any(), coordinateFactory) } answers {
+            mutableListOf<Coordinate>().apply {
+                val initCoord = firstArg<Coordinate>()
+                for (adjacent in AdjacentTranslations.entries) {
+                    val newX = initCoord.x() + adjacent.transX
+                    val newY = initCoord.y() + adjacent.transY
+                    if (newX >= 0 && newY >= 0 && newX < Config.width && newY < Config.height) {
+                        val newIndex = xyIndexTranslator.xyToIndex(newX, newY)
+                        val newCoord = coordinateFactory.createCoordinate(newX, newY, newIndex)
+                        add(newCoord)
+                    }
+                }
+            }
+        }
+        val clearedList = mutableListOf<Coordinate>()
+        every { field.clear(any()) } answers {
+            val index = firstArg<Int>()
+            val (x, y) = xyIndexTranslator.indexToXY(index)
+            clearedList.add(coordinateFactory.createCoordinate(x, y, index))
+            false
+        }
+        every { field.allClear() } answers { clearedList.size == Config.width * Config.height }
+        every { field.cleared } answers { clearedList }
         gameController.maybeCreateGame(0)
         gameController.clearEverything()
-        verify(exactly = Config.height * Config.width) { gameModel.clear(any(), any()) }
+        verify(exactly = Config.height * Config.width) { field.clear(any()) }
     }
 
     @Test
     fun testClearAdjacentTiles() = runTest {
+        every { field.adjacentCoordinates(any(), coordinateFactory) } answers {
+            mutableListOf<Coordinate>().apply {
+                val initCoord = firstArg<Coordinate>()
+                if (initCoord.x() != 0 || initCoord.y() != 0) {
+                    return@apply
+                }
+                for (adjacent in AdjacentTranslations.entries) {
+                    val newX = initCoord.x() + adjacent.transX
+                    val newY = initCoord.y() + adjacent.transY
+                    if (newX >= 0 && newY >= 0 && newX < Config.width && newY < Config.height) {
+                        val newIndex = xyIndexTranslator.xyToIndex(newX, newY)
+                        val newCoord = coordinateFactory.createCoordinate(newX, newY, newIndex)
+                        add(newCoord)
+                    }
+                }
+            }
+        }
+        val clearedList = mutableListOf<Coordinate>()
+        every { field.clear(any()) } answers {
+            val index = firstArg<Int>()
+            val (x, y) = xyIndexTranslator.indexToXY(index)
+            clearedList.add(coordinateFactory.createCoordinate(x, y, index))
+            false
+        }
+        every { field.allClear() } answers { clearedList.size == Config.width * Config.height }
+        every { field.cleared } answers { clearedList }
         gameController.maybeCreateGame(0)
         gameController.clearAdjacentTiles(0)
-        verify(exactly = 1) { gameModel.clearAdjacentTiles(any(), any()) }
+        verify(exactly = 3) { field.clear(any()) }
     }
 
     @Test
     fun testCountAdjacentFlags() = runTest {
+        every { field.adjacentCoordinates(any(), coordinateFactory) } answers {
+            mutableListOf<Coordinate>().apply {
+                val initCoord = firstArg<Coordinate>()
+                for (adjacent in AdjacentTranslations.entries) {
+                    val newX = initCoord.x() + adjacent.transX
+                    val newY = initCoord.y() + adjacent.transY
+                    if (newX >= 0 && newY >= 0 && newX < Config.width && newY < Config.height) {
+                        val newIndex = xyIndexTranslator.xyToIndex(newX, newY)
+                        val newCoord = coordinateFactory.createCoordinate(newX, newY, newIndex)
+                        add(newCoord)
+                    }
+                }
+            }
+        }
         gameController.maybeCreateGame(0)
         gameController.countAdjacentFlags(0)
-        verify(exactly = 1) { gameModel.countAdjacentFlags(any(), any()) }
+        verify(exactly = 1) { field.adjacentCoordinates(any(), any()) }
     }
 }

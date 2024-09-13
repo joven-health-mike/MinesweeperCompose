@@ -15,6 +15,7 @@ import javax.inject.Inject
 class TileViewClickListener @Inject constructor(
     private val gameViewModel: GameViewModel
 ) {
+
     /**
      * Handles a click event on a tile.
      *

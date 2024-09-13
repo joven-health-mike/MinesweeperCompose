@@ -6,59 +6,45 @@ package com.lordinatec.minesweepercompose.di
 
 import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
-import com.lordinatec.minesweepercompose.gameplay.model.AdjacentHelper
-import com.lordinatec.minesweepercompose.gameplay.model.AdjacentHelperImpl
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidConfiguration
+import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidPositionPool
-import com.lordinatec.minesweepercompose.gameplay.model.PositionFactory
-import com.lordinatec.minesweepercompose.gameplay.model.RandomPositionPool
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactoryImpl
+import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
+import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
+/**
+ * Module for providing game related dependencies
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 class GameModule {
 
     @Provides
     @Singleton
-    fun provideAndroidPositionPool(
-        positionFactory: PositionFactory,
+    fun provideAndroidField(
+        coordinateFactory: CoordinateFactory,
+        configuration: Configuration,
         xyIndexTranslator: XYIndexTranslator
-    ): AndroidPositionPool = AndroidPositionPool(positionFactory, xyIndexTranslator)
+    ): AndroidField =
+        AndroidField(coordinateFactory, configuration, xyIndexTranslator)
 
     @Provides
     @Singleton
-    fun provideRandomPositionPool(
-        positionPool: AndroidPositionPool
-    ): RandomPositionPool = RandomPositionPool(positionPool)
-
-    @Provides
-    @Singleton
-    fun providePositionFactory(): PositionFactory = PositionFactory()
-
-    @Provides
-    @Singleton
-    fun provideAndroidField(configuration: AndroidConfiguration): AndroidField =
-        AndroidField(configuration)
-
-    @Provides
-    @Singleton
-    fun provideAndroidConfiguration(
-        positionPool: RandomPositionPool,
-        numMines: Int
-    ): AndroidConfiguration = AndroidConfiguration(positionPool, numMines)
-
-    @Provides
-    @Singleton
-    fun provideAdjacentHelperImpl(
-        field: AndroidField,
-        positionPool: AndroidPositionPool
-    ): AdjacentHelperImpl = AdjacentHelperImpl(field, positionPool)
+    fun provideDefaultConfiguration(
+        @Named("numRows") numRows: Int,
+        @Named("numCols") numCols: Int,
+        @Named("numMines") numMines: Int
+    ): DefaultConfiguration = DefaultConfiguration(numRows, numCols, numMines)
 
     @Provides
     @Singleton
@@ -66,6 +52,26 @@ class GameModule {
 
     @Provides
     @Singleton
+    fun provideCoordinateFactoryImpl(): CoordinateFactoryImpl = CoordinateFactoryImpl()
+
+    @Provides
+    @Singleton
+    fun provideTimerLifecycleObserver(gameController: GameController): TimerLifecycleObserver =
+        TimerLifecycleObserver(gameController)
+
+    @Provides
+    @Singleton
+    @Named("numRows")
+    fun provideNumRows(): Int = 0
+
+    @Provides
+    @Singleton
+    @Named("numCols")
+    fun provideNumCols(): Int = 0
+
+    @Provides
+    @Singleton
+    @Named("numMines")
     fun provideNumMines(): Int = 0
 
 }
@@ -75,8 +81,14 @@ class GameModule {
 abstract class InterfaceGameModule {
 
     @Binds
-    abstract fun bindAdjacentHelper(adjacentHelperImpl: AdjacentHelperImpl): AdjacentHelper
+    abstract fun bindConfiguration(defaultConfiguration: DefaultConfiguration): Configuration
 
     @Binds
     abstract fun bindCoordinateTranslator(xyIndexTranslator: XYIndexTranslator): CoordinateTranslator
+
+    @Binds
+    abstract fun bindCoordinateFactory(coordinateFactoryImpl: CoordinateFactoryImpl): CoordinateFactory
+
+    @Binds
+    abstract fun bindField(androidField: AndroidField): Field
 }

@@ -10,6 +10,9 @@ import javax.inject.Inject
 
 /**
  * Consumes game events and updates the stats.
+ *
+ * @param eventPublisher The event publisher.
+ * @param statsProvider The stats provider.
  */
 class StatsEventConsumer @Inject constructor(
     private val eventPublisher: EventPublisher,
@@ -35,7 +38,7 @@ class StatsEventConsumer @Inject constructor(
 
     private fun maybeSaveBestTime(newTime: Long) {
         val bestTime = statsProvider.getBestTime()
-        if (bestTime == 0L || newTime < bestTime) {
+        if (bestTime < 1L || newTime < bestTime) {
             statsProvider.setBestTime(newTime)
         }
     }

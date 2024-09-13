@@ -46,6 +46,9 @@ class GameActivity : ComponentActivity() {
     @Inject
     lateinit var xyIndexTranslator: XYIndexTranslator
 
+    @Inject
+    lateinit var timerLifecycleObserver: TimerLifecycleObserver
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,11 +56,12 @@ class GameActivity : ComponentActivity() {
             resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
         setContent {
             val viewModel: GameViewModel = hiltViewModel()
-            lifecycle.addObserver(TimerLifecycleObserver(viewModel))
+            lifecycle.addObserver(timerLifecycleObserver)
             loadConfigFromPrefs()
             if (Config.feature_adjust_field_to_screen_size) {
                 determineFieldSize(viewModel, isPortraitMode)
             }
+            xyIndexTranslator.updateSize(Config.width, Config.height)
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     LaunchedEffect(Unit) {
@@ -96,7 +100,6 @@ class GameActivity : ComponentActivity() {
         Config.width = if (isPortraitMode) desiredFieldWidth else desiredFieldHeight
         Config.height = if (isPortraitMode) desiredFieldHeight else desiredFieldWidth
         Config.mines = desiredFieldWidth * desiredFieldHeight / 6
-        xyIndexTranslator.updateSize(Config.width, Config.height)
         viewModel.updateSize()
     }
 

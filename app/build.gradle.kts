@@ -64,14 +64,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.coroutines.core)
-    implementation(
-        fileTree(
-            mapOf(
-                "dir" to "../app/lib/mines-java-1.0.1.2.jar",
-                "include" to listOf("*.aar", "*.jar")
-            )
-        )
-    )
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     kapt(libs.hilt.android.compiler)

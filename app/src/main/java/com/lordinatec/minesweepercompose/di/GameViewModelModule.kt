@@ -8,11 +8,10 @@ import android.app.Application
 import android.content.Context
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.GameController
-import com.lordinatec.minesweepercompose.gameplay.GameFactory
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidPositionPool
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.timer.CoroutineTimer
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
@@ -29,6 +28,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
+/**
+ * Module for providing GameViewModel and its dependencies
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 class GameViewModelModule {
@@ -38,8 +40,8 @@ class GameViewModelModule {
     fun provideViewModel(
         gameController: GameController,
         gameEventPublisher: GameEventPublisher,
-        timer: Timer
-    ): GameViewModel = GameViewModel(gameController, gameEventPublisher, timer)
+        field: AndroidField,
+    ): GameViewModel = GameViewModel(gameController, gameEventPublisher, field)
 
     @Provides
     @Singleton
@@ -79,13 +81,13 @@ class GameViewModelModule {
     @Provides
     @Singleton
     fun provideGameController(
-        gameFactory: GameFactory,
+        androidField: AndroidField,
+        timer: Timer,
         eventPublisher: GameEventPublisher,
-        gameField: AndroidField,
-        positionPool: AndroidPositionPool,
-        xyIndexTranslator: XYIndexTranslator
+        xyIndexTranslator: XYIndexTranslator,
+        coordinateFactory: CoordinateFactory
     ): GameController =
-        GameController(gameFactory, eventPublisher, gameField, positionPool, xyIndexTranslator)
+        GameController(androidField, timer, eventPublisher, xyIndexTranslator, coordinateFactory)
 
     @Provides
     @Singleton

@@ -6,23 +6,25 @@ package com.lordinatec.minesweepercompose.gameplay.timer
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
+import com.lordinatec.minesweepercompose.gameplay.GameController
+import javax.inject.Inject
 
 /**
  * Lifecycle observer to start and stop the timer when the game is resumed and paused.
  *
- * @param gameViewModel The game view model to control the timer.
+ * @param gameController The game controller.
  *
  * @constructor Creates a new instance of TimerLifecycleObserver.
  */
-class TimerLifecycleObserver(private val gameViewModel: GameViewModel) : DefaultLifecycleObserver {
+class TimerLifecycleObserver @Inject constructor(private val gameController: GameController) :
+    DefaultLifecycleObserver {
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
-        gameViewModel.resumeTimer()
+        gameController.resumeTimer()
     }
 
     override fun onPause(owner: LifecycleOwner) {
         super.onPause(owner)
-        gameViewModel.pauseTimer()
+        gameController.pauseTimer()
     }
 }

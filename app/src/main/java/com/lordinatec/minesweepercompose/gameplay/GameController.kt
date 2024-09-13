@@ -5,35 +5,43 @@
 package com.lordinatec.minesweepercompose.gameplay
 
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
+import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidPositionPool
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
+import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import javax.inject.Inject
 
 /**
  * GameController - handles all interactions between the view model and the model
  *
- * @param gameFactory - factory to create a game
- * @param eventPublisher - publisher to publish game events
  * @param gameField - field to store game state
- * @param positionPool - pool to store positions
- * @param xyIndexTranslator - translator to convert between index and x,y coordinates
+ * @param timer - timer to keep track of game time
+ * @param eventPublisher - publisher to publish game events
+ * @param xyIndexTranslator - translator to convert between xy and index
  *
  * @constructor Create empty Game controller
  */
 class GameController @Inject constructor(
-    private val gameFactory: GameFactory,
+    private val gameField: Field,
+    private val timer: Timer,
     private val eventPublisher: GameEventPublisher,
-    private val gameField: AndroidField,
-    private val positionPool: AndroidPositionPool,
-    private val xyIndexTranslator: XYIndexTranslator
+    private val xyIndexTranslator: CoordinateTranslator,
+    private val coordinateFactory: CoordinateFactory
 ) {
 
     private var gameCreated: Boolean = false
-    private var gameModel: AndroidGameControlStrategy? = null
+
+    init {
+        timer.onTickListener = Timer.OnTickListener { newTime ->
+            eventPublisher.timeUpdate(newTime)
+        }
+        gameCreated = false
+        gameField.reset()
+        timer.stop()
+    }
 
     /**
      * Create a game. Mine will never occur at the given index.
@@ -45,7 +53,9 @@ class GameController @Inject constructor(
             gameCreated = true
             eventPublisher.publish(GameEvent.GameCreated)
             val (x, y) = xyIndexTranslator.indexToXY(index)
-            gameModel = gameFactory.createGame(x, y)
+            gameField.createMines(x, y)
+            timer.stop()
+            timer.start()
             return true
         }
         return false
@@ -56,11 +66,32 @@ class GameController @Inject constructor(
      */
     fun clearEverything() {
         if (!gameCreated) return
-
-        for (i in 0 until Config.width * Config.height) {
-            val (x, y) = xyIndexTranslator.indexToXY(i)
-            gameModel?.clear(x, y)
+        for ((index, coordinate) in gameField.fieldList.withIndex()) {
+            if (!gameField.cleared.contains(coordinate)) {
+                clear(index)
+            }
         }
+    }
+
+    private fun getAdjacent(index: Int): Collection<Coordinate> {
+        val position = gameField.fieldList[index]
+        return gameField.adjacentCoordinates(position, coordinateFactory)
+    }
+
+    /**
+     * Clears the entire field.
+     */
+    fun pauseTimer() {
+        if (!gameCreated) return
+        timer.pause()
+    }
+
+    /**
+     * Clears the entire field.
+     */
+    fun resumeTimer() {
+        if (!gameCreated) return
+        timer.resume()
     }
 
     /**
@@ -70,9 +101,12 @@ class GameController @Inject constructor(
      */
     fun clearAdjacentTiles(index: Int) {
         if (!gameCreated) return
-
-        val (x, y) = xyIndexTranslator.indexToXY(index)
-        gameModel?.clearAdjacentTiles(x, y)
+        val adjacentCoordinates = getAdjacent(index).filter { !gameField.isFlag(it.index) }
+        for (adjacentCoordinate in adjacentCoordinates) {
+            if (!gameField.cleared.contains(adjacentCoordinate)) {
+                clear(adjacentCoordinate.index)
+            }
+        }
     }
 
     /**
@@ -82,18 +116,24 @@ class GameController @Inject constructor(
      */
     fun countAdjacentFlags(index: Int): Int {
         if (!gameCreated) return -1
-
-        val (x, y) = xyIndexTranslator.indexToXY(index)
-        return gameModel?.countAdjacentFlags(x, y) ?: 0
+        return getAdjacent(index).count {
+            gameField.isFlag(
+                xyIndexTranslator.xyToIndex(
+                    it.x(),
+                    it.y()
+                )
+            )
+        }
     }
 
     /**
      * Reset the game
      */
     fun resetGame() {
-        if (!gameCreated) return
         gameCreated = false
-        gameModel?.resetGame()
+        eventPublisher.resetField()
+        gameField.reset()
+        timer.stop()
     }
 
     /**
@@ -103,9 +143,28 @@ class GameController @Inject constructor(
      */
     fun clear(index: Int) {
         if (!gameCreated) return
+        if (gameField.isFlag(index)) return
+        if (gameField.cleared.contains(gameField.fieldList[index])) return
 
-        val (x, y) = xyIndexTranslator.indexToXY(index)
-        gameModel?.clear(x, y)
+        val isMine = gameField.clear(index)
+        if (isMine) {
+            timer.stop()
+            eventPublisher.publish(GameEvent.PositionExploded(index))
+            eventPublisher.gameLost()
+        } else {
+            val adjacent = getAdjacent(index).filter { coordinate ->
+                val coordIndex = xyIndexTranslator.xyToIndex(coordinate.x(), coordinate.y())
+                gameField.isMine(coordIndex)
+            }.size
+            eventPublisher.publish(GameEvent.PositionCleared(index, adjacent))
+            if (adjacent == 0) {
+                clearAdjacentTiles(index)
+            }
+            if (gameField.allClear()) {
+                timer.stop()
+                eventPublisher.gameWon(timer.time)
+            }
+        }
     }
 
     /**
@@ -116,8 +175,27 @@ class GameController @Inject constructor(
     fun toggleFlag(index: Int) {
         if (!gameCreated) return
 
-        val (x, y) = xyIndexTranslator.indexToXY(index)
-        gameModel?.toggleFlag(x, y)
+        val unflagged = gameField.flag(index)
+        if (unflagged) {
+            eventPublisher.publish(GameEvent.PositionUnflagged(index))
+        } else {
+            eventPublisher.publish(GameEvent.PositionFlagged(index))
+            maybeEndGame()
+        }
+    }
+
+    /**
+     * Maybe end the game if all mines are flagged
+     */
+    private fun maybeEndGame() {
+        if (Config.feature_end_game_on_last_flag && gameField.flaggedAllMines()) {
+            timer.stop()
+            if (gameField.allFlagsCorrect()) {
+                eventPublisher.gameWon(timer.time)
+            } else {
+                eventPublisher.gameLost()
+            }
+        }
     }
 
     /**
@@ -128,8 +206,6 @@ class GameController @Inject constructor(
     fun flagIsCorrect(index: Int): Boolean {
         if (!gameCreated) return false
 
-        val (x, y) = xyIndexTranslator.indexToXY(index)
-        val position = positionPool.atLocation(x, y)
-        return gameField.isMine(position)
+        return gameField.isMine(index)
     }
 }

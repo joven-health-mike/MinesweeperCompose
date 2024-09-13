@@ -6,9 +6,15 @@ package com.lordinatec.minesweepercompose.gameplay.model
 
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.config.XYIndexTranslator
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateImpl
+import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import io.mockk.MockKAnnotations
+import io.mockk.Runs
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.just
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -23,79 +29,74 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class AndroidFieldTest {
     @MockK
-    private lateinit var configuration: AndroidConfiguration
+    private lateinit var configuration: Configuration
 
-    private val xyIndexTranslator = XYIndexTranslator()
-    private val androidPositionPool =
-        AndroidPositionPool(PositionFactory(), xyIndexTranslator).apply {
-            setDimensions(Config.width, Config.height)
-        }
-    private val randomPositionPool = RandomPositionPool(androidPositionPool).apply {
-        reset()
+    @MockK
+    private lateinit var coordinateFactory: CoordinateFactory
+
+    private val xyIndexTranslator = XYIndexTranslator().apply {
+        updateSize(Config.width, Config.height)
     }
-
     private lateinit var androidField: AndroidField
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
-        every { configuration.positionPool() } answers { randomPositionPool }
-        every { configuration.numMines() } answers { Config.mines }
-        androidField = AndroidField(configuration)
-    }
-
-    @Test
-    fun testCreateMines() = runTest {
-        androidField.createMines()
-        assertEquals(configuration.numMines(), androidField.minesPlaced())
-        for ((minesFound, position) in randomPositionPool.withIndex()) {
-            assertTrue(androidField.isMine(position))
-            if (minesFound + 1 == configuration.numMines()) {
-                break
-            }
+        every { configuration.numRows } answers { Config.width }
+        every { configuration.numCols } answers { Config.height }
+        every { configuration.numMines } answers { Config.mines }
+        every { configuration.numRows = any() } just Runs
+        every { configuration.numCols = any() } just Runs
+        every { configuration.numMines = any() } just Runs
+        every { coordinateFactory.createCoordinate(any(), any(), any()) } answers {
+            CoordinateImpl(firstArg() as Int to secondArg() as Int, thirdArg() as Int)
+        }
+        androidField = AndroidField(coordinateFactory, configuration, xyIndexTranslator).apply {
+            updateConfiguration(DefaultConfiguration())
         }
     }
 
     @Test
     fun testCreateMinesWithXY() = runTest {
-        val initX = 0
-        val initY = 0
-        androidField.createMines(initX, initY)
-        assertEquals(configuration.numMines(), androidField.minesPlaced())
-        for ((minesFound, position) in randomPositionPool.withIndex()) {
-            if (position.x() == initX && position.y() == initY) {
-                assertFalse(androidField.isMine(position))
+        val testCoord = coordinateFactory.createCoordinate(0, 0, 0)
+        androidField.createMines(testCoord.x(), testCoord.y())
+        assertEquals(configuration.numMines, androidField.mines.size)
+        var minesFound = 0
+        for (position in androidField.fieldList) {
+            if (testCoord == position) {
+                assertFalse(androidField.isMine(position.index))
             } else {
-                assertTrue(androidField.isMine(position))
-            }
-            if (minesFound + 1 == configuration.numMines()) {
-                break
+                if (androidField.isMine(position.index)) {
+                    minesFound++
+                }
             }
         }
+        assertEquals(Config.mines, minesFound)
     }
 
     @Test
     fun testFlagsPlaced() = runTest {
-        androidField.flag(randomPositionPool.atLocation(0, 0))
-        assertEquals(1, androidField.flagsPlaced())
-        assertTrue(androidField.isFlag(randomPositionPool.atLocation(0, 0)))
+        val testCoord = coordinateFactory.createCoordinate(0, 0, 0)
+        androidField.flag(testCoord.index)
+        assertEquals(1, androidField.flags.size)
+        assertTrue(androidField.isFlag(testCoord.index))
     }
 
     @Test
     fun testConfiguration() = runTest {
-        assertEquals(configuration, androidField.configuration())
+        assertEquals(configuration, androidField.configuration)
     }
 
     @Test
     fun testClear() = runTest {
-        androidField.createMines()
+        androidField.createMines(0, 0)
         var numMines = 0
-        for (position in randomPositionPool) {
-            if (androidField.clear(position)) {
+        for (position in androidField.fieldList) {
+            if (androidField.clear(position.index)) {
                 numMines++
             }
         }
-        assertEquals(configuration.numMines(), numMines)
+        assertEquals(configuration.numMines, numMines)
     }
 }

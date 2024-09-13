@@ -10,6 +10,11 @@ import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Logs game events to Logcat. Logger starts immediately on creation.
+ *
+ * @param eventPublisher The event publisher to listen to.
+ */
 class LogcatLogger @Inject constructor(
     val eventPublisher: GameEventPublisher
 ) {
@@ -22,7 +27,6 @@ class LogcatLogger @Inject constructor(
                     is GameEvent.GameCreated -> level("Game created")
                     is GameEvent.GameLost -> level("Game lost")
                     is GameEvent.GameWon -> level("Game won")
-                    is GameEvent.TimeUpdate -> level("Time updated: ${event.newTime}")
                     is GameEvent.PositionCleared -> level("Position cleared: ${event.index}, ${event.adjacentMines}")
                     is GameEvent.PositionFlagged -> level("Position flagged: ${event.index}")
                     is GameEvent.PositionUnflagged -> level("Position unflagged: ${event.index}")
@@ -34,8 +38,8 @@ class LogcatLogger @Inject constructor(
     }
 
     companion object {
-        private val debug: (s: String) -> Unit = { s -> Log.d("MinewsweeperCompose", s) }
-        private val info: (s: String) -> Unit = { s -> Log.i("MinewsweeperCompose", s) }
-        private val verbose: (s: String) -> Unit = { s -> Log.v("MinewsweeperCompose", s) }
+        private val debug: (s: String) -> Unit = { s -> Log.d("MinesweeperCompose", s) }
+        private val info: (s: String) -> Unit = { s -> Log.i("MinesweeperCompose", s) }
+        private val verbose: (s: String) -> Unit = { s -> Log.v("MinesweeperCompose", s) }
     }
 }

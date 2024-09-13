@@ -4,15 +4,11 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import javax.inject.Inject
+import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 
 /**
  * Android specific configuration for the game
  */
-class AndroidConfiguration @Inject constructor(
-    private val positionPool: RandomPositionPool,
-    var numMines: Int
-) {
-    fun positionPool(): RandomPositionPool = positionPool
-    fun numMines(): Int = numMines
-}
+data class AndroidConfiguration(
+    override var numRows: Int, override var numCols: Int, override var numMines: Int
+) : Configuration

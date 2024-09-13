@@ -22,7 +22,6 @@ class LogcatLogger @Inject constructor(
                     is GameEvent.GameCreated -> level("Game created")
                     is GameEvent.GameLost -> level("Game lost")
                     is GameEvent.GameWon -> level("Game won")
-                    is GameEvent.TimeUpdate -> level("Time updated: ${event.newTime}")
                     is GameEvent.PositionCleared -> level("Position cleared: ${event.index}, ${event.adjacentMines}")
                     is GameEvent.PositionFlagged -> level("Position flagged: ${event.index}")
                     is GameEvent.PositionUnflagged -> level("Position unflagged: ${event.index}")

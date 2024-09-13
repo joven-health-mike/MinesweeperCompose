@@ -9,8 +9,6 @@ import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidGameControlStrategy
-import com.lordinatec.minesweepercompose.gameplay.model.AndroidPositionPool
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every

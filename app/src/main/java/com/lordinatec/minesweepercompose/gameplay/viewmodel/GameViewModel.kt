@@ -6,10 +6,12 @@ package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.lordinatec.minesweepercompose.config.Config
+import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.timer.Timer
+import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
+import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,24 +35,25 @@ import javax.inject.Inject
 class GameViewModel @Inject constructor(
     private val gameController: GameController,
     private val gameEvents: GameEventPublisher,
-    private val timer: Timer
+    private val field: AndroidField,
+    private val xyIndexTranslator: XYIndexTranslator
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
     init {
-        timer.onTickListener = Timer.OnTickListener { newTime ->
-            _uiState.update { state ->
-                state.copy(
-                    timeValue = newTime
-                )
-            }
-        }
-
         // listen for game events
         gameEvents.publisherScope.launch {
             gameEvents.events.collect { event ->
                 when (event) {
+                    is GameEvent.TimeUpdate -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                timeValue = event.newTime
+                            )
+                        }
+                    }
+
                     is GameEvent.PositionCleared -> updatePosition(
                         event.index, TileState.CLEARED, TileValue.fromValue(event.adjacentMines)
                     )
@@ -70,7 +73,6 @@ class GameViewModel @Inject constructor(
                     is GameEvent.GameWon -> gameWon()
                     is GameEvent.GameLost -> gameLost()
                     is GameEvent.GameCreated -> {
-                        timer.start()
                         _uiState.update { state ->
                             state.copy(
                                 newGame = false,
@@ -127,8 +129,14 @@ class GameViewModel @Inject constructor(
         // lazily create the game when the user makes their first move
         val newGame = gameController.maybeCreateGame(index)
         if (newGame) {
-            timer.stop()
-            timer.start()
+            field.updateConfiguration(DefaultConfiguration())
+            updateSize()
+            _uiState.update { state ->
+                state.copy(
+                    newGame = true,
+                    gameOver = false
+                )
+            }
         }
         gameController.clear(index)
     }
@@ -163,21 +171,6 @@ class GameViewModel @Inject constructor(
         return gameController.countAdjacentFlags(index)
     }
 
-    /**
-     * Pauses the timer.
-     */
-    fun pauseTimer() {
-        timer.pause()
-    }
-
-    /**
-     * Resumes the timer.
-     */
-    fun resumeTimer() {
-        if (uiState.value.gameOver) return
-        timer.resume()
-    }
-
     /* PRIVATE FUNCTIONS */
     /**
      * Updates the position at the given index.
@@ -209,7 +202,6 @@ class GameViewModel @Inject constructor(
      */
     private val gameWon: () -> Unit = {
         gameController.clearEverything()
-        timer.stop()
         _uiState.update { state ->
             state.copy(
                 gameOver = true,
@@ -225,7 +217,6 @@ class GameViewModel @Inject constructor(
      */
     private val gameLost: () -> Unit = {
         gameController.clearEverything()
-        timer.stop()
         _uiState.update { state ->
             state.copy(
                 gameOver = true,

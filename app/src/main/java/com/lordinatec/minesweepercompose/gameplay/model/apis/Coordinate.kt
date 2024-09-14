@@ -33,23 +33,13 @@ interface Coordinate {
 }
 
 /**
- * AdjacentTranslations is an enum class that represents the translations needed to move to the adjacent cells of a grid.
- */
-enum class AdjacentTranslations(val transX: Int, val transY: Int) {
-    TOP_LEFT(-1, -1),
-    TOP(0, -1),
-    TOP_RIGHT(1, -1),
-    LEFT(-1, 0),
-    RIGHT(1, 0),
-    BOTTOM_LEFT(-1, 1),
-    BOTTOM(0, 1),
-    BOTTOM_RIGHT(1, 1)
-}
-
-/**
  * CoordinateImpl is a data class that implements the Coordinate interface and overrides the equals and hashCode methods.
  */
 class CoordinateImpl(override val value: Pair<Int, Int>, override val index: Int) : Coordinate {
+    override fun toString(): String {
+        return "Coordinate(value=(${value.first}, ${value.second}), index=$index)"
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Coordinate) return false
@@ -127,4 +117,18 @@ class CoordinateFactoryImpl @Inject constructor(
         val (x, y) = coordinateTranslator.indexToXY(index)
         return createCoordinate(x, y)
     }
+}
+
+/**
+ * AdjacentTranslations is an enum class that represents the translations needed to move to the adjacent cells of a grid.
+ */
+enum class AdjacentTranslations(val transX: Int, val transY: Int) {
+    TOP_LEFT(-1, -1),
+    TOP(0, -1),
+    TOP_RIGHT(1, -1),
+    LEFT(-1, 0),
+    RIGHT(1, 0),
+    BOTTOM_LEFT(-1, 1),
+    BOTTOM(0, 1),
+    BOTTOM_RIGHT(1, 1)
 }

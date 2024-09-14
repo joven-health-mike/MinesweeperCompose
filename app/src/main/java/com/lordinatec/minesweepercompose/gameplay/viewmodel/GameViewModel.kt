@@ -9,7 +9,6 @@ import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import com.lordinatec.minesweepercompose.gameplay.views.TileValue
@@ -98,6 +97,7 @@ class GameViewModel @Inject constructor(
      */
     fun updateSize() {
         if (uiState.value.tileStates.size != Config.width * Config.height) {
+            field.reset()
             _uiState.update { state ->
                 state.copy(
                     tileStates = List(Config.width * Config.height) { TileState.COVERED },
@@ -127,11 +127,9 @@ class GameViewModel @Inject constructor(
         // lazily create the game when the user makes their first move
         val newGame = gameController.maybeCreateGame(index)
         if (newGame) {
-            field.updateConfiguration(DefaultConfiguration())
             updateSize()
             _uiState.update { state ->
                 state.copy(
-                    newGame = true,
                     gameOver = false
                 )
             }

@@ -39,13 +39,6 @@ interface Field {
     fun reset()
 
     /**
-     * Update the configuration of the field
-     *
-     * @param configuration Configuration New configuration
-     */
-    fun updateConfiguration(configuration: Configuration)
-
-    /**
      * Create mines in the field. The given coordinates are guaranteed to NOT be a mine.
      *
      * @param index Int Index to avoid creating mines on

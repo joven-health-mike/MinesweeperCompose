@@ -71,13 +71,4 @@ class GameEventPublisher @Inject constructor(val publisherScope: CoroutineScope)
             gameOver = true
         }
     }
-
-    /**
-     * Converts a GameControlStrategy.Listener gameLost to a GameLost event.
-     *
-     * This function will only publish the event once.
-     */
-    fun resetField() {
-        publish(GameEvent.FieldReset)
-    }
 }

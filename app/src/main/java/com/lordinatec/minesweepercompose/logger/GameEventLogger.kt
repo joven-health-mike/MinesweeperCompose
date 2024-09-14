@@ -21,8 +21,7 @@ class GameEventLogger @Inject constructor(
                 when (event) {
                     is GameEvent.GameCreated -> println("Game created")
                     is GameEvent.GameLost -> println("Game lost")
-                    is GameEvent.GameWon -> println("Game won")
-                    is GameEvent.TimeUpdate -> println("Time updated: ${event.newTime}")
+                    is GameEvent.GameWon -> println("Game won: ${event.endTime}")
                     is GameEvent.PositionCleared -> println("Position cleared: ${event.index}, ${event.adjacentMines}")
                     is GameEvent.PositionFlagged -> println("Position flagged: ${event.index}")
                     is GameEvent.PositionUnflagged -> println("Position unflagged: ${event.index}")

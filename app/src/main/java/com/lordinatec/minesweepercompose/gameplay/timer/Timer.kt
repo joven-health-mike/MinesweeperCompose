@@ -108,6 +108,7 @@ class CoroutineTimer @Inject constructor(
     }
 
     override fun pause() {
+        onTickListener.onTick(time)
         isPaused = true
     }
 
@@ -119,6 +120,7 @@ class CoroutineTimer @Inject constructor(
         isRunning = false
         isPaused = false
         time = 0
+        onTickListener.onTick(time)
         timerJob?.cancel()
     }
 }

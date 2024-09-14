@@ -19,7 +19,7 @@ import javax.inject.Inject
  * @param gameField - field to store game state
  * @param timer - timer to keep track of game time
  * @param eventPublisher - publisher to publish game events
- * @param xyIndexTranslator - translator to convert between xy and index
+ * @param coordinateFactory - factory to create coordinates
  *
  * @constructor Create empty Game controller
  */
@@ -31,10 +31,12 @@ class GameController @Inject constructor(
 ) {
 
     private var gameCreated: Boolean = false
+    private var gameTime: Long = 0
 
     init {
         timer.onTickListener = Timer.OnTickListener { newTime ->
             eventPublisher.timeUpdate(newTime)
+            gameTime = newTime
         }
         gameCreated = false
         gameField.reset()
@@ -123,7 +125,7 @@ class GameController @Inject constructor(
      */
     fun resetGame() {
         gameCreated = false
-        eventPublisher.resetField()
+        eventPublisher.publish(GameEvent.FieldReset)
         gameField.reset()
         timer.stop()
     }
@@ -140,7 +142,7 @@ class GameController @Inject constructor(
 
         val isMine = gameField.clear(index)
         if (isMine) {
-            timer.stop()
+            timer.pause()
             eventPublisher.publish(GameEvent.PositionExploded(index))
             eventPublisher.gameLost()
         } else {
@@ -152,8 +154,8 @@ class GameController @Inject constructor(
                 clearAdjacentTiles(index)
             }
             if (gameField.allClear()) {
-                timer.stop()
-                eventPublisher.gameWon(timer.time)
+                timer.pause()
+                eventPublisher.gameWon(gameTime)
             }
         }
     }
@@ -180,9 +182,9 @@ class GameController @Inject constructor(
      */
     private fun maybeEndGame() {
         if (Config.feature_end_game_on_last_flag && gameField.flaggedAllMines()) {
-            timer.stop()
+            timer.pause()
             if (gameField.allFlagsCorrect()) {
-                eventPublisher.gameWon(timer.time)
+                eventPublisher.gameWon(gameTime)
             } else {
                 eventPublisher.gameLost()
             }

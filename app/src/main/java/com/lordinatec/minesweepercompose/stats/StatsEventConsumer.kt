@@ -38,7 +38,7 @@ class StatsEventConsumer @Inject constructor(
 
     private fun maybeSaveBestTime(newTime: Long) {
         val bestTime = statsProvider.getBestTime()
-        if (bestTime < 1L || newTime < bestTime) {
+        if (bestTime == 0L || newTime < bestTime) {
             statsProvider.setBestTime(newTime)
         }
     }

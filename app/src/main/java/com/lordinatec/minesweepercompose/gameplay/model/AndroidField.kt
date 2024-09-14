@@ -4,10 +4,10 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
+import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import javax.inject.Inject
 
@@ -35,29 +35,12 @@ class AndroidField @Inject constructor(
         get() = _cleared.toSet()
 
     override fun reset() {
-        _mines.clear()
-        _flags.clear()
-        _cleared.clear()
-    }
-
-    override fun updateConfiguration(configuration: Configuration) {
-        this.configuration.numRows = configuration.numRows
-        this.configuration.numCols = configuration.numCols
-        this.configuration.numMines = configuration.numMines
-        reset()
-        _fieldList.clear()
-
-        for (y in 0 until configuration.numCols) {
-            for (x in 0 until configuration.numRows) {
-                _fieldList.add(
-                    coordinateFactory.createCoordinate(x, y)
-                )
-            }
-        }
+        clearCollections()
+        updateConfiguration(DefaultConfiguration())
     }
 
     override fun createMines(index: Int) {
-        reset()
+        clearCollections()
 
         val initCoord = coordinateFactory.createCoordinate(index)
         val shuffledCoordinates = fieldList.shuffled()
@@ -73,10 +56,6 @@ class AndroidField @Inject constructor(
     }
 
     override fun clear(index: Int): Boolean {
-        if (_mines.isEmpty()) {
-            createMines(index)
-        }
-
         val position = _fieldList[index]
         _cleared.add(position)
         return _mines.contains(position)
@@ -103,5 +82,28 @@ class AndroidField @Inject constructor(
     override fun isMine(index: Int): Boolean {
         val position = _fieldList[index]
         return _mines.contains(position)
+    }
+
+    private fun updateConfiguration(configuration: Configuration) {
+        if (this.configuration == configuration) return
+        this.configuration.numRows = configuration.numRows
+        this.configuration.numCols = configuration.numCols
+        this.configuration.numMines = configuration.numMines
+        clearCollections()
+        _fieldList.clear()
+
+        for (y in 0 until configuration.numCols) {
+            for (x in 0 until configuration.numRows) {
+                _fieldList.add(
+                    coordinateFactory.createCoordinate(x, y)
+                )
+            }
+        }
+    }
+
+    private fun clearCollections() {
+        _mines.clear()
+        _flags.clear()
+        _cleared.clear()
     }
 }

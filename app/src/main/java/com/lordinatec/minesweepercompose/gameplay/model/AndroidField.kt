@@ -7,7 +7,6 @@ package com.lordinatec.minesweepercompose.gameplay.model
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
-import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import javax.inject.Inject
 
@@ -17,7 +16,7 @@ import javax.inject.Inject
  * @param configuration the configuration of the field
  */
 class AndroidField @Inject constructor(
-    private val coordinateFactory: CoordinateFactory,
+    override val coordinateFactory: CoordinateFactory,
     override val configuration: Configuration
 ) : Field {
     private val _fieldList = mutableListOf<Coordinate>()
@@ -34,9 +33,9 @@ class AndroidField @Inject constructor(
     override val cleared: Collection<Coordinate>
         get() = _cleared.toSet()
 
-    override fun reset() {
+    override fun reset(configuration: Configuration) {
         clearCollections()
-        updateConfiguration(DefaultConfiguration())
+        updateConfiguration(configuration)
     }
 
     override fun createMines(index: Int) {

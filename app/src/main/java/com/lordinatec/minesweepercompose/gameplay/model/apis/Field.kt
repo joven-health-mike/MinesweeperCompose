@@ -14,6 +14,11 @@ interface Field {
     val configuration: Configuration
 
     /**
+     * Coordinate factory
+     */
+    val coordinateFactory: CoordinateFactory
+
+    /**
      * List of coordinates in the field
      */
     val fieldList: List<Coordinate>
@@ -35,8 +40,10 @@ interface Field {
 
     /**
      * Reset the field
+     *
+     * @param configuration Configuration Configuration of the field
      */
-    fun reset()
+    fun reset(configuration: Configuration)
 
     /**
      * Create mines in the field. The given coordinates are guaranteed to NOT be a mine.
@@ -111,21 +118,19 @@ interface Field {
     /**
      * Get the adjacent coordinates of the given coordinate
      *
-     * @param coordinate Coordinate Coordinate to get adjacent coordinates
+     * @param index Int Index of the coordinate
      * @param factory CoordinateFactory Factory to create coordinates
      *
      * @return Collection<Coordinate> Adjacent coordinates
      */
-    fun adjacentCoordinates(
-        coordinate: Coordinate,
-        factory: CoordinateFactory
-    ): Collection<Coordinate> {
+    fun adjacentCoordinates(index: Int): Collection<Coordinate> {
+        val coordinate = fieldList[index]
         return mutableListOf<Coordinate>().apply {
             for (adjacentCoordinate in AdjacentTranslations.entries) {
                 val x = coordinate.x() + adjacentCoordinate.transX
                 val y = coordinate.y() + adjacentCoordinate.transY
                 if (x in 0..<configuration.numRows && y in 0..<configuration.numCols) {
-                    add(factory.createCoordinate(x, y))
+                    add(coordinateFactory.createCoordinate(x, y))
                 }
             }
         }

@@ -58,13 +58,12 @@ class GameControllerTest {
         every { field.fieldList } answers { fieldList }
         every { field.isMine(any()) } answers { false }
         every { field.isFlag(any()) } answers { false }
-        every { field.reset() } just Runs
+        every { field.reset(any()) } just Runs
         every { field.createMines(any()) } just Runs
         every { field.clear(any()) } answers { false }
         every { field.flag(any()) } answers { false }
         every { field.flaggedAllMines() } answers { false }
         every { eventPublisher.publish(any()) } just Runs
-        every { eventPublisher.resetField() } just Runs
         every { eventPublisher.gameWon(any()) } just Runs
         for (y in 0 until Config.height) {
             for (x in 0 until Config.width) {
@@ -104,7 +103,7 @@ class GameControllerTest {
 
     @Test
     fun testClearOnGameStarted() = runTest {
-        every { field.adjacentCoordinates(any(), coordinateFactory) } answers { emptyList() }
+        every { field.adjacentCoordinates(any()) } answers { emptyList() }
         val clearedList = mutableListOf<Coordinate>()
         every { field.clear(any()) } answers {
             val index = firstArg<Int>()
@@ -155,9 +154,9 @@ class GameControllerTest {
 
     @Test
     fun testClearEverything() = runTest {
-        every { field.adjacentCoordinates(any(), coordinateFactory) } answers {
+        every { field.adjacentCoordinates(any()) } answers {
             mutableListOf<Coordinate>().apply {
-                val initCoord = firstArg<Coordinate>()
+                val initCoord = coordinateFactory.createCoordinate(firstArg<Int>())
                 for (adjacent in AdjacentTranslations.entries) {
                     val newX = initCoord.x() + adjacent.transX
                     val newY = initCoord.y() + adjacent.transY
@@ -183,9 +182,9 @@ class GameControllerTest {
 
     @Test
     fun testClearAdjacentTiles() = runTest {
-        every { field.adjacentCoordinates(any(), coordinateFactory) } answers {
+        every { field.adjacentCoordinates(any()) } answers {
             mutableListOf<Coordinate>().apply {
-                val initCoord = firstArg<Coordinate>()
+                val initCoord = coordinateFactory.createCoordinate(firstArg<Int>())
                 if (initCoord.x() != 0 || initCoord.y() != 0) {
                     return@apply
                 }
@@ -214,9 +213,9 @@ class GameControllerTest {
 
     @Test
     fun testCountAdjacentFlags() = runTest {
-        every { field.adjacentCoordinates(any(), coordinateFactory) } answers {
+        every { field.adjacentCoordinates(any()) } answers {
             mutableListOf<Coordinate>().apply {
-                val initCoord = firstArg<Coordinate>()
+                val initCoord = coordinateFactory.createCoordinate(firstArg<Int>())
                 for (adjacent in AdjacentTranslations.entries) {
                     val newX = initCoord.x() + adjacent.transX
                     val newY = initCoord.y() + adjacent.transY
@@ -229,6 +228,6 @@ class GameControllerTest {
         }
         gameController.maybeCreateGame(0)
         gameController.countAdjacentFlags(0)
-        verify(exactly = 1) { field.adjacentCoordinates(any(), any()) }
+        verify(exactly = 1) { field.adjacentCoordinates(any()) }
     }
 }

@@ -51,7 +51,7 @@ class GameViewModelTest {
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
-        every { field.updateConfiguration(any()) } just Runs
+        every { field.reset(any()) } just Runs
         every { gameController.maybeCreateGame(any()) } answers { true }
         every { gameController.clear(any()) } just Runs
         every { gameController.resetGame() } just Runs

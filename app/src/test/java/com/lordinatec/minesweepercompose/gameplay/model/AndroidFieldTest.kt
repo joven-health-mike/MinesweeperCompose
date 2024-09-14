@@ -47,7 +47,7 @@ class AndroidFieldTest {
         every { configuration.numCols = any() } just Runs
         every { configuration.numMines = any() } just Runs
         androidField = AndroidField(coordinateFactory, configuration).apply {
-            updateConfiguration(DefaultConfiguration())
+            reset(DefaultConfiguration())
         }
     }
 

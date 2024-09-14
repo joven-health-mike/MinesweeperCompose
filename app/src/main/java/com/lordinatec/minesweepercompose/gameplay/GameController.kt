@@ -9,6 +9,7 @@ import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
+import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import javax.inject.Inject
@@ -39,7 +40,7 @@ class GameController @Inject constructor(
             gameTime = newTime
         }
         gameCreated = false
-        gameField.reset()
+        gameField.reset(DefaultConfiguration())
         timer.stop()
     }
 
@@ -73,8 +74,7 @@ class GameController @Inject constructor(
     }
 
     private fun getAdjacent(index: Int): Collection<Coordinate> {
-        val position = gameField.fieldList[index]
-        return gameField.adjacentCoordinates(position, coordinateFactory)
+        return gameField.adjacentCoordinates(index)
     }
 
     /**
@@ -126,7 +126,7 @@ class GameController @Inject constructor(
     fun resetGame() {
         gameCreated = false
         eventPublisher.publish(GameEvent.FieldReset)
-        gameField.reset()
+        gameField.reset(DefaultConfiguration())
         timer.stop()
     }
 
@@ -136,9 +136,7 @@ class GameController @Inject constructor(
      * @param index - index of the tile to clear
      */
     fun clear(index: Int) {
-        if (!gameCreated) return
-        if (gameField.isFlag(index)) return
-        if (gameField.cleared.contains(gameField.fieldList[index])) return
+        if (!gameCreated || gameField.isFlag(index) || gameField.cleared.contains(gameField.fieldList[index])) return
 
         val isMine = gameField.clear(index)
         if (isMine) {

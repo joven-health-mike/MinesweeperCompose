@@ -5,14 +5,14 @@
 package com.lordinatec.minesweepercompose.gameplay
 
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.apis.AdjacentTranslations
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateImpl
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactoryImpl
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
+import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
@@ -39,12 +39,8 @@ class GameControllerTest {
     @MockK
     private lateinit var timer: Timer
 
-    @MockK
-    private lateinit var coordinateFactory: CoordinateFactory
-
-    private val xyIndexTranslator = XYIndexTranslator().apply {
-        updateSize(Config.width, Config.height)
-    }
+    private val coordinateTranslator = XYIndexTranslator()
+    private val coordinateFactory: CoordinateFactory = CoordinateFactoryImpl(coordinateTranslator)
     private val fieldList = mutableListOf<Coordinate>()
 
     private lateinit var gameController: GameController
@@ -63,36 +59,28 @@ class GameControllerTest {
         every { field.isMine(any()) } answers { false }
         every { field.isFlag(any()) } answers { false }
         every { field.reset() } just Runs
-        every { field.createMines(any(), any()) } just Runs
+        every { field.createMines(any()) } just Runs
         every { field.clear(any()) } answers { false }
         every { field.flag(any()) } answers { false }
         every { field.flaggedAllMines() } answers { false }
         every { eventPublisher.publish(any()) } just Runs
         every { eventPublisher.resetField() } just Runs
         every { eventPublisher.gameWon(any()) } just Runs
-        every { coordinateFactory.createCoordinate(any(), any(), any()) } answers {
-            val x = firstArg<Int>()
-            val y = secondArg<Int>()
-            val index = thirdArg<Int>()
-            CoordinateImpl(x to y, index)
-        }
         for (y in 0 until Config.height) {
             for (x in 0 until Config.width) {
                 fieldList.add(
-                    coordinateFactory.createCoordinate(
-                        x, y, xyIndexTranslator.xyToIndex(x, y)
-                    )
+                    coordinateFactory.createCoordinate(x, y)
                 )
             }
         }
         gameController =
-            GameController(field, timer, eventPublisher, xyIndexTranslator, coordinateFactory)
+            GameController(field, timer, eventPublisher, coordinateFactory)
     }
 
     @Test
     fun testMaybeCreateGame() = runTest {
         gameController.maybeCreateGame(0)
-        verify(exactly = 1) { field.createMines(any(), any()) }
+        verify(exactly = 1) { field.createMines(0) }
         verify(exactly = 1) { eventPublisher.publish(GameEvent.GameCreated) }
     }
 
@@ -100,7 +88,7 @@ class GameControllerTest {
     fun testMaybeCreateGameWhenGameStarted() = runTest {
         repeat(2) {
             gameController.maybeCreateGame(0)
-            verify(exactly = 1) { field.createMines(any(), any()) }
+            verify(exactly = 1) { field.createMines(0) }
             verify(exactly = 1) { eventPublisher.publish(GameEvent.GameCreated) }
         }
     }
@@ -108,10 +96,10 @@ class GameControllerTest {
     @Test
     fun testMaybeCreateGameAfterReset() = runTest {
         gameController.maybeCreateGame(0)
-        verify(exactly = 1) { field.createMines(any(), any()) }
+        verify(exactly = 1) { field.createMines(0) }
         gameController.resetGame()
         gameController.maybeCreateGame(1)
-        verify(exactly = 2) { field.createMines(any(), any()) }
+        verify(exactly = 2) { field.createMines(any()) }
     }
 
     @Test
@@ -120,10 +108,9 @@ class GameControllerTest {
         val clearedList = mutableListOf<Coordinate>()
         every { field.clear(any()) } answers {
             val index = firstArg<Int>()
-            val (x, y) = xyIndexTranslator.indexToXY(index)
-            val coordinate = coordinateFactory.createCoordinate(x, y, index)
+            val coordinate = coordinateFactory.createCoordinate(index)
             if (!clearedList.contains(coordinate)) {
-                clearedList.add(coordinateFactory.createCoordinate(x, y, index))
+                clearedList.add(coordinateFactory.createCoordinate(index))
             }
             false
         }
@@ -175,8 +162,7 @@ class GameControllerTest {
                     val newX = initCoord.x() + adjacent.transX
                     val newY = initCoord.y() + adjacent.transY
                     if (newX >= 0 && newY >= 0 && newX < Config.width && newY < Config.height) {
-                        val newIndex = xyIndexTranslator.xyToIndex(newX, newY)
-                        val newCoord = coordinateFactory.createCoordinate(newX, newY, newIndex)
+                        val newCoord = coordinateFactory.createCoordinate(newX, newY)
                         add(newCoord)
                     }
                 }
@@ -185,8 +171,7 @@ class GameControllerTest {
         val clearedList = mutableListOf<Coordinate>()
         every { field.clear(any()) } answers {
             val index = firstArg<Int>()
-            val (x, y) = xyIndexTranslator.indexToXY(index)
-            clearedList.add(coordinateFactory.createCoordinate(x, y, index))
+            clearedList.add(coordinateFactory.createCoordinate(index))
             false
         }
         every { field.allClear() } answers { clearedList.size == Config.width * Config.height }
@@ -208,8 +193,7 @@ class GameControllerTest {
                     val newX = initCoord.x() + adjacent.transX
                     val newY = initCoord.y() + adjacent.transY
                     if (newX >= 0 && newY >= 0 && newX < Config.width && newY < Config.height) {
-                        val newIndex = xyIndexTranslator.xyToIndex(newX, newY)
-                        val newCoord = coordinateFactory.createCoordinate(newX, newY, newIndex)
+                        val newCoord = coordinateFactory.createCoordinate(newX, newY)
                         add(newCoord)
                     }
                 }
@@ -218,8 +202,7 @@ class GameControllerTest {
         val clearedList = mutableListOf<Coordinate>()
         every { field.clear(any()) } answers {
             val index = firstArg<Int>()
-            val (x, y) = xyIndexTranslator.indexToXY(index)
-            clearedList.add(coordinateFactory.createCoordinate(x, y, index))
+            clearedList.add(coordinateFactory.createCoordinate(index))
             false
         }
         every { field.allClear() } answers { clearedList.size == Config.width * Config.height }
@@ -238,8 +221,7 @@ class GameControllerTest {
                     val newX = initCoord.x() + adjacent.transX
                     val newY = initCoord.y() + adjacent.transY
                     if (newX >= 0 && newY >= 0 && newX < Config.width && newY < Config.height) {
-                        val newIndex = xyIndexTranslator.xyToIndex(newX, newY)
-                        val newCoord = coordinateFactory.createCoordinate(newX, newY, newIndex)
+                        val newCoord = coordinateFactory.createCoordinate(newX, newY)
                         add(newCoord)
                     }
                 }

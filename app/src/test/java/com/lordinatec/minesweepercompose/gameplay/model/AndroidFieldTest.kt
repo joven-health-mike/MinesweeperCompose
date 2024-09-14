@@ -5,11 +5,11 @@
 package com.lordinatec.minesweepercompose.gameplay.model
 
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateImpl
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactoryImpl
 import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
+import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every
@@ -31,12 +31,9 @@ class AndroidFieldTest {
     @MockK
     private lateinit var configuration: Configuration
 
-    @MockK
-    private lateinit var coordinateFactory: CoordinateFactory
+    private val coordinateTranslator = XYIndexTranslator()
+    private val coordinateFactory: CoordinateFactory = CoordinateFactoryImpl(coordinateTranslator)
 
-    private val xyIndexTranslator = XYIndexTranslator().apply {
-        updateSize(Config.width, Config.height)
-    }
     private lateinit var androidField: AndroidField
 
     @BeforeTest
@@ -49,18 +46,15 @@ class AndroidFieldTest {
         every { configuration.numRows = any() } just Runs
         every { configuration.numCols = any() } just Runs
         every { configuration.numMines = any() } just Runs
-        every { coordinateFactory.createCoordinate(any(), any(), any()) } answers {
-            CoordinateImpl(firstArg() as Int to secondArg() as Int, thirdArg() as Int)
-        }
-        androidField = AndroidField(coordinateFactory, configuration, xyIndexTranslator).apply {
+        androidField = AndroidField(coordinateFactory, configuration).apply {
             updateConfiguration(DefaultConfiguration())
         }
     }
 
     @Test
     fun testCreateMinesWithXY() = runTest {
-        val testCoord = coordinateFactory.createCoordinate(0, 0, 0)
-        androidField.createMines(testCoord.x(), testCoord.y())
+        val testCoord = coordinateFactory.createCoordinate(0)
+        androidField.createMines(testCoord.index)
         assertEquals(configuration.numMines, androidField.mines.size)
         var minesFound = 0
         for (position in androidField.fieldList) {
@@ -77,7 +71,7 @@ class AndroidFieldTest {
 
     @Test
     fun testFlagsPlaced() = runTest {
-        val testCoord = coordinateFactory.createCoordinate(0, 0, 0)
+        val testCoord = coordinateFactory.createCoordinate(0)
         androidField.flag(testCoord.index)
         assertEquals(1, androidField.flags.size)
         assertTrue(androidField.isFlag(testCoord.index))
@@ -90,7 +84,7 @@ class AndroidFieldTest {
 
     @Test
     fun testClear() = runTest {
-        androidField.createMines(0, 0)
+        androidField.createMines(0)
         var numMines = 0
         for (position in androidField.fieldList) {
             if (androidField.clear(position.index)) {

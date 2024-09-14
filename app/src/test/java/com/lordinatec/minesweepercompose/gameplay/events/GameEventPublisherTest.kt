@@ -6,7 +6,6 @@
 
 package com.lordinatec.minesweepercompose.gameplay.events
 
-import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import io.mockk.MockKAnnotations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,15 +20,13 @@ import kotlin.test.assertEquals
 
 class GameEventPublisherTest {
 
-    private val xyIndexTranslator = XYIndexTranslator()
-
     private lateinit var gameEventPublisher: GameEventPublisher
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
-        gameEventPublisher = GameEventPublisher(TestScope(), xyIndexTranslator)
+        gameEventPublisher = GameEventPublisher(TestScope())
     }
 
     @Test
@@ -45,10 +42,8 @@ class GameEventPublisherTest {
     @Test
     fun testPositionCleared() = runTest {
         val index = 0
-        val x = 0
-        val y = 0
         val adjacentMines = 1
-        gameEventPublisher.positionCleared(x, y, adjacentMines)
+        gameEventPublisher.publish(GameEvent.PositionCleared(index, adjacentMines))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.PositionCleared)
             assertEquals(index, (it as GameEvent.PositionCleared).index)
@@ -59,9 +54,7 @@ class GameEventPublisherTest {
     @Test
     fun testPositionExploded() = runTest {
         val index = 0
-        val x = 0
-        val y = 0
-        gameEventPublisher.positionExploded(x, y)
+        gameEventPublisher.publish(GameEvent.PositionExploded(index))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.PositionExploded)
             assertEquals(index, (it as GameEvent.PositionExploded).index)
@@ -71,9 +64,7 @@ class GameEventPublisherTest {
     @Test
     fun testPositionFlagged() = runTest {
         val index = 0
-        val x = 0
-        val y = 0
-        gameEventPublisher.positionFlagged(x, y)
+        gameEventPublisher.publish(GameEvent.PositionFlagged(index))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.PositionFlagged)
             assertEquals(index, (it as GameEvent.PositionFlagged).index)
@@ -83,9 +74,7 @@ class GameEventPublisherTest {
     @Test
     fun testPositionUnflagged() = runTest {
         val index = 0
-        val x = 0
-        val y = 0
-        gameEventPublisher.positionUnflagged(x, y)
+        gameEventPublisher.publish(GameEvent.PositionUnflagged(index))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.PositionUnflagged)
             assertEquals(index, (it as GameEvent.PositionUnflagged).index)

@@ -99,22 +99,22 @@ class GameViewModelModule {
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class GameViewModelInterfaceModule {
+interface GameViewModelInterfaceModule {
     @Binds
-    abstract fun provideEventPublisher(
+    fun provideEventPublisher(
         gameEventPublisher: GameEventPublisher
     ): EventPublisher
 
     @Binds
-    abstract fun provideStatsProvider(
+    fun provideStatsProvider(
         statsUpdater: StatsUpdater
     ): StatsProvider
 
     @Binds
-    abstract fun provideTimer(
+    fun provideTimer(
         timer: CoroutineTimer
     ): Timer
 
     @Binds
-    abstract fun provideTimerOnTickListener(defaultOnTickListener: Timer.DefaultOnTickListener): Timer.OnTickListener
+    fun provideTimerOnTickListener(defaultOnTickListener: Timer.DefaultOnTickListener): Timer.OnTickListener
 }

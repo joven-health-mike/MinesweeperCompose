@@ -4,15 +4,15 @@
 
 package com.lordinatec.minesweepercompose.di
 
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateTranslator
-import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactoryImpl
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateTranslator
 import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
+import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
 import dagger.Binds
 import dagger.Module
@@ -78,17 +78,17 @@ class GameModule {
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class InterfaceGameModule {
+interface InterfaceGameModule {
 
     @Binds
-    abstract fun bindConfiguration(defaultConfiguration: DefaultConfiguration): Configuration
+    fun bindConfiguration(defaultConfiguration: DefaultConfiguration): Configuration
 
     @Binds
-    abstract fun bindCoordinateTranslator(xyIndexTranslator: XYIndexTranslator): CoordinateTranslator
+    fun bindCoordinateTranslator(xyIndexTranslator: XYIndexTranslator): CoordinateTranslator
 
     @Binds
-    abstract fun bindCoordinateFactory(coordinateFactoryImpl: CoordinateFactoryImpl): CoordinateFactory
+    fun bindCoordinateFactory(coordinateFactoryImpl: CoordinateFactoryImpl): CoordinateFactory
 
     @Binds
-    abstract fun bindField(androidField: AndroidField): Field
+    fun bindField(androidField: AndroidField): Field
 }

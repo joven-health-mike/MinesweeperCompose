@@ -4,8 +4,6 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model.apis
 
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
-
 /**
  * Field interface
  */
@@ -36,11 +34,6 @@ interface Field {
     val cleared: Collection<Coordinate>
 
     /**
-     * XYIndexTranslator to translate between indexes and coordinates
-     */
-    val xyIndexTranslator: XYIndexTranslator
-
-    /**
      * Reset the field
      */
     fun reset()
@@ -55,10 +48,9 @@ interface Field {
     /**
      * Create mines in the field. The given coordinates are guaranteed to NOT be a mine.
      *
-     * @param x Int X coordinate of the initial click
-     * @param y Int Y coordinate of the initial click
+     * @param index Int Index to avoid creating mines on
      */
-    fun createMines(x: Int, y: Int)
+    fun createMines(index: Int)
 
     /**
      * Determines if the index is a flag
@@ -140,7 +132,7 @@ interface Field {
                 val x = coordinate.x() + adjacentCoordinate.transX
                 val y = coordinate.y() + adjacentCoordinate.transY
                 if (x in 0..<configuration.numRows && y in 0..<configuration.numCols) {
-                    add(factory.createCoordinate(x, y, xyIndexTranslator.xyToIndex(x, y)))
+                    add(factory.createCoordinate(x, y))
                 }
             }
         }

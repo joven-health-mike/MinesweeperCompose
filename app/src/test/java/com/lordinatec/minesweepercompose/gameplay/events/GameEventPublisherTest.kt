@@ -6,7 +6,7 @@
 
 package com.lordinatec.minesweepercompose.gameplay.events
 
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
+import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import io.mockk.MockKAnnotations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -4,7 +4,7 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
+import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
@@ -18,8 +18,7 @@ import javax.inject.Inject
  */
 class AndroidField @Inject constructor(
     private val coordinateFactory: CoordinateFactory,
-    override val configuration: Configuration,
-    override val xyIndexTranslator: XYIndexTranslator
+    override val configuration: Configuration
 ) : Field {
     private val _fieldList = mutableListOf<Coordinate>()
     private val _mines = mutableSetOf<Coordinate>()
@@ -51,24 +50,16 @@ class AndroidField @Inject constructor(
         for (y in 0 until configuration.numCols) {
             for (x in 0 until configuration.numRows) {
                 _fieldList.add(
-                    coordinateFactory.createCoordinate(
-                        x,
-                        y,
-                        xyIndexTranslator.xyToIndex(x, y)
-                    )
+                    coordinateFactory.createCoordinate(x, y)
                 )
             }
         }
     }
 
-    override fun createMines(x: Int, y: Int) {
+    override fun createMines(index: Int) {
         reset()
 
-        val initCoord = coordinateFactory.createCoordinate(
-            x,
-            y,
-            xyIndexTranslator.xyToIndex(x, y)
-        )
+        val initCoord = coordinateFactory.createCoordinate(index)
         val shuffledCoordinates = fieldList.shuffled()
 
         for (coordinate in shuffledCoordinates) {
@@ -83,8 +74,7 @@ class AndroidField @Inject constructor(
 
     override fun clear(index: Int): Boolean {
         if (_mines.isEmpty()) {
-            val (x, y) = xyIndexTranslator.indexToXY(index)
-            createMines(x, y)
+            createMines(index)
         }
 
         val position = _fieldList[index]

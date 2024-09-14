@@ -4,6 +4,9 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model.apis
 
+import com.lordinatec.minesweepercompose.config.Config
+import javax.inject.Inject
+
 /**
  * Coordinate is a data class that represents a 2D coordinate in a grid and an associated index.
  */
@@ -64,27 +67,45 @@ class CoordinateImpl(override val value: Pair<Int, Int>, override val index: Int
 /**
  * CoordinateFactory is a functional interface that creates a Coordinate object.
  */
-fun interface CoordinateFactory {
+interface CoordinateFactory {
     /**
      * Creates a Coordinate object.
      *
      * @param row The row value of the coordinate.
      * @param col The column value of the coordinate.
+     */
+    fun createCoordinate(row: Int, col: Int): Coordinate
+
+    /**
+     * Creates a Coordinate object.
+     *
      * @param index The index value of the coordinate.
      */
-    fun createCoordinate(row: Int, col: Int, index: Int): Coordinate
+    fun createCoordinate(index: Int): Coordinate
 
 }
 
 /**
  * CoordinateFactoryImpl is a class that implements the CoordinateFactory interface and creates a Coordinate object.
  */
-class CoordinateFactoryImpl : CoordinateFactory {
+class CoordinateFactoryImpl @Inject constructor(
+    private val coordinateTranslator: CoordinateTranslator
+) : CoordinateFactory {
     private val cache by lazy {
         mutableMapOf<Int, Coordinate>()
     }
 
-    override fun createCoordinate(row: Int, col: Int, index: Int): Coordinate {
+    private fun maybeUpdateSize() {
+        if (coordinateTranslator.width != Config.width || coordinateTranslator.height != Config.height) {
+            cache.clear()
+            coordinateTranslator.updateSize(Config.width, Config.height)
+        }
+    }
+
+    override fun createCoordinate(row: Int, col: Int): Coordinate {
+        maybeUpdateSize()
+        val index = coordinateTranslator.xyToIndex(row, col)
+
         return if (cache.containsKey(index)) {
             val coord = cache[index]!!
             var result = coord
@@ -99,5 +120,11 @@ class CoordinateFactoryImpl : CoordinateFactory {
             cache[index] = newCoord
             newCoord
         }
+    }
+
+    override fun createCoordinate(index: Int): Coordinate {
+        maybeUpdateSize()
+        val (x, y) = coordinateTranslator.indexToXY(index)
+        return createCoordinate(x, y)
     }
 }

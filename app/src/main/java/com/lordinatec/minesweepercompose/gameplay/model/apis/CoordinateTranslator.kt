@@ -2,12 +2,18 @@
  * Copyright Lordinatec LLC 2024
  */
 
-package com.lordinatec.minesweepercompose.config
+package com.lordinatec.minesweepercompose.gameplay.model.apis
+
+import com.lordinatec.minesweepercompose.config.Config
 
 /**
  * Interface for translating between XY coordinates and a single index.
  */
 interface CoordinateTranslator {
+
+    var width: Int
+    var height: Int
+
     /**
      * Translates XY coordinates to a single index.
      *
@@ -40,8 +46,8 @@ interface CoordinateTranslator {
  * A simple XY index translator.
  */
 class XYIndexTranslator : CoordinateTranslator {
-    var width = Config.width
-    var height = Config.height
+    override var width = Config.width
+    override var height = Config.height
 
     override fun xyToIndex(x: Int, y: Int): Int {
         return y * width + x

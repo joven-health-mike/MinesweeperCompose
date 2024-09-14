@@ -5,7 +5,6 @@
 package com.lordinatec.minesweepercompose.gameplay
 
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.config.CoordinateTranslator
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
@@ -28,7 +27,6 @@ class GameController @Inject constructor(
     private val gameField: Field,
     private val timer: Timer,
     private val eventPublisher: GameEventPublisher,
-    private val xyIndexTranslator: CoordinateTranslator,
     private val coordinateFactory: CoordinateFactory
 ) {
 
@@ -52,8 +50,7 @@ class GameController @Inject constructor(
         if (!gameCreated) {
             gameCreated = true
             eventPublisher.publish(GameEvent.GameCreated)
-            val (x, y) = xyIndexTranslator.indexToXY(index)
-            gameField.createMines(x, y)
+            gameField.createMines(index)
             timer.stop()
             timer.start()
             return true
@@ -117,12 +114,7 @@ class GameController @Inject constructor(
     fun countAdjacentFlags(index: Int): Int {
         if (!gameCreated) return -1
         return getAdjacent(index).count {
-            gameField.isFlag(
-                xyIndexTranslator.xyToIndex(
-                    it.x(),
-                    it.y()
-                )
-            )
+            gameField.isFlag(it.index)
         }
     }
 
@@ -153,8 +145,7 @@ class GameController @Inject constructor(
             eventPublisher.gameLost()
         } else {
             val adjacent = getAdjacent(index).filter { coordinate ->
-                val coordIndex = xyIndexTranslator.xyToIndex(coordinate.x(), coordinate.y())
-                gameField.isMine(coordIndex)
+                gameField.isMine(coordinate.index)
             }.size
             eventPublisher.publish(GameEvent.PositionCleared(index, adjacent))
             if (adjacent == 0) {

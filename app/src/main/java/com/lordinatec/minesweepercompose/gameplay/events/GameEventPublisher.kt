@@ -4,7 +4,6 @@
 
 package com.lordinatec.minesweepercompose.gameplay.events
 
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -16,11 +15,7 @@ import javax.inject.Inject
  *
  * @constructor Creates a new GameEventPublisher
  */
-class GameEventPublisher @Inject constructor(
-    val publisherScope: CoroutineScope,
-    private val xyIndexTranslator: XYIndexTranslator
-) :
-    EventPublisher {
+class GameEventPublisher @Inject constructor(val publisherScope: CoroutineScope) : EventPublisher {
     private val _events = MutableSharedFlow<Event>()
     override val events = _events.asSharedFlow()
     private var gameOver = false
@@ -51,51 +46,6 @@ class GameEventPublisher @Inject constructor(
      */
     fun timeUpdate(newTime: Long) {
         publish(GameEvent.TimeUpdate(newTime))
-    }
-
-    /**
-     * Converts a GameControlStrategy.Listener positionCleared to a PositionCleared event
-     *
-     * @param x The x coordinate of the cleared position
-     * @param y The y coordinate of the cleared position
-     * @param adjacentMines The number of adjacent mines
-     */
-    fun positionCleared(x: Int, y: Int, adjacentMines: Int) {
-        val index = xyIndexTranslator.xyToIndex(x, y)
-        publish(GameEvent.PositionCleared(index, adjacentMines))
-    }
-
-    /**
-     * Converts a GameControlStrategy.Listener positionExploded to a PositionExploded event
-     *
-     * @param x The x coordinate of the exploded position
-     * @param y The y coordinate of the exploded position
-     */
-    fun positionExploded(x: Int, y: Int) {
-        val index = xyIndexTranslator.xyToIndex(x, y)
-        publish(GameEvent.PositionExploded(index))
-    }
-
-    /**
-     * Converts a GameControlStrategy.Listener positionFlagged to a PositionFlagged event
-     *
-     * @param x The x coordinate of the flagged position
-     * @param y The y coordinate of the flagged position
-     */
-    fun positionFlagged(x: Int, y: Int) {
-        val index = xyIndexTranslator.xyToIndex(x, y)
-        publish(GameEvent.PositionFlagged(index))
-    }
-
-    /**
-     * Converts a GameControlStrategy.Listener positionUnflagged to a PositionUnflagged event
-     *
-     * @param x The x coordinate of the unflagged position
-     * @param y The y coordinate of the unflagged position
-     */
-    fun positionUnflagged(x: Int, y: Int) {
-        val index = xyIndexTranslator.xyToIndex(x, y)
-        publish(GameEvent.PositionUnflagged(index))
     }
 
     /**

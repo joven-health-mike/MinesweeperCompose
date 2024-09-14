@@ -5,7 +5,7 @@
 package com.lordinatec.minesweepercompose.gameplay.model
 
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
+import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateImpl

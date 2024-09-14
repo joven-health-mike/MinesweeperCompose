@@ -6,7 +6,6 @@ package com.lordinatec.minesweepercompose.di
 
 import android.app.Application
 import android.content.Context
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
@@ -58,8 +57,7 @@ class GameViewModelModule {
     @Singleton
     fun provideGameEventPublisher(
         scope: CoroutineScope,
-        xyIndexTranslator: XYIndexTranslator
-    ): GameEventPublisher = GameEventPublisher(scope, xyIndexTranslator)
+    ): GameEventPublisher = GameEventPublisher(scope)
 
     @Provides
     @Singleton
@@ -84,10 +82,9 @@ class GameViewModelModule {
         androidField: AndroidField,
         timer: Timer,
         eventPublisher: GameEventPublisher,
-        xyIndexTranslator: XYIndexTranslator,
         coordinateFactory: CoordinateFactory
     ): GameController =
-        GameController(androidField, timer, eventPublisher, xyIndexTranslator, coordinateFactory)
+        GameController(androidField, timer, eventPublisher, coordinateFactory)
 
     @Provides
     @Singleton

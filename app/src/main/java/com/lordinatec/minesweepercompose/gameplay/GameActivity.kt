@@ -23,7 +23,6 @@ import androidx.lifecycle.lifecycleScope
 import com.lordinatec.minesweepercompose.R
 import com.lordinatec.minesweepercompose.android.sharedPreferences
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.gameplay.views.GameView
@@ -44,9 +43,6 @@ class GameActivity : ComponentActivity() {
     lateinit var statsEventConsumer: StatsEventConsumer
 
     @Inject
-    lateinit var xyIndexTranslator: XYIndexTranslator
-
-    @Inject
     lateinit var timerLifecycleObserver: TimerLifecycleObserver
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +57,6 @@ class GameActivity : ComponentActivity() {
             if (Config.feature_adjust_field_to_screen_size) {
                 determineFieldSize(viewModel, isPortraitMode)
             }
-            xyIndexTranslator.updateSize(Config.width, Config.height)
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     LaunchedEffect(Unit) {

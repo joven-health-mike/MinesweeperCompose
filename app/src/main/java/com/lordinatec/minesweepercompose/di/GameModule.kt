@@ -8,7 +8,7 @@ import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactoryImpl
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CachedCoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateTranslator
 import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
@@ -51,8 +51,8 @@ class GameModule {
 
     @Provides
     @Singleton
-    fun provideCoordinateFactoryImpl(coordinateTranslator: CoordinateTranslator): CoordinateFactoryImpl =
-        CoordinateFactoryImpl(coordinateTranslator)
+    fun provideCoordinateFactoryImpl(coordinateTranslator: CoordinateTranslator): CachedCoordinateFactory =
+        CachedCoordinateFactory(coordinateTranslator)
 
     @Provides
     @Singleton
@@ -87,7 +87,7 @@ interface InterfaceGameModule {
     fun bindCoordinateTranslator(xyIndexTranslator: XYIndexTranslator): CoordinateTranslator
 
     @Binds
-    fun bindCoordinateFactory(coordinateFactoryImpl: CoordinateFactoryImpl): CoordinateFactory
+    fun bindCoordinateFactory(coordinateFactoryImpl: CachedCoordinateFactory): CoordinateFactory
 
     @Binds
     fun bindField(androidField: AndroidField): Field

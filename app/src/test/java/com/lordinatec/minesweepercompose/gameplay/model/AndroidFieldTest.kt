@@ -7,7 +7,7 @@ package com.lordinatec.minesweepercompose.gameplay.model
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactoryImpl
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CachedCoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import io.mockk.MockKAnnotations
@@ -32,7 +32,7 @@ class AndroidFieldTest {
     private lateinit var configuration: Configuration
 
     private val coordinateTranslator = XYIndexTranslator()
-    private val coordinateFactory: CoordinateFactory = CoordinateFactoryImpl(coordinateTranslator)
+    private val coordinateFactory: CoordinateFactory = CachedCoordinateFactory(coordinateTranslator)
 
     private lateinit var androidField: AndroidField
 

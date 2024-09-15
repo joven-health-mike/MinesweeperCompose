@@ -45,10 +45,10 @@ interface CoordinateTranslator {
 /**
  * A simple XY index translator.
  */
-class XYIndexTranslator : CoordinateTranslator {
-    override var width = Config.width
-    override var height = Config.height
-
+class XYIndexTranslator(
+    override var width: Int = Config.width,
+    override var height: Int = Config.height
+) : CoordinateTranslator {
     override fun xyToIndex(x: Int, y: Int): Int {
         return y * width + x
     }

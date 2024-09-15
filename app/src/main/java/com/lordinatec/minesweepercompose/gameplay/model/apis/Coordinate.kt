@@ -35,7 +35,8 @@ interface Coordinate {
 /**
  * CoordinateImpl is a data class that implements the Coordinate interface and overrides the equals and hashCode methods.
  */
-class CoordinateImpl(override val value: Pair<Int, Int>, override val index: Int) : Coordinate {
+class CoordinateImpl(override val value: Pair<Int, Int>, override val index: Int) :
+    Coordinate {
     override fun toString(): String {
         return "Coordinate(value=(${value.first}, ${value.second}), index=$index)"
     }
@@ -78,18 +79,11 @@ interface CoordinateFactory {
 /**
  * CoordinateFactoryImpl is a class that implements the CoordinateFactory interface and creates a Coordinate object.
  */
-class CoordinateFactoryImpl @Inject constructor(
+class CachedCoordinateFactory @Inject constructor(
     private val coordinateTranslator: CoordinateTranslator
 ) : CoordinateFactory {
     private val cache by lazy {
         mutableMapOf<Int, Coordinate>()
-    }
-
-    private fun maybeUpdateSize() {
-        if (coordinateTranslator.width != Config.width || coordinateTranslator.height != Config.height) {
-            cache.clear()
-            coordinateTranslator.updateSize(Config.width, Config.height)
-        }
     }
 
     override fun createCoordinate(row: Int, col: Int): Coordinate {
@@ -116,6 +110,13 @@ class CoordinateFactoryImpl @Inject constructor(
         maybeUpdateSize()
         val (x, y) = coordinateTranslator.indexToXY(index)
         return createCoordinate(x, y)
+    }
+
+    private fun maybeUpdateSize() {
+        if (coordinateTranslator.width != Config.width || coordinateTranslator.height != Config.height) {
+            cache.clear()
+            coordinateTranslator.updateSize(Config.width, Config.height)
+        }
     }
 }
 

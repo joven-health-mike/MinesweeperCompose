@@ -10,7 +10,7 @@ import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.apis.AdjacentTranslations
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactoryImpl
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CachedCoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
@@ -40,7 +40,7 @@ class GameControllerTest {
     private lateinit var timer: Timer
 
     private val coordinateTranslator = XYIndexTranslator()
-    private val coordinateFactory: CoordinateFactory = CoordinateFactoryImpl(coordinateTranslator)
+    private val coordinateFactory: CoordinateFactory = CachedCoordinateFactory(coordinateTranslator)
     private val fieldList = mutableListOf<Coordinate>()
 
     private lateinit var gameController: GameController

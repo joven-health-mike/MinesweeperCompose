@@ -6,13 +6,23 @@ package com.lordinatec.minesweepercompose.gameplay.model.apis
 
 import com.lordinatec.minesweepercompose.config.Config
 
+/**
+ * Configuration is a data class that represents the configuration of the game.
+ *
+ * @property numRows The number of rows in the grid.
+ * @property numCols The number of columns in the grid.
+ * @property numMines The number of mines in the grid.
+ */
 interface Configuration {
     var numRows: Int
     var numCols: Int
     var numMines: Int
 }
 
-class DefaultConfiguration(
+/**
+ * DefaultConfiguration is a class that implements the Configuration interface and overrides the equals and hashCode methods.
+ */
+data class DefaultConfiguration(
     override var numRows: Int = Config.width,
     override var numCols: Int = Config.height,
     override var numMines: Int = Config.mines

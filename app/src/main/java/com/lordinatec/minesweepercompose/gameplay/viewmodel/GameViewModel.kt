@@ -15,6 +15,7 @@ import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,7 +38,7 @@ class GameViewModel @Inject constructor(
     private val gameController: GameController,
     private val gameEvents: GameEventPublisher,
     private val field: Field,
-    private val callbackDispatcher: CoroutineDispatcher
+    var callbackDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()

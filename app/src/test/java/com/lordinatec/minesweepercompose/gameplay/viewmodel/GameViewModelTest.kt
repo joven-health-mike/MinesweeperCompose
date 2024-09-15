@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.BeforeTest
@@ -60,43 +61,53 @@ class GameViewModelTest {
         every { gameController.clearEverything() } just Runs
         every { eventPublisher.events } answers { testFlow.asSharedFlow() }
         every { eventPublisher.publisherScope } answers { TestScope() }
-        gameViewModel = GameViewModel(gameController, eventPublisher, field).apply {
+        gameViewModel = GameViewModel(
+            gameController,
+            eventPublisher,
+            field,
+        ).apply {
             updateSize()
         }
     }
 
     @Test
     fun testCreateGame() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         gameViewModel.clear(0)
         verify { gameController.maybeCreateGame(0) }
     }
 
     @Test
     fun testClear() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         gameViewModel.clear(0)
         verify { gameController.clear(0) }
     }
 
     @Test
     fun testToggleFlag() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         gameViewModel.toggleFlag(0)
         verify { gameController.toggleFlag(0) }
     }
 
     @Test
     fun testFlagIsCorrect() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         gameViewModel.flagIsCorrect(0)
         verify { gameController.flagIsCorrect(0) }
     }
 
     @Test
     fun testResetGame() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         gameViewModel.resetGame()
         verify { gameController.resetGame() }
     }
 
     @Test
     fun testPositionCleared() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         val testIndex = 1
         val testAdjacent = 2
         testFlow.emit(GameEvent.PositionCleared(testIndex, testAdjacent))
@@ -108,6 +119,7 @@ class GameViewModelTest {
 
     @Test
     fun testPositionExploded() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         val testIndex = 1
         testFlow.emit(GameEvent.PositionExploded(testIndex))
         gameViewModel.uiState.first().let {
@@ -118,6 +130,7 @@ class GameViewModelTest {
 
     @Test
     fun testPositionFlagged() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         val testIndex = 1
         testFlow.emit(GameEvent.PositionFlagged(testIndex))
         gameViewModel.uiState.first().let {
@@ -128,6 +141,7 @@ class GameViewModelTest {
 
     @Test
     fun testPositionUnflagged() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         val testIndex = 1
         testFlow.emit(GameEvent.PositionUnflagged(testIndex))
         gameViewModel.uiState.first().let {
@@ -138,6 +152,7 @@ class GameViewModelTest {
 
     @Test
     fun testGameWon() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         gameViewModel.resetGame()
         testFlow.emit(GameEvent.GameWon(1000L))
         gameViewModel.uiState.first().let {
@@ -148,6 +163,7 @@ class GameViewModelTest {
 
     @Test
     fun testGameLost() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         testFlow.emit(GameEvent.GameLost)
         gameViewModel.uiState.first().let { state ->
             assertTrue(state.gameOver)
@@ -157,6 +173,7 @@ class GameViewModelTest {
 
     @Test
     fun testGameCreated() = runTest {
+        gameViewModel.callbackDispatcher = UnconfinedTestDispatcher(testScheduler)
         testFlow.emit(GameEvent.GameCreated)
         gameViewModel.uiState.first().let {
             assertFalse(it.newGame)

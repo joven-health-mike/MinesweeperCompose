@@ -32,7 +32,7 @@ class GameEventPublisherTest {
     @Test
     fun testTimeUpdate() = runTest {
         val newTime = 100L
-        gameEventPublisher.timeUpdate(newTime)
+        gameEventPublisher.publish(GameEvent.TimeUpdate(newTime))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.TimeUpdate)
             assertEquals(newTime, (it as GameEvent.TimeUpdate).newTime)
@@ -84,7 +84,7 @@ class GameEventPublisherTest {
     @Test
     fun testGameWon() = runTest {
         val winTime = 100L
-        gameEventPublisher.gameWon(winTime)
+        gameEventPublisher.publish(GameEvent.GameWon(winTime))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.GameWon)
             assertEquals(winTime, (it as GameEvent.GameWon).endTime)
@@ -93,7 +93,7 @@ class GameEventPublisherTest {
 
     @Test
     fun testGameLost() = runTest {
-        gameEventPublisher.gameLost()
+        gameEventPublisher.publish(GameEvent.GameLost)
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.GameLost)
         }

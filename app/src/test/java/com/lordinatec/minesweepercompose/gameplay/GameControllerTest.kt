@@ -8,9 +8,9 @@ import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.apis.AdjacentTranslations
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CachedCoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CachedCoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
@@ -64,7 +64,6 @@ class GameControllerTest {
         every { field.flag(any()) } answers { false }
         every { field.flaggedAllMines() } answers { false }
         every { eventPublisher.publish(any()) } just Runs
-        every { eventPublisher.gameWon(any()) } just Runs
         for (y in 0 until Config.height) {
             for (x in 0 until Config.width) {
                 fieldList.add(

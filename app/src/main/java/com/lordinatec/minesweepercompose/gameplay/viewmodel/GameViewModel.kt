@@ -14,14 +14,11 @@ import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -38,7 +35,6 @@ class GameViewModel @Inject constructor(
     private val gameController: GameController,
     private val gameEvents: GameEventPublisher,
     private val field: Field,
-    var callbackDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
@@ -47,42 +43,40 @@ class GameViewModel @Inject constructor(
         // listen for game events
         gameEvents.publisherScope.launch {
             gameEvents.events.collect { event ->
-                withContext(callbackDispatcher) {
-                    when (event) {
-                        is GameEvent.TimeUpdate -> {
-                            _uiState.update { state ->
-                                state.copy(
-                                    timeValue = event.newTime
-                                )
-                            }
+                when (event) {
+                    is GameEvent.TimeUpdate -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                timeValue = event.newTime
+                            )
                         }
+                    }
 
-                        is GameEvent.PositionCleared -> updatePosition(
-                            event.index, TileState.CLEARED, TileValue.fromValue(event.adjacentMines)
-                        )
+                    is GameEvent.PositionCleared -> updatePosition(
+                        event.index, TileState.CLEARED, TileValue.fromValue(event.adjacentMines)
+                    )
 
-                        is GameEvent.PositionExploded -> updatePosition(
-                            event.index, TileState.EXPLODED, TileValue.MINE
-                        )
+                    is GameEvent.PositionExploded -> updatePosition(
+                        event.index, TileState.EXPLODED, TileValue.MINE
+                    )
 
-                        is GameEvent.PositionFlagged -> updatePosition(
-                            event.index, TileState.FLAGGED, TileValue.FLAG
-                        )
+                    is GameEvent.PositionFlagged -> updatePosition(
+                        event.index, TileState.FLAGGED, TileValue.FLAG
+                    )
 
-                        is GameEvent.PositionUnflagged -> updatePosition(
-                            event.index, TileState.COVERED, TileValue.UNKNOWN
-                        )
+                    is GameEvent.PositionUnflagged -> updatePosition(
+                        event.index, TileState.COVERED, TileValue.UNKNOWN
+                    )
 
-                        is GameEvent.GameWon -> gameWon()
-                        is GameEvent.GameLost -> gameLost()
-                        is GameEvent.GameCreated -> {
-                            _uiState.update { state ->
-                                state.copy(
-                                    newGame = false,
-                                    tileStates = List(Config.width * Config.height) { TileState.COVERED },
-                                    tileValues = List(Config.width * Config.height) { TileValue.UNKNOWN }
-                                )
-                            }
+                    is GameEvent.GameWon -> gameWon()
+                    is GameEvent.GameLost -> gameLost()
+                    is GameEvent.GameCreated -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                newGame = false,
+                                tileStates = List(Config.width * Config.height) { TileState.COVERED },
+                                tileValues = List(Config.width * Config.height) { TileValue.UNKNOWN }
+                            )
                         }
                     }
                 }

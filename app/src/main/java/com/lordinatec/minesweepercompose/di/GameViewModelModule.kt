@@ -41,8 +41,7 @@ class GameViewModelModule {
         gameController: GameController,
         gameEventPublisher: GameEventPublisher,
         field: AndroidField,
-        dispatcher: CoroutineDispatcher
-    ): GameViewModel = GameViewModel(gameController, gameEventPublisher, field, dispatcher)
+    ): GameViewModel = GameViewModel(gameController, gameEventPublisher, field)
 
     @Provides
     @Singleton

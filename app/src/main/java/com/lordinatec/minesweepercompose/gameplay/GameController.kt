@@ -36,7 +36,7 @@ class GameController @Inject constructor(
 
     init {
         timer.onTickListener = Timer.OnTickListener { newTime ->
-            eventPublisher.timeUpdate(newTime)
+            eventPublisher.publish(GameEvent.TimeUpdate(newTime))
             gameTime = newTime
         }
         gameCreated = false
@@ -142,7 +142,7 @@ class GameController @Inject constructor(
         if (isMine) {
             timer.pause()
             eventPublisher.publish(GameEvent.PositionExploded(index))
-            eventPublisher.gameLost()
+            eventPublisher.publish(GameEvent.GameLost)
         } else {
             val adjacent = getAdjacent(index).filter { coordinate ->
                 gameField.isMine(coordinate.index)
@@ -153,7 +153,7 @@ class GameController @Inject constructor(
             }
             if (gameField.allClear()) {
                 timer.pause()
-                eventPublisher.gameWon(gameTime)
+                eventPublisher.publish(GameEvent.GameWon(gameTime))
             }
         }
     }
@@ -182,9 +182,9 @@ class GameController @Inject constructor(
         if (Config.feature_end_game_on_last_flag && gameField.flaggedAllMines()) {
             timer.pause()
             if (gameField.allFlagsCorrect()) {
-                eventPublisher.gameWon(gameTime)
+                eventPublisher.publish(GameEvent.GameWon(gameTime))
             } else {
-                eventPublisher.gameLost()
+                eventPublisher.publish(GameEvent.GameLost)
             }
         }
     }

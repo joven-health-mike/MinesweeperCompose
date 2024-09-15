@@ -99,12 +99,7 @@ class GameViewModel @Inject constructor(
     fun updateSize() {
         if (uiState.value.tileStates.size != Config.width * Config.height) {
             field.reset(DefaultConfiguration())
-            _uiState.update { state ->
-                state.copy(
-                    tileStates = List(Config.width * Config.height) { TileState.COVERED },
-                    tileValues = List(Config.width * Config.height) { TileValue.UNKNOWN }
-                )
-            }
+            _uiState.update { GameState() }
         }
     }
 

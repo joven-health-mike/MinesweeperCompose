@@ -71,7 +71,7 @@ class GameControllerTest {
             }
         }
         gameController =
-            GameController(field, timer, eventPublisher, coordinateFactory)
+            GameController(field, timer, eventPublisher)
     }
 
     @Test

@@ -8,7 +8,6 @@ import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
@@ -20,7 +19,6 @@ import javax.inject.Inject
  * @param gameField - field to store game state
  * @param timer - timer to keep track of game time
  * @param eventPublisher - publisher to publish game events
- * @param coordinateFactory - factory to create coordinates
  *
  * @constructor Create empty Game controller
  */
@@ -28,7 +26,6 @@ class GameController @Inject constructor(
     private val gameField: Field,
     private val timer: Timer,
     private val eventPublisher: GameEventPublisher,
-    private val coordinateFactory: CoordinateFactory
 ) {
 
     private var gameCreated: Boolean = false
@@ -62,10 +59,8 @@ class GameController @Inject constructor(
      */
     fun clearEverything() {
         if (!gameCreated) return
-        for ((index, coordinate) in gameField.fieldList.withIndex()) {
-            if (!gameField.cleared.contains(coordinate)) {
-                clear(index)
-            }
+        for ((index) in gameField.fieldList.withIndex()) {
+            clear(index)
         }
     }
 

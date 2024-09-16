@@ -4,24 +4,22 @@
 
 package com.lordinatec.minesweepercompose.gameplay.events
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * Bridge class to convert GameControlStrategy.Listener events to GameEvent objects
+ * A publisher of GameEvents
+ *
+ * @property publisherScope The CoroutineScope to use for publishing events
  *
  * @constructor Creates a new GameEventPublisher
  */
 class GameEventPublisher @Inject constructor(
     val publisherScope: CoroutineScope,
-    val callbackDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : EventPublisher {
     private val _events = MutableSharedFlow<Event>()
     override val events = _events.asSharedFlow()
@@ -46,8 +44,6 @@ class GameEventPublisher @Inject constructor(
     }
 
     private suspend fun publishEvent(event: GameEvent) {
-        withContext(callbackDispatcher) {
-            _events.emit(event)
-        }
+        _events.emit(event)
     }
 }

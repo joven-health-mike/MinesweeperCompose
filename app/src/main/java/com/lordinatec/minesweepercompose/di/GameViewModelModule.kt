@@ -9,7 +9,6 @@ import android.content.Context
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.timer.CoroutineTimer
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameController
@@ -89,9 +88,8 @@ class GameViewModelModule {
         androidField: AndroidField,
         timer: Timer,
         eventPublisher: GameEventPublisher,
-        coordinateFactory: CoordinateFactory
     ): GameController =
-        GameController(androidField, timer, eventPublisher, coordinateFactory)
+        GameController(androidField, timer, eventPublisher)
 
     @Provides
     @Singleton

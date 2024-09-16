@@ -32,7 +32,7 @@ class GameStateEventConsumer @Inject constructor(
 
     init {
         eventPublisher.publisherScope.launch {
-            eventPublisher.events.collect() { event -> consume(event as GameEvent) }
+            eventPublisher.events.collect { event -> consume(event as GameEvent) }
         }
     }
 

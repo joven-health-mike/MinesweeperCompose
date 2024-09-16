@@ -119,7 +119,6 @@ interface Field {
      * Get the adjacent coordinates of the given coordinate
      *
      * @param index Int Index of the coordinate
-     * @param factory CoordinateFactory Factory to create coordinates
      *
      * @return Collection<Coordinate> Adjacent coordinates
      */

@@ -6,13 +6,14 @@ package com.lordinatec.minesweepercompose.di
 
 import android.app.Application
 import android.content.Context
-import com.lordinatec.minesweepercompose.gameplay.GameController
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.timer.CoroutineTimer
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
+import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameController
+import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameStateEventConsumer
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.stats.StatsEventConsumer
 import com.lordinatec.minesweepercompose.stats.StatsProvider
@@ -39,9 +40,15 @@ class GameViewModelModule {
     @Singleton
     fun provideViewModel(
         gameController: GameController,
-        gameEventPublisher: GameEventPublisher,
-        field: AndroidField,
-    ): GameViewModel = GameViewModel(gameController, gameEventPublisher, field)
+        gameStateEventConsumer: GameStateEventConsumer
+    ): GameViewModel =
+        GameViewModel(gameController, gameStateEventConsumer)
+
+    @Provides
+    @Singleton
+    fun provideGameStateEventConsumer(
+        eventPublisher: GameEventPublisher
+    ): GameStateEventConsumer = GameStateEventConsumer(eventPublisher)
 
     @Provides
     @Singleton
@@ -70,16 +77,11 @@ class GameViewModelModule {
 
     @Provides
     @Singleton
-    fun provideTimerDefaultOnTickListener(): Timer.DefaultOnTickListener =
-        Timer.DefaultOnTickListener()
-
-    @Provides
-    @Singleton
     fun provideCoroutineTimer(
         interval: Long,
         scope: CoroutineScope,
-        onTickListener: Timer.OnTickListener
-    ): CoroutineTimer = CoroutineTimer(interval, scope, onTickListener)
+        eventPublisher: GameEventPublisher
+    ): CoroutineTimer = CoroutineTimer(interval, scope, eventPublisher)
 
     @Provides
     @Singleton
@@ -119,7 +121,4 @@ interface GameViewModelInterfaceModule {
     fun provideTimer(
         timer: CoroutineTimer
     ): Timer
-
-    @Binds
-    fun provideTimerOnTickListener(defaultOnTickListener: Timer.DefaultOnTickListener): Timer.OnTickListener
 }

@@ -2,7 +2,7 @@
  * Copyright Lordinatec LLC 2024
  */
 
-package com.lordinatec.minesweepercompose.gameplay
+package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
@@ -49,7 +49,6 @@ class GameControllerTest {
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
-        every { timer.onTickListener = any() } just Runs
         every { timer.start() } just Runs
         every { timer.stop() } just Runs
         every { timer.pause() } just Runs

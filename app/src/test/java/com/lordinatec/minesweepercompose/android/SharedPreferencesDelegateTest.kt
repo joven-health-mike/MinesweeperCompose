@@ -2,11 +2,10 @@
  * Copyright Lordinatec LLC 2024
  */
 
-package com.lordinatec.minesweepercompose.gameplay.android
+package com.lordinatec.minesweepercompose.android
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.lordinatec.minesweepercompose.android.SharedPreferencesDelegate
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every

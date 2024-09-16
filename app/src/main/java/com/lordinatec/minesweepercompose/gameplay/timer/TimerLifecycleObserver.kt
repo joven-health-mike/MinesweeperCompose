@@ -6,7 +6,7 @@ package com.lordinatec.minesweepercompose.gameplay.timer
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.lordinatec.minesweepercompose.gameplay.GameController
+import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameController
 import javax.inject.Inject
 
 /**

@@ -6,90 +6,30 @@ package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.gameplay.GameController
-import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
-import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
-import com.lordinatec.minesweepercompose.gameplay.views.TileState
-import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
  * ViewModel for the Game screen.
  *
  * @param gameController The controller for the game.
- * @param gameEvents The event publisher for the game.
- * @param field The field for the game.
+ * @param gameStateEventConsumer The consumer for game state events.
  *
  * @return A ViewModel for the Game screen.
  */
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val gameController: GameController,
-    private val gameEvents: GameEventPublisher,
-    private val field: Field,
+    private val gameStateEventConsumer: GameStateEventConsumer
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(GameState())
-    val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
-    init {
-        // listen for game events
-        gameEvents.publisherScope.launch {
-            gameEvents.events.collect { event ->
-                when (event) {
-                    is GameEvent.TimeUpdate -> {
-                        _uiState.update { state ->
-                            state.copy(
-                                timeValue = event.newTime
-                            )
-                        }
-                    }
-
-                    is GameEvent.PositionCleared -> updatePosition(
-                        event.index, TileState.CLEARED, TileValue.fromValue(event.adjacentMines)
-                    )
-
-                    is GameEvent.PositionExploded -> updatePosition(
-                        event.index, TileState.EXPLODED, TileValue.MINE
-                    )
-
-                    is GameEvent.PositionFlagged -> updatePosition(
-                        event.index, TileState.FLAGGED, TileValue.FLAG
-                    )
-
-                    is GameEvent.PositionUnflagged -> updatePosition(
-                        event.index, TileState.COVERED, TileValue.UNKNOWN
-                    )
-
-                    is GameEvent.GameWon -> gameWon()
-                    is GameEvent.GameLost -> gameLost()
-                    is GameEvent.GameCreated -> {
-                        _uiState.update { state ->
-                            state.copy(
-                                newGame = false,
-                                tileStates = List(Config.width * Config.height) { TileState.COVERED },
-                                tileValues = List(Config.width * Config.height) { TileValue.UNKNOWN }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+    val uiState = gameStateEventConsumer.uiState
 
     /* PUBLIC APIS */
     /**
      * Clear the game state and reset the game.
      */
     fun resetGame() {
-        _uiState.update { GameState() }
         gameController.resetGame()
     }
 
@@ -98,8 +38,8 @@ class GameViewModel @Inject constructor(
      */
     fun updateSize() {
         if (uiState.value.tileStates.size != Config.width * Config.height) {
-            field.reset(DefaultConfiguration())
-            _uiState.update { GameState() }
+            gameController.resetGame()
+            gameStateEventConsumer.updateSize()
         }
     }
 
@@ -121,14 +61,8 @@ class GameViewModel @Inject constructor(
      */
     fun clear(index: Int) {
         // lazily create the game when the user makes their first move
-        val newGame = gameController.maybeCreateGame(index)
-        if (newGame) {
+        if (gameController.maybeCreateGame(index)) {
             updateSize()
-            _uiState.update { state ->
-                state.copy(
-                    gameOver = false
-                )
-            }
         }
         gameController.clear(index)
     }
@@ -161,59 +95,5 @@ class GameViewModel @Inject constructor(
      */
     fun getAdjacentFlags(index: Int): Int {
         return gameController.countAdjacentFlags(index)
-    }
-
-    /* PRIVATE FUNCTIONS */
-    /**
-     * Updates the position at the given index.
-     *
-     * @param index The index of the tile to update.
-     * @param tileState The new state of the tile.
-     * @param tileValue The new value of the tile.
-     */
-    private fun updatePosition(index: Int, tileState: TileState, tileValue: TileValue) {
-        _uiState.update { state ->
-            var newMinesValue = state.minesRemaining
-            if (tileState == TileState.FLAGGED) {
-                newMinesValue--
-            } else if (tileState == TileState.COVERED) {
-                newMinesValue++
-            }
-            state.copy(
-                tileStates = state.tileStates.toMutableList().apply { this[index] = tileState },
-                tileValues = state.tileValues.toMutableList().apply { this[index] = tileValue },
-                minesRemaining = newMinesValue
-            )
-        }
-    }
-
-    /**
-     * Update the game state when the game is won.
-     *
-     * This will clear the entire field and stop the timer.
-     */
-    private val gameWon: () -> Unit = {
-        gameController.clearEverything()
-        _uiState.update { state ->
-            state.copy(
-                gameOver = true,
-                winner = true,
-            )
-        }
-    }
-
-    /**
-     * Update the game state when the game is lost.
-     *
-     * This will clear the entire field and stop the timer.
-     */
-    private val gameLost: () -> Unit = {
-        gameController.clearEverything()
-        _uiState.update { state ->
-            state.copy(
-                gameOver = true,
-                winner = false,
-            )
-        }
     }
 }

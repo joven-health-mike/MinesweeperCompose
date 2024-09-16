@@ -2,7 +2,7 @@
  * Copyright Lordinatec LLC 2024
  */
 
-package com.lordinatec.minesweepercompose.gameplay
+package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
@@ -32,14 +32,9 @@ class GameController @Inject constructor(
 ) {
 
     private var gameCreated: Boolean = false
-    private var gameTime: Long = 0
+    private var gameOver: Boolean = false
 
     init {
-        timer.onTickListener = Timer.OnTickListener { newTime ->
-            eventPublisher.publish(GameEvent.TimeUpdate(newTime))
-            gameTime = newTime
-        }
-        gameCreated = false
         gameField.reset(DefaultConfiguration())
         timer.stop()
     }
@@ -52,6 +47,7 @@ class GameController @Inject constructor(
     fun maybeCreateGame(index: Int): Boolean {
         if (!gameCreated) {
             gameCreated = true
+            gameOver = false
             eventPublisher.publish(GameEvent.GameCreated)
             gameField.createMines(index)
             timer.stop()
@@ -71,10 +67,6 @@ class GameController @Inject constructor(
                 clear(index)
             }
         }
-    }
-
-    private fun getAdjacent(index: Int): Collection<Coordinate> {
-        return gameField.adjacentCoordinates(index)
     }
 
     /**
@@ -125,6 +117,7 @@ class GameController @Inject constructor(
      */
     fun resetGame() {
         gameCreated = false
+        gameOver = false
         eventPublisher.publish(GameEvent.FieldReset)
         gameField.reset(DefaultConfiguration())
         timer.stop()
@@ -142,7 +135,11 @@ class GameController @Inject constructor(
         if (isMine) {
             timer.pause()
             eventPublisher.publish(GameEvent.PositionExploded(index))
-            eventPublisher.publish(GameEvent.GameLost)
+            if (!gameOver) {
+                gameOver = true
+                eventPublisher.publish(GameEvent.GameLost)
+                clearEverything()
+            }
         } else {
             val adjacent = getAdjacent(index).filter { coordinate ->
                 gameField.isMine(coordinate.index)
@@ -153,7 +150,11 @@ class GameController @Inject constructor(
             }
             if (gameField.allClear()) {
                 timer.pause()
-                eventPublisher.publish(GameEvent.GameWon(gameTime))
+                if (!gameOver) {
+                    gameOver = true
+                    eventPublisher.publish(GameEvent.GameWon(timer.time))
+                }
+                clearEverything()
             }
         }
     }
@@ -176,20 +177,6 @@ class GameController @Inject constructor(
     }
 
     /**
-     * Maybe end the game if all mines are flagged
-     */
-    private fun maybeEndGame() {
-        if (Config.feature_end_game_on_last_flag && gameField.flaggedAllMines()) {
-            timer.pause()
-            if (gameField.allFlagsCorrect()) {
-                eventPublisher.publish(GameEvent.GameWon(gameTime))
-            } else {
-                eventPublisher.publish(GameEvent.GameLost)
-            }
-        }
-    }
-
-    /**
      * Checks if a flag is correct at the given index
      *
      * @param index - index of the tile to check
@@ -198,5 +185,26 @@ class GameController @Inject constructor(
         if (!gameCreated) return false
 
         return gameField.isMine(index)
+    }
+
+    /**
+     * Maybe end the game if all mines are flagged
+     */
+    private fun maybeEndGame() {
+        if (Config.feature_end_game_on_last_flag && gameField.flaggedAllMines()) {
+            timer.pause()
+            if (gameOver) return
+            gameOver = true
+            if (gameField.allFlagsCorrect()) {
+                eventPublisher.publish(GameEvent.GameWon(timer.time))
+            } else {
+                eventPublisher.publish(GameEvent.GameLost)
+            }
+            clearEverything()
+        }
+    }
+
+    private fun getAdjacent(index: Int): Collection<Coordinate> {
+        return gameField.adjacentCoordinates(index)
     }
 }

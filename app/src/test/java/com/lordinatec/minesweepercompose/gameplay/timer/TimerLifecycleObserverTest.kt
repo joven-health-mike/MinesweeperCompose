@@ -5,7 +5,7 @@
 package com.lordinatec.minesweepercompose.gameplay.timer
 
 import androidx.lifecycle.LifecycleOwner
-import com.lordinatec.minesweepercompose.gameplay.GameController
+import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameController
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every

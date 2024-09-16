@@ -4,7 +4,7 @@
 
 package com.lordinatec.minesweepercompose.di
 
-import com.lordinatec.minesweepercompose.gameplay.GameController
+import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameController
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory

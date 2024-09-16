@@ -4,6 +4,8 @@
 
 package com.lordinatec.minesweepercompose.gameplay.timer
 
+import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -18,14 +20,12 @@ import javax.inject.Inject
  * @property isPaused true if the timer is paused
  * @property time the current time of the timer
  * @property interval the interval at which the timer ticks
- * @property onTickListener the listener that is called when the timer ticks
  */
 interface Timer {
     var isRunning: Boolean
     var isPaused: Boolean
     var time: Long
     val interval: Long
-    var onTickListener: OnTickListener
 
     /**
      * Starts the timer
@@ -46,26 +46,6 @@ interface Timer {
      * Stops the timer
      */
     fun stop()
-
-    /**
-     * Listener for when the timer ticks
-     *
-     * @property onTick the function that is called when the timer ticks
-     */
-    fun interface OnTickListener {
-        fun onTick(newTime: Long)
-    }
-
-    /**
-     * Default implementation of the OnTickListener interface
-     *
-     * @property onTick the function that is called when the timer ticks
-     */
-    class DefaultOnTickListener : OnTickListener {
-        override fun onTick(newTime: Long) {
-            // do nothing
-        }
-    }
 }
 
 /**
@@ -73,14 +53,14 @@ interface Timer {
  *
  * @property interval the interval at which the timer ticks
  * @property scope the coroutine scope in which the timer runs
- * @property onTickListener the listener that is called when the timer ticks
+ * @property eventPublisher the publisher of game events
  *
  * @constructor creates a new CoroutineTimer
  */
 class CoroutineTimer @Inject constructor(
     override val interval: Long,
     private val scope: CoroutineScope,
-    override var onTickListener: Timer.OnTickListener
+    private val eventPublisher: GameEventPublisher,
 ) : Timer {
 
     override var isRunning: Boolean = false
@@ -101,14 +81,14 @@ class CoroutineTimer @Inject constructor(
                 if (!isPaused) {
                     delay(interval)
                     time += interval
-                    onTickListener.onTick(time)
+                    sendTimeEvent(time)
                 }
             }
         }
     }
 
     override fun pause() {
-        onTickListener.onTick(time)
+        sendTimeEvent(time)
         isPaused = true
     }
 
@@ -120,7 +100,11 @@ class CoroutineTimer @Inject constructor(
         isRunning = false
         isPaused = false
         time = 0
-        onTickListener.onTick(time)
+        sendTimeEvent(time)
         timerJob?.cancel()
+    }
+
+    private fun sendTimeEvent(time: Long) {
+        eventPublisher.publish(GameEvent.TimeUpdate(time))
     }
 }

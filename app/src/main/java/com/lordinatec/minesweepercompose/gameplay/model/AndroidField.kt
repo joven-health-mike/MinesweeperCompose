@@ -5,9 +5,8 @@
 package com.lordinatec.minesweepercompose.gameplay.model
 
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
+import com.lordinatec.minesweepercompose.gameplay.model.apis.FieldIndex
 import javax.inject.Inject
 
 /**
@@ -16,21 +15,17 @@ import javax.inject.Inject
  * @param configuration the configuration of the field
  */
 class AndroidField @Inject constructor(
-    override val coordinateFactory: CoordinateFactory,
-    override val configuration: Configuration
+    override var configuration: Configuration
 ) : Field {
-    private val _fieldList = mutableListOf<Coordinate>()
-    private val _mines = mutableSetOf<Coordinate>()
-    private val _flags = mutableSetOf<Coordinate>()
-    private val _cleared = mutableSetOf<Coordinate>()
+    private val _mines = mutableSetOf<FieldIndex>()
+    private val _flags = mutableSetOf<FieldIndex>()
+    private val _cleared = mutableSetOf<FieldIndex>()
 
-    override val fieldList: List<Coordinate>
-        get() = _fieldList.toList()
-    override val mines: Collection<Coordinate>
+    override val mines: Collection<FieldIndex>
         get() = _mines.toSet()
-    override val flags: Collection<Coordinate>
+    override val flags: Collection<FieldIndex>
         get() = _flags.toSet()
-    override val cleared: Collection<Coordinate>
+    override val cleared: Collection<FieldIndex>
         get() = _cleared.toSet()
 
     override fun reset(configuration: Configuration) {
@@ -38,15 +33,14 @@ class AndroidField @Inject constructor(
         updateConfiguration(configuration)
     }
 
-    override fun createMines(index: Int) {
+    override fun createMines(safeIndex: FieldIndex) {
         clearCollections()
 
-        val initCoord = coordinateFactory.createCoordinate(index)
-        val shuffledCoordinates = fieldList.shuffled()
+        val shuffledIndexes = configuration.fieldIndexRange().toList().shuffled()
 
-        for (coordinate in shuffledCoordinates) {
-            if (coordinate != initCoord) {
-                _mines.add(coordinate)
+        for (mineIndex in shuffledIndexes) {
+            if (mineIndex != safeIndex) {
+                _mines.add(mineIndex)
             }
             if (_mines.size >= configuration.numMines) {
                 break
@@ -54,50 +48,35 @@ class AndroidField @Inject constructor(
         }
     }
 
-    override fun clear(index: Int): Boolean {
-        val position = _fieldList[index]
-        _cleared.add(position)
-        return _mines.contains(position)
+    override fun clear(clearIndex: FieldIndex): Boolean {
+        _cleared.add(clearIndex)
+        return _mines.contains(clearIndex)
     }
 
-    override fun flag(index: Int): Boolean {
-        val position = _fieldList[index]
-        val isFlag = isFlag(index)
+    override fun flag(flagIndex: FieldIndex): Boolean {
+        val isFlag = isFlag(flagIndex)
 
         if (isFlag) {
-            _flags.remove(position)
+            _flags.remove(flagIndex)
         } else {
-            _flags.add(position)
+            _flags.add(flagIndex)
         }
 
         return isFlag
     }
 
-    override fun isFlag(index: Int): Boolean {
-        val position = _fieldList[index]
-        return _flags.contains(position)
+    override fun isFlag(index: FieldIndex): Boolean {
+        return _flags.contains(index)
     }
 
-    override fun isMine(index: Int): Boolean {
-        val position = _fieldList[index]
-        return _mines.contains(position)
+    override fun isMine(index: FieldIndex): Boolean {
+        return _mines.contains(index)
     }
 
     private fun updateConfiguration(configuration: Configuration) {
         if (this.configuration == configuration) return
-        this.configuration.numRows = configuration.numRows
-        this.configuration.numCols = configuration.numCols
-        this.configuration.numMines = configuration.numMines
+        this.configuration = configuration
         clearCollections()
-        _fieldList.clear()
-
-        for (y in 0 until configuration.numCols) {
-            for (x in 0 until configuration.numRows) {
-                _fieldList.add(
-                    coordinateFactory.createCoordinate(x, y)
-                )
-            }
-        }
     }
 
     private fun clearCollections() {

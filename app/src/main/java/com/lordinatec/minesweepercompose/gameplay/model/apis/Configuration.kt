@@ -17,16 +17,26 @@ interface Configuration {
     var numRows: Int
     var numCols: Int
     var numMines: Int
+    fun fieldIndexRange(): IntRange
+    fun fieldSize(): Int
 }
 
 /**
  * DefaultConfiguration is a class that implements the Configuration interface and overrides the equals and hashCode methods.
  */
-data class DefaultConfiguration(
+class DefaultConfiguration(
     override var numRows: Int = Config.width,
     override var numCols: Int = Config.height,
-    override var numMines: Int = Config.mines
+    override var numMines: Int = Config.mines,
 ) : Configuration {
+    override fun fieldIndexRange(): IntRange {
+        return 0 until fieldSize()
+    }
+
+    override fun fieldSize(): Int {
+        return numRows * numCols
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Configuration) return false

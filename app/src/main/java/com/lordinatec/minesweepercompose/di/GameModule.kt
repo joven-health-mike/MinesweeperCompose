@@ -4,15 +4,15 @@
 
 package com.lordinatec.minesweepercompose.di
 
-import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameController
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
+import com.lordinatec.minesweepercompose.gameplay.model.apis.CachedCoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateFactory
-import com.lordinatec.minesweepercompose.gameplay.model.apis.CachedCoordinateFactory
 import com.lordinatec.minesweepercompose.gameplay.model.apis.CoordinateTranslator
 import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
 import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
+import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
 import dagger.Binds
 import dagger.Module
@@ -56,8 +56,8 @@ class GameModule {
 
     @Provides
     @Singleton
-    fun provideTimerLifecycleObserver(gameController: GameController): TimerLifecycleObserver =
-        TimerLifecycleObserver(gameController)
+    fun provideTimerLifecycleObserver(timer: Timer): TimerLifecycleObserver =
+        TimerLifecycleObserver(timer)
 
     @Provides
     @Singleton

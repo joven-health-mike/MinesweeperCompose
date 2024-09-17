@@ -23,6 +23,7 @@ import androidx.lifecycle.lifecycleScope
 import com.lordinatec.minesweepercompose.R
 import com.lordinatec.minesweepercompose.android.sharedPreferences
 import com.lordinatec.minesweepercompose.config.Config
+import com.lordinatec.minesweepercompose.gameplay.timer.TimerEventConsumer
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.gameplay.views.GameView
@@ -41,6 +42,9 @@ class GameActivity : ComponentActivity() {
 
     @Inject
     lateinit var statsEventConsumer: StatsEventConsumer
+
+    @Inject
+    lateinit var timerEventConsumer: TimerEventConsumer
 
     @Inject
     lateinit var timerLifecycleObserver: TimerLifecycleObserver
@@ -63,6 +67,9 @@ class GameActivity : ComponentActivity() {
                         lifecycleScope.launch {
                             statsEventConsumer.consume()
                         }
+                        lifecycleScope.launch {
+                            timerEventConsumer.consume()
+                        }
                     }
                     Modifier.padding(innerPadding)
                     GameView(viewModel)
@@ -73,13 +80,11 @@ class GameActivity : ComponentActivity() {
 
     private fun loadConfigFromPrefs() {
         val adjustFieldSizeToScreenSize by sharedPreferences(
-            "adjustToScreenSize",
-            Config.feature_adjust_field_to_screen_size.toString()
+            "adjustToScreenSize", Config.feature_adjust_field_to_screen_size.toString()
         )
         Config.feature_adjust_field_to_screen_size = adjustFieldSizeToScreenSize.toBoolean()
         val endGameOnLastFlag by sharedPreferences(
-            "endGameOnLastFlag",
-            Config.feature_end_game_on_last_flag.toString()
+            "endGameOnLastFlag", Config.feature_end_game_on_last_flag.toString()
         )
         Config.feature_end_game_on_last_flag = endGameOnLastFlag.toBoolean()
     }

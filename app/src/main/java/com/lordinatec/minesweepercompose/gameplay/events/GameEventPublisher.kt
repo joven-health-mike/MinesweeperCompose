@@ -20,9 +20,10 @@ import javax.inject.Inject
  */
 class GameEventPublisher @Inject constructor(
     val publisherScope: CoroutineScope,
-) : EventPublisher {
+) : EventPublisher, EventProvider {
     private val _events = MutableSharedFlow<Event>()
     override val events = _events.asSharedFlow()
+    override val eventFlow = events
     private var gameOver = false
 
     /**

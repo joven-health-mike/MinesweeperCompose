@@ -25,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -32,6 +33,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import com.lordinatec.minesweepercompose.gameplay.GameActivity
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.logger.LogcatLogger
@@ -42,6 +44,7 @@ import com.lordinatec.minesweepercompose.views.AppIcon
 import com.lordinatec.minesweepercompose.views.TopBar
 import com.lordinatec.minesweepercompose.views.topBarPadding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -64,6 +67,13 @@ class MainActivity : ComponentActivity() {
                     Modifier.padding(innerPadding)
                     val isPortraitMode =
                         LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+
+                    LaunchedEffect(Unit) {
+                        lifecycleScope.launch {
+                            logcatLogger.consume()
+                        }
+                    }
+
                     if (isPortraitMode) {
                         PortraitScreen()
                     } else {

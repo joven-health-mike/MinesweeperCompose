@@ -6,6 +6,7 @@ package com.lordinatec.minesweepercompose.di
 
 import android.app.Application
 import android.content.Context
+import com.lordinatec.minesweepercompose.gameplay.events.EventProvider
 import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
@@ -47,8 +48,8 @@ class GameViewModelModule {
     @Provides
     @Singleton
     fun provideGameStateEventConsumer(
-        eventPublisher: GameEventPublisher
-    ): GameStateEventConsumer = GameStateEventConsumer(eventPublisher)
+        eventProvider: EventProvider
+    ): GameStateEventConsumer = GameStateEventConsumer(eventProvider)
 
     @Provides
     @Singleton
@@ -69,9 +70,9 @@ class GameViewModelModule {
     @Singleton
     fun provideTimerEventConsumer(
         timer: Timer,
-        eventPublisher: GameEventPublisher
+        eventProvider: EventProvider
     ): TimerEventConsumer =
-        TimerEventConsumer(timer, eventPublisher)
+        TimerEventConsumer(timer, eventProvider)
 
     @Provides
     @Singleton
@@ -128,4 +129,9 @@ interface GameViewModelInterfaceModule {
     fun provideTimer(
         timer: CoroutineTimer
     ): Timer
+
+    @Binds
+    fun provideEventProvider(
+        eventPublisher: GameEventPublisher
+    ): EventProvider
 }

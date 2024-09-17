@@ -5,15 +5,14 @@
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import com.lordinatec.minesweepercompose.config.Config
+import com.lordinatec.minesweepercompose.gameplay.events.EventProvider
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
-import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import com.lordinatec.minesweepercompose.gameplay.views.TileValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -24,16 +23,14 @@ import javax.inject.Inject
  * @constructor Creates a new GameStateEventConsumer.
  */
 class GameStateEventConsumer @Inject constructor(
-    eventPublisher: GameEventPublisher
+    private val eventProvider: EventProvider
 ) {
 
     private val _uiState = MutableStateFlow(GameState())
     val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
-    init {
-        eventPublisher.publisherScope.launch {
-            eventPublisher.events.collect { event -> consume(event as GameEvent) }
-        }
+    suspend fun consume() {
+        eventProvider.eventFlow.collect { event -> consume(event as GameEvent) }
     }
 
     private fun consume(event: GameEvent) {

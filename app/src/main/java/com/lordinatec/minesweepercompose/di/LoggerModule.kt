@@ -4,7 +4,7 @@
 
 package com.lordinatec.minesweepercompose.di
 
-import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
+import com.lordinatec.minesweepercompose.gameplay.events.EventProvider
 import com.lordinatec.minesweepercompose.logger.GameEventLogger
 import com.lordinatec.minesweepercompose.logger.LogcatLogger
 import dagger.Module
@@ -23,13 +23,13 @@ class LoggerModule {
     @Provides
     @Singleton
     fun providesGameEventLogger(
-        eventPublisher: GameEventPublisher
-    ): GameEventLogger = GameEventLogger(eventPublisher)
+        eventProvider: EventProvider
+    ): GameEventLogger = GameEventLogger(eventProvider)
 
     @Provides
     @Singleton
     fun providesLogcatLogger(
-        eventPublisher: GameEventPublisher
-    ): LogcatLogger = LogcatLogger(eventPublisher)
+        eventProvider: EventProvider
+    ): LogcatLogger = LogcatLogger(eventProvider)
 
 }

@@ -25,6 +25,7 @@ import com.lordinatec.minesweepercompose.android.sharedPreferences
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerEventConsumer
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
+import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameStateEventConsumer
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.gameplay.views.GameView
 import com.lordinatec.minesweepercompose.stats.StatsEventConsumer
@@ -45,6 +46,9 @@ class GameActivity : ComponentActivity() {
 
     @Inject
     lateinit var timerEventConsumer: TimerEventConsumer
+
+    @Inject
+    lateinit var gameStateEventConsumer: GameStateEventConsumer
 
     @Inject
     lateinit var timerLifecycleObserver: TimerLifecycleObserver
@@ -69,6 +73,9 @@ class GameActivity : ComponentActivity() {
                         }
                         lifecycleScope.launch {
                             timerEventConsumer.consume()
+                        }
+                        lifecycleScope.launch {
+                            gameStateEventConsumer.consume()
                         }
                     }
                     Modifier.padding(innerPadding)

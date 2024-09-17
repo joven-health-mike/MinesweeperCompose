@@ -7,6 +7,7 @@
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import com.lordinatec.minesweepercompose.gameplay.events.Event
+import com.lordinatec.minesweepercompose.gameplay.events.EventProvider
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -29,7 +31,7 @@ import kotlin.test.assertTrue
 
 class GameStateEventConsumerTest {
     @MockK
-    private lateinit var eventPublisher: GameEventPublisher
+    private lateinit var eventProvider: EventProvider
 
     private val testFlow = MutableSharedFlow<Event>()
 
@@ -39,10 +41,12 @@ class GameStateEventConsumerTest {
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
-        every { eventPublisher.events } answers { testFlow }
-        every { eventPublisher.publisherScope } answers { TestScope() }
-        gameStateEventConsumer = GameStateEventConsumer(eventPublisher).apply {
+        every { eventProvider.eventFlow } answers { testFlow }
+        gameStateEventConsumer = GameStateEventConsumer(eventProvider).apply {
             updateSize()
+            TestScope().launch {
+                consume()
+            }
         }
     }
 

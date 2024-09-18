@@ -15,7 +15,7 @@ package com.lordinatec.minesweepercompose.gameplay.model.apis
  */
 class Adjacent(val index: FieldIndex, val width: Int, val height: Int) : Iterable<Int> {
     private val top: FieldIndex = if (index < width) -1 else index - width
-    private val bottom: FieldIndex = if (index >= width * (width - 1)) -1 else index + width
+    private val bottom: FieldIndex = if (index >= width * (height - 1)) -1 else index + width
     private val left: FieldIndex = if (index % width == 0) -1 else index - 1
     private val right: FieldIndex = if (index % width == width - 1) -1 else index + 1
     private val topLeft: FieldIndex = if (top == -1 || left == -1) -1 else top - 1

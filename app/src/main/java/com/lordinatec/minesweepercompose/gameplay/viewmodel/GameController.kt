@@ -52,7 +52,7 @@ class GameController @Inject constructor(
      */
     fun clearEverything() {
         if (!gameCreated) return
-        for (index in gameField.configuration.fieldIndexRange()) {
+        for (index in gameField.fieldIndexRange()) {
             clear(index)
         }
     }
@@ -77,9 +77,8 @@ class GameController @Inject constructor(
      */
     fun countAdjacentFlags(index: FieldIndex): Int {
         if (!gameCreated) return -1
-        return getAdjacent(index).count {
-            gameField.isFlag(it)
-        }
+        val result = getAdjacent(index).count { gameField.isFlag(it) }
+        return result
     }
 
     /**
@@ -96,7 +95,7 @@ class GameController @Inject constructor(
      * Clear all non-mines
      */
     fun clearNonMines() {
-        for (i in gameField.configuration.fieldIndexRange()) {
+        for (i in gameField.fieldIndexRange()) {
             if (!gameField.isMine(i)) {
                 clear(i)
             }
@@ -208,7 +207,6 @@ class GameController @Inject constructor(
      * @return Boolean - true if the tile should be cleared
      */
     private fun handleSafeCleared(index: FieldIndex) {
-        val something = getAdjacent(index)
         val adjacent = getAdjacent(index).filter {
             gameField.isMine(it)
         }.size

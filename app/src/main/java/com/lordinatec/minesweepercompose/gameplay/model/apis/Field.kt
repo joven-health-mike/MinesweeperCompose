@@ -125,6 +125,24 @@ interface Field {
      * @return Boolean True if the entire field has been cleared
      */
     fun allClear(): Boolean {
-        return cleared.size == configuration.fieldSize() - mines.size
+        return cleared.size == fieldSize() - mines.size
+    }
+
+    /**
+     * Returns the size of the field.
+     *
+     * @return Int Size of the field
+     */
+    fun fieldSize(): Int {
+        return configuration.numRows * configuration.numCols
+    }
+
+    /**
+     * Returns the range of the field indexes.
+     *
+     * @return IntRange Range of the field indexes
+     */
+    fun fieldIndexRange(): IntRange {
+        return 0 until fieldSize()
     }
 }

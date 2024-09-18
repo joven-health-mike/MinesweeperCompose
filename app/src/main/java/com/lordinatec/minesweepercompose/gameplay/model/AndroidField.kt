@@ -36,7 +36,7 @@ class AndroidField @Inject constructor(
     override fun createMines(safeIndex: FieldIndex) {
         clearCollections()
 
-        val shuffledIndexes = configuration.fieldIndexRange().toList().shuffled()
+        val shuffledIndexes = fieldIndexRange().toList().shuffled()
 
         for (mineIndex in shuffledIndexes) {
             if (mineIndex != safeIndex) {

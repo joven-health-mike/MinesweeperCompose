@@ -17,8 +17,6 @@ interface Configuration {
     var numRows: Int
     var numCols: Int
     var numMines: Int
-    fun fieldIndexRange(): IntRange
-    fun fieldSize(): Int
 }
 
 /**
@@ -29,13 +27,6 @@ class DefaultConfiguration(
     override var numCols: Int = Config.height,
     override var numMines: Int = Config.mines,
 ) : Configuration {
-    override fun fieldIndexRange(): IntRange {
-        return 0 until fieldSize()
-    }
-
-    override fun fieldSize(): Int {
-        return numRows * numCols
-    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

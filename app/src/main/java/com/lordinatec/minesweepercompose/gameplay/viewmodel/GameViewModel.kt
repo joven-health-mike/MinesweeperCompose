@@ -73,7 +73,10 @@ class GameViewModel @Inject constructor(
      * @param index The index of the tile to toggle the flag.
      */
     fun toggleFlag(index: Int) {
-        // TODO: what should happen if the user flags a tile before the game has been created?
+        // lazily create the game when the user makes their first move
+        if (gameController.maybeCreateGame()) {
+            updateSize()
+        }
         gameController.toggleFlag(index)
     }
 

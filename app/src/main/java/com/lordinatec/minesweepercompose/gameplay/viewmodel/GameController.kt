@@ -32,9 +32,20 @@ class GameController @Inject constructor(
     private var gameOver: Boolean = false
 
     /**
+     * Create a game.
+     *
+     * @return Boolean - true if the game was created
+     */
+    fun maybeCreateGame(): Boolean {
+        return maybeCreateGame(gameField.fieldIndexRange().random())
+    }
+
+    /**
      * Create a game. Mine will never occur at the given index.
      *
      * @param index - index of the initial clicked tile
+     *
+     * @return Boolean - true if the game was created
      */
     fun maybeCreateGame(index: FieldIndex): Boolean {
         if (!gameCreated) {

@@ -7,10 +7,10 @@ package com.lordinatec.minesweepercompose.gameplay.viewmodel
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Adjacent
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
-import com.lordinatec.minesweepercompose.gameplay.model.apis.FieldIndex
+import com.lordinatec.minesweepercompose.gameplay.model.Adjacent
+import com.lordinatec.minesweepercompose.gameplay.model.Configuration
+import com.lordinatec.minesweepercompose.gameplay.model.Field
+import com.lordinatec.minesweepercompose.gameplay.model.FieldIndex
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import io.mockk.MockKAnnotations
 import io.mockk.Runs

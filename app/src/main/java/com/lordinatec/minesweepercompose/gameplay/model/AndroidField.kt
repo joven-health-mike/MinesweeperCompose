@@ -4,9 +4,6 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
-import com.lordinatec.minesweepercompose.gameplay.model.apis.FieldIndex
 import javax.inject.Inject
 
 /**

@@ -7,9 +7,9 @@ package com.lordinatec.minesweepercompose.gameplay.viewmodel
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
-import com.lordinatec.minesweepercompose.gameplay.model.apis.FieldIndex
+import com.lordinatec.minesweepercompose.gameplay.model.DefaultConfiguration
+import com.lordinatec.minesweepercompose.gameplay.model.Field
+import com.lordinatec.minesweepercompose.gameplay.model.FieldIndex
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import javax.inject.Inject
 

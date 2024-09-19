@@ -2,7 +2,7 @@
  * Copyright Lordinatec LLC 2024
  */
 
-package com.lordinatec.minesweepercompose.gameplay.model.apis
+package com.lordinatec.minesweepercompose.gameplay.model
 
 /**
  * Adjacent is a class that represents the adjacent fields of a field.

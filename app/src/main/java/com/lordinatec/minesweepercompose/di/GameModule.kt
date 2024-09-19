@@ -5,9 +5,9 @@
 package com.lordinatec.minesweepercompose.di
 
 import com.lordinatec.minesweepercompose.gameplay.model.AndroidField
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
-import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
+import com.lordinatec.minesweepercompose.gameplay.model.Configuration
+import com.lordinatec.minesweepercompose.gameplay.model.DefaultConfiguration
+import com.lordinatec.minesweepercompose.gameplay.model.Field
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
 import dagger.Binds

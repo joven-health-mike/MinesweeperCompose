@@ -2,7 +2,7 @@
  * Copyright Lordinatec LLC 2024
  */
 
-package com.lordinatec.minesweepercompose.gameplay.model.apis
+package com.lordinatec.minesweepercompose.gameplay.model
 
 import com.lordinatec.minesweepercompose.config.Config
 

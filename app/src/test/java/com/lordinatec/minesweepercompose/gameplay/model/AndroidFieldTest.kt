@@ -5,7 +5,6 @@
 package com.lordinatec.minesweepercompose.gameplay.model
 
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Configuration
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every

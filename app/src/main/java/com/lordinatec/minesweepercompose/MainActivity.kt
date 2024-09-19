@@ -35,10 +35,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import com.lordinatec.minesweepercompose.gameplay.GameActivity
+import com.lordinatec.minesweepercompose.gameplay.timer.TimerEventConsumer
+import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameStateEventConsumer
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.logger.LogcatLogger
 import com.lordinatec.minesweepercompose.settings.SettingsActivity
 import com.lordinatec.minesweepercompose.stats.StatsActivity
+import com.lordinatec.minesweepercompose.stats.StatsEventConsumer
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.lordinatec.minesweepercompose.views.AppIcon
 import com.lordinatec.minesweepercompose.views.TopBar
@@ -52,6 +55,16 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var statsEventConsumer: StatsEventConsumer
+
+    @Inject
+    lateinit var timerEventConsumer: TimerEventConsumer
+
+    @Inject
+    lateinit var gameStateEventConsumer: GameStateEventConsumer
+
     @Inject
     lateinit var logcatLogger: LogcatLogger
 
@@ -71,6 +84,15 @@ class MainActivity : ComponentActivity() {
                     LaunchedEffect(Unit) {
                         lifecycleScope.launch {
                             logcatLogger.consume()
+                        }
+                        lifecycleScope.launch {
+                            statsEventConsumer.consume()
+                        }
+                        lifecycleScope.launch {
+                            timerEventConsumer.consume()
+                        }
+                        lifecycleScope.launch {
+                            gameStateEventConsumer.consume()
                         }
                     }
 

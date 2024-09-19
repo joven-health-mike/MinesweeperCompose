@@ -42,15 +42,6 @@ import kotlin.math.floor
 class GameActivity : ComponentActivity() {
 
     @Inject
-    lateinit var statsEventConsumer: StatsEventConsumer
-
-    @Inject
-    lateinit var timerEventConsumer: TimerEventConsumer
-
-    @Inject
-    lateinit var gameStateEventConsumer: GameStateEventConsumer
-
-    @Inject
     lateinit var timerLifecycleObserver: TimerLifecycleObserver
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,17 +58,6 @@ class GameActivity : ComponentActivity() {
             }
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LaunchedEffect(Unit) {
-                        lifecycleScope.launch {
-                            statsEventConsumer.consume()
-                        }
-                        lifecycleScope.launch {
-                            timerEventConsumer.consume()
-                        }
-                        lifecycleScope.launch {
-                            gameStateEventConsumer.consume()
-                        }
-                    }
                     Modifier.padding(innerPadding)
                     GameView(viewModel)
                 }

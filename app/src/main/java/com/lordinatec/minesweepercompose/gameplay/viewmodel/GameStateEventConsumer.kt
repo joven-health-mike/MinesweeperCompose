@@ -18,7 +18,7 @@ import javax.inject.Inject
 /**
  * Consumes game events and updates the game state.
  *
- * @param eventPublisher The publisher of game events.
+ * @param eventProvider The provider for game events.
  *
  * @constructor Creates a new GameStateEventConsumer.
  */
@@ -66,8 +66,6 @@ class GameStateEventConsumer @Inject constructor(
                     state.copy(
                         newGame = false,
                         gameOver = false,
-                        tileStates = List(Config.width * Config.height) { TileState.COVERED },
-                        tileValues = List(Config.width * Config.height) { TileValue.UNKNOWN }
                     )
                 }
             }

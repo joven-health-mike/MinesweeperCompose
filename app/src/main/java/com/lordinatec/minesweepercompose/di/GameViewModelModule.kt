@@ -62,9 +62,9 @@ class GameViewModelModule {
     @Provides
     @Singleton
     fun provideStatsEventConsumer(
-        eventPublisher: EventPublisher,
+        eventProvider: EventProvider,
         statsProvider: StatsProvider
-    ): StatsEventConsumer = StatsEventConsumer(eventPublisher, statsProvider)
+    ): StatsEventConsumer = StatsEventConsumer(eventProvider, statsProvider)
 
     @Provides
     @Singleton

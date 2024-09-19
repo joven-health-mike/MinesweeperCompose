@@ -7,9 +7,9 @@ package com.lordinatec.minesweepercompose.gameplay.viewmodel
 import com.lordinatec.minesweepercompose.config.Config
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
 import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.model.apis.Coordinate
 import com.lordinatec.minesweepercompose.gameplay.model.apis.DefaultConfiguration
 import com.lordinatec.minesweepercompose.gameplay.model.apis.Field
+import com.lordinatec.minesweepercompose.gameplay.model.apis.FieldIndex
 import com.lordinatec.minesweepercompose.gameplay.timer.Timer
 import javax.inject.Inject
 
@@ -32,11 +32,22 @@ class GameController @Inject constructor(
     private var gameOver: Boolean = false
 
     /**
+     * Create a game.
+     *
+     * @return Boolean - true if the game was created
+     */
+    fun maybeCreateGame(): Boolean {
+        return maybeCreateGame(gameField.fieldIndexRange().random())
+    }
+
+    /**
      * Create a game. Mine will never occur at the given index.
      *
      * @param index - index of the initial clicked tile
+     *
+     * @return Boolean - true if the game was created
      */
-    fun maybeCreateGame(index: Int): Boolean {
+    fun maybeCreateGame(index: FieldIndex): Boolean {
         if (!gameCreated) {
             gameCreated = true
             gameOver = false
@@ -52,7 +63,7 @@ class GameController @Inject constructor(
      */
     fun clearEverything() {
         if (!gameCreated) return
-        for (index in gameField.fieldList.indices) {
+        for (index in gameField.fieldIndexRange()) {
             clear(index)
         }
     }
@@ -62,13 +73,11 @@ class GameController @Inject constructor(
      *
      * @param index - index of the tile to clear adjacent tiles
      */
-    fun clearAdjacentTiles(index: Int) {
+    fun clearAdjacentTiles(index: FieldIndex) {
         if (!gameCreated) return
-        val adjacentCoordinates = getAdjacent(index).filter { !gameField.isFlag(it.index) }
-        for (adjacentCoordinate in adjacentCoordinates) {
-            if (!gameField.cleared.contains(adjacentCoordinate)) {
-                clear(adjacentCoordinate.index)
-            }
+        val adjacentCoordinates = getAdjacent(index).filter { !gameField.isFlag(it) }
+        for (adjacentIndex in adjacentCoordinates) {
+            clear(adjacentIndex)
         }
     }
 
@@ -77,11 +86,10 @@ class GameController @Inject constructor(
      *
      * @param index - index of the tile to count adjacent flags
      */
-    fun countAdjacentFlags(index: Int): Int {
+    fun countAdjacentFlags(index: FieldIndex): Int {
         if (!gameCreated) return -1
-        return getAdjacent(index).count {
-            gameField.isFlag(it.index)
-        }
+        val result = getAdjacent(index).count { gameField.isFlag(it) }
+        return result
     }
 
     /**
@@ -98,7 +106,7 @@ class GameController @Inject constructor(
      * Clear all non-mines
      */
     fun clearNonMines() {
-        for (i in gameField.fieldList.indices) {
+        for (i in gameField.fieldIndexRange()) {
             if (!gameField.isMine(i)) {
                 clear(i)
             }
@@ -110,7 +118,7 @@ class GameController @Inject constructor(
      *
      * @param index - index of the tile to clear
      */
-    fun clear(index: Int) {
+    fun clear(index: FieldIndex) {
         if (!shouldClear(index)) return
 
         val isMine = gameField.clear(index)
@@ -126,7 +134,7 @@ class GameController @Inject constructor(
      *
      * @param index - index of the tile to toggle flag
      */
-    fun toggleFlag(index: Int) {
+    fun toggleFlag(index: FieldIndex) {
         if (!gameCreated) return
 
         val unflagged = gameField.flag(index)
@@ -143,7 +151,7 @@ class GameController @Inject constructor(
      *
      * @param index - index of the tile to check
      */
-    fun flagIsCorrect(index: Int): Boolean {
+    fun flagIsCorrect(index: FieldIndex): Boolean {
         if (!gameCreated) return false
 
         return gameField.isMine(index)
@@ -172,8 +180,8 @@ class GameController @Inject constructor(
      *
      * @return Collection<Coordinate> - collection of adjacent coordinates
      */
-    private fun getAdjacent(index: Int): Collection<Coordinate> {
-        return gameField.adjacentCoordinates(index)
+    private fun getAdjacent(index: FieldIndex): Collection<FieldIndex> {
+        return gameField.adjacentFieldIndexes(index)
     }
 
     /**
@@ -183,8 +191,8 @@ class GameController @Inject constructor(
      *
      * @return Boolean - true if the tile should be cleared
      */
-    private fun shouldClear(index: Int): Boolean =
-        gameCreated && !gameField.isFlag(index) && !gameField.cleared.contains(gameField.fieldList[index])
+    private fun shouldClear(index: FieldIndex): Boolean =
+        gameCreated && !gameField.isFlag(index) && !gameField.cleared.contains(index)
 
     /**
      * Handle mine cleared tile at the given index. Publishes PositionExploded event and clears the field
@@ -193,7 +201,7 @@ class GameController @Inject constructor(
      *
      * @return Boolean - true if the tile should be cleared
      */
-    private fun handleMineCleared(index: Int) {
+    private fun handleMineCleared(index: FieldIndex) {
         eventPublisher.publish(GameEvent.PositionExploded(index))
         if (!gameOver) {
             gameOver = true
@@ -209,9 +217,9 @@ class GameController @Inject constructor(
      *
      * @return Boolean - true if the tile should be cleared
      */
-    private fun handleSafeCleared(index: Int) {
-        val adjacent = getAdjacent(index).filter { coordinate ->
-            gameField.isMine(coordinate.index)
+    private fun handleSafeCleared(index: FieldIndex) {
+        val adjacent = getAdjacent(index).filter {
+            gameField.isMine(it)
         }.size
         eventPublisher.publish(GameEvent.PositionCleared(index, adjacent))
         if (adjacent == 0) {

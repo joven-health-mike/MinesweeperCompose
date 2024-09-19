@@ -17,17 +17,14 @@ class TimerEventConsumer @Inject constructor(
         eventProvider.eventFlow.collect { event ->
             when (event) {
                 is GameEvent.FieldReset -> {
-                    println("Stopping timer")
                     timer.stop()
                 }
 
                 is GameEvent.GameCreated -> {
-                    println("Starting timer")
                     timer.start()
                 }
 
                 is GameEvent.GameWon, GameEvent.GameLost -> {
-                    println("Pausing timer")
                     timer.pause()
                 }
             }

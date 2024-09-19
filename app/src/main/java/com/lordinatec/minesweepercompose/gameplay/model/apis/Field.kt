@@ -14,29 +14,19 @@ interface Field {
     val configuration: Configuration
 
     /**
-     * Coordinate factory
+     * Mines FieldIndexs
      */
-    val coordinateFactory: CoordinateFactory
+    val mines: Collection<FieldIndex>
 
     /**
-     * List of coordinates in the field
+     * Flags FieldIndexs
      */
-    val fieldList: List<Coordinate>
+    val flags: Collection<FieldIndex>
 
     /**
-     * Mines coordinates
+     * Cleared FieldIndexs
      */
-    val mines: Collection<Coordinate>
-
-    /**
-     * Flags coordinates
-     */
-    val flags: Collection<Coordinate>
-
-    /**
-     * Cleared coordinates
-     */
-    val cleared: Collection<Coordinate>
+    val cleared: Collection<FieldIndex>
 
     /**
      * Reset the field
@@ -46,11 +36,11 @@ interface Field {
     fun reset(configuration: Configuration)
 
     /**
-     * Create mines in the field. The given coordinates are guaranteed to NOT be a mine.
+     * Create mines in the field. The given FieldIndexes are guaranteed to NOT be a mine.
      *
-     * @param index Int Index to avoid creating mines on
+     * @param safeIndex Int Index to avoid creating mines on
      */
-    fun createMines(index: Int)
+    fun createMines(safeIndex: FieldIndex)
 
     /**
      * Determines if the index is a flag
@@ -59,7 +49,7 @@ interface Field {
      *
      * @return Boolean True if the index is a flag
      */
-    fun isFlag(index: Int): Boolean
+    fun isFlag(index: FieldIndex): Boolean
 
     /**
      * Determines if the index is a mine
@@ -68,25 +58,25 @@ interface Field {
      *
      * @return Boolean True if the index is a mine
      */
-    fun isMine(index: Int): Boolean
+    fun isMine(index: FieldIndex): Boolean
 
     /**
      * Clear the given index.
      *
-     * @param index Int Index to clear
+     * @param clearIndex Int Index to clear
      *
      * @return Boolean True if the cleared position was a mine
      */
-    fun clear(index: Int): Boolean
+    fun clear(clearIndex: FieldIndex): Boolean
 
     /**
      * Flag the given index and returns true if the position was UNflagged.
      *
-     * @param index Int Index to flag
+     * @param flagIndex Int Index to flag
      *
      * @return Boolean True if the position was UNflagged
      */
-    fun flag(index: Int): Boolean
+    fun flag(flagIndex: FieldIndex): Boolean
 
     /**
      * Returns the number of flags remaining to be placed.
@@ -116,22 +106,16 @@ interface Field {
     }
 
     /**
-     * Get the adjacent coordinates of the given coordinate
+     * Get the adjacent FieldIndexes of the given FieldIndex
      *
-     * @param index Int Index of the coordinate
+     * @param index Int Index of the FieldIndex
      *
-     * @return Collection<Coordinate> Adjacent coordinates
+     * @return Collection<FieldIndex> Adjacent FieldIndexes
      */
-    fun adjacentCoordinates(index: Int): Collection<Coordinate> {
-        val coordinate = fieldList[index]
-        return mutableListOf<Coordinate>().apply {
-            for (adjacentCoordinate in AdjacentTranslations.entries) {
-                val x = coordinate.x() + adjacentCoordinate.transX
-                val y = coordinate.y() + adjacentCoordinate.transY
-                if (x in 0..<configuration.numRows && y in 0..<configuration.numCols) {
-                    add(coordinateFactory.createCoordinate(x, y))
-                }
-            }
+    fun adjacentFieldIndexes(index: FieldIndex): Collection<FieldIndex> {
+        return mutableListOf<FieldIndex>().apply {
+            for (adjacent in Adjacent(index, configuration.numRows, configuration.numCols))
+                add(adjacent)
         }
     }
 
@@ -141,6 +125,24 @@ interface Field {
      * @return Boolean True if the entire field has been cleared
      */
     fun allClear(): Boolean {
-        return cleared.size == fieldList.size - mines.size
+        return cleared.size == fieldSize() - mines.size
+    }
+
+    /**
+     * Returns the size of the field.
+     *
+     * @return Int Size of the field
+     */
+    fun fieldSize(): Int {
+        return configuration.numRows * configuration.numCols
+    }
+
+    /**
+     * Returns the range of the field indexes.
+     *
+     * @return IntRange Range of the field indexes
+     */
+    fun fieldIndexRange(): IntRange {
+        return 0 until fieldSize()
     }
 }

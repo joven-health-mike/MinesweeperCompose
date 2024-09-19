@@ -13,11 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.lordinatec.minesweepercompose.gameplay.model.apis.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import kotlinx.coroutines.delay
-
-private val xyIndexTranslator = XYIndexTranslator()
 
 /**
  * A 2D array of tiles.
@@ -53,8 +50,7 @@ private fun TransposedTileArray(
         for (currHeight in 0 until height) {
             Column {
                 for (currWidth in 0 until width) {
-                    val currIndex = xyIndexTranslator.xyToIndex(currWidth, currHeight)
-                    MaybeShowTile(currIndex, viewModel, tileViewFactory)
+                    MaybeShowTile(currHeight * width + currWidth, viewModel, tileViewFactory)
                 }
             }
         }
@@ -72,8 +68,7 @@ private fun RegularTileArray(
         for (currHeight in 0 until height) {
             Row {
                 for (currWidth in 0 until width) {
-                    val currIndex = xyIndexTranslator.xyToIndex(currWidth, currHeight)
-                    MaybeShowTile(currIndex, viewModel, tileViewFactory)
+                    MaybeShowTile(currHeight * width + currWidth, viewModel, tileViewFactory)
                 }
             }
         }

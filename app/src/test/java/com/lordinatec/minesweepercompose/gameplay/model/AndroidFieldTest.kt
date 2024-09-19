@@ -39,8 +39,6 @@ class AndroidFieldTest {
         every { configuration.numRows = any() } just Runs
         every { configuration.numCols = any() } just Runs
         every { configuration.numMines = any() } just Runs
-        every { configuration.fieldIndexRange() } answers { 0 until Config.width * Config.height }
-        every { configuration.fieldSize() } answers { Config.width * Config.height }
         androidField = AndroidField(configuration)
     }
 
@@ -50,7 +48,7 @@ class AndroidFieldTest {
         androidField.createMines(testCoord)
         assertEquals(configuration.numMines, androidField.mines.size)
         var minesFound = 0
-        for (position in configuration.fieldIndexRange()) {
+        for (position in androidField.fieldIndexRange()) {
             if (testCoord == position) {
                 assertFalse(androidField.isMine(position))
             } else {
@@ -79,7 +77,7 @@ class AndroidFieldTest {
     fun testClear() = runTest {
         androidField.createMines(0)
         var numMines = 0
-        for (position in configuration.fieldIndexRange()) {
+        for (position in androidField.fieldIndexRange()) {
             if (androidField.clear(position)) {
                 numMines++
             }

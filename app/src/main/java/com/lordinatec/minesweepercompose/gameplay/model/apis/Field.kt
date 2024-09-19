@@ -14,17 +14,17 @@ interface Field {
     val configuration: Configuration
 
     /**
-     * Mines FieldIndexs
+     * Mines FieldIndexes
      */
     val mines: Collection<FieldIndex>
 
     /**
-     * Flags FieldIndexs
+     * Flags FieldIndexes
      */
     val flags: Collection<FieldIndex>
 
     /**
-     * Cleared FieldIndexs
+     * Cleared FieldIndexes
      */
     val cleared: Collection<FieldIndex>
 
@@ -83,27 +83,21 @@ interface Field {
      *
      * @return Int number of flags remaining
      */
-    fun flagsRemaining(): Int {
-        return configuration.numMines - flags.size
-    }
+    fun flagsRemaining() = configuration.numMines - flags.size
 
     /**
      * Determines if all mines are flagged
      *
      * @return Boolean True if all mines are flagged
      */
-    fun flaggedAllMines(): Boolean {
-        return flags.size == mines.size
-    }
+    fun flaggedAllMines() = flags.size == mines.size
 
     /**
      * Determines if all flags are correct
      *
      * @return Boolean True if all flags are correct
      */
-    fun allFlagsCorrect(): Boolean {
-        return flags.size == mines.size && flags.containsAll(mines)
-    }
+    fun allFlagsCorrect() = flags.size == mines.size && flags.containsAll(mines)
 
     /**
      * Get the adjacent FieldIndexes of the given FieldIndex
@@ -112,37 +106,30 @@ interface Field {
      *
      * @return Collection<FieldIndex> Adjacent FieldIndexes
      */
-    fun adjacentFieldIndexes(index: FieldIndex): Collection<FieldIndex> {
-        return mutableListOf<FieldIndex>().apply {
+    fun adjacentFieldIndexes(index: FieldIndex): Collection<FieldIndex> =
+        mutableListOf<FieldIndex>().apply {
             for (adjacent in Adjacent(index, configuration.numRows, configuration.numCols))
                 add(adjacent)
-        }
-    }
+        }.toList()
 
     /**
      * Determines if the entire field has been cleared.
      *
      * @return Boolean True if the entire field has been cleared
      */
-    fun allClear(): Boolean {
-        return cleared.size == fieldSize() - mines.size
-    }
+    fun allClear() = cleared.size == fieldSize() - mines.size
 
     /**
      * Returns the size of the field.
      *
      * @return Int Size of the field
      */
-    fun fieldSize(): Int {
-        return configuration.numRows * configuration.numCols
-    }
+    fun fieldSize() = configuration.numRows * configuration.numCols
 
     /**
      * Returns the range of the field indexes.
      *
      * @return IntRange Range of the field indexes
      */
-    fun fieldIndexRange(): IntRange {
-        return 0 until fieldSize()
-    }
+    fun fieldIndexRange() = 0 until fieldSize()
 }

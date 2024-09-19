@@ -36,16 +36,9 @@ class AndroidField @Inject constructor(
     override fun createMines(safeIndex: FieldIndex) {
         clearCollections()
 
-        val shuffledIndexes = fieldIndexRange().toList().shuffled()
+        val shuffledIndexes = fieldIndexRange().filterNot { it == safeIndex }.shuffled()
 
-        for (mineIndex in shuffledIndexes) {
-            if (mineIndex != safeIndex) {
-                _mines.add(mineIndex)
-            }
-            if (_mines.size >= configuration.numMines) {
-                break
-            }
-        }
+        _mines.addAll(shuffledIndexes.take(configuration.numMines))
     }
 
     override fun clear(clearIndex: FieldIndex): Boolean {
@@ -54,15 +47,14 @@ class AndroidField @Inject constructor(
     }
 
     override fun flag(flagIndex: FieldIndex): Boolean {
-        val isFlag = isFlag(flagIndex)
-
-        if (isFlag) {
-            _flags.remove(flagIndex)
-        } else {
-            _flags.add(flagIndex)
+        return isFlag(flagIndex).let { isFlag ->
+            if (isFlag) {
+                _flags.remove(flagIndex)
+            } else {
+                _flags.add(flagIndex)
+            }
+            isFlag
         }
-
-        return isFlag
     }
 
     override fun isFlag(index: FieldIndex): Boolean {

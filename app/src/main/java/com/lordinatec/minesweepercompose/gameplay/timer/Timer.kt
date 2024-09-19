@@ -76,13 +76,14 @@ class CoroutineTimer @Inject constructor(
 
         isRunning = true
         isPaused = false
+
         timerJob = scope.launch {
             while (isRunning && isActive) {
-                if (!isPaused) {
-                    delay(interval)
-                    time += interval
-                    sendTimeEvent(time)
-                }
+                if (isPaused) continue
+
+                delay(interval)
+                time += interval
+                sendTimeEvent(time)
             }
         }
     }

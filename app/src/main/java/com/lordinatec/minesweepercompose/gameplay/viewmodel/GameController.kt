@@ -48,23 +48,22 @@ class GameController @Inject constructor(
      * @return Boolean - true if the game was created
      */
     fun maybeCreateGame(index: FieldIndex): Boolean {
-        if (!gameCreated) {
-            gameCreated = true
-            gameOver = false
-            eventPublisher.publish(GameEvent.GameCreated)
-            gameField.createMines(index)
-            return true
-        }
-        return false
+        if (gameCreated) return false
+
+        gameCreated = true
+        gameOver = false
+        eventPublisher.publish(GameEvent.GameCreated)
+        gameField.createMines(index)
+        return true
     }
 
     /**
      * Clears the entire field.
      */
     fun clearEverything() {
-        if (!gameCreated) return
-        for (index in gameField.fieldIndexRange()) {
-            clear(index)
+        if (gameCreated) {
+            gameField.fieldIndexRange()
+                .forEach { clear(it) }
         }
     }
 
@@ -74,10 +73,10 @@ class GameController @Inject constructor(
      * @param index - index of the tile to clear adjacent tiles
      */
     fun clearAdjacentTiles(index: FieldIndex) {
-        if (!gameCreated) return
-        val adjacentCoordinates = getAdjacent(index).filter { !gameField.isFlag(it) }
-        for (adjacentIndex in adjacentCoordinates) {
-            clear(adjacentIndex)
+        if (gameCreated) {
+            getAdjacent(index)
+                .filterNot { gameField.isFlag(it) }
+                .forEach { clear(it) }
         }
     }
 
@@ -87,9 +86,7 @@ class GameController @Inject constructor(
      * @param index - index of the tile to count adjacent flags
      */
     fun countAdjacentFlags(index: FieldIndex): Int {
-        if (!gameCreated) return -1
-        val result = getAdjacent(index).count { gameField.isFlag(it) }
-        return result
+        return if (!gameCreated) -1 else getAdjacent(index).count { gameField.isFlag(it) }
     }
 
     /**
@@ -106,11 +103,9 @@ class GameController @Inject constructor(
      * Clear all non-mines
      */
     fun clearNonMines() {
-        for (i in gameField.fieldIndexRange()) {
-            if (!gameField.isMine(i)) {
-                clear(i)
-            }
-        }
+        gameField.fieldIndexRange()
+            .filterNot { gameField.isMine(it) }
+            .forEach { clear(it) }
     }
 
     /**
@@ -119,13 +114,12 @@ class GameController @Inject constructor(
      * @param index - index of the tile to clear
      */
     fun clear(index: FieldIndex) {
-        if (!shouldClear(index)) return
-
-        val isMine = gameField.clear(index)
-        if (isMine) {
-            handleMineCleared(index)
-        } else {
-            handleSafeCleared(index)
+        if (shouldClear(index)) {
+            if (gameField.clear(index)) {
+                handleMineCleared(index)
+            } else {
+                handleSafeCleared(index)
+            }
         }
     }
 
@@ -135,14 +129,14 @@ class GameController @Inject constructor(
      * @param index - index of the tile to toggle flag
      */
     fun toggleFlag(index: FieldIndex) {
-        if (!gameCreated) return
+        if (gameCreated) {
+            val flagged = !gameField.flag(index)
+            val event =
+                if (flagged) GameEvent.PositionFlagged(index) else GameEvent.PositionUnflagged(index)
 
-        val unflagged = gameField.flag(index)
-        if (unflagged) {
-            eventPublisher.publish(GameEvent.PositionUnflagged(index))
-        } else {
-            eventPublisher.publish(GameEvent.PositionFlagged(index))
-            maybeEndGame()
+            eventPublisher.publish(event)
+
+            if (flagged) maybeEndGame()
         }
     }
 
@@ -152,23 +146,23 @@ class GameController @Inject constructor(
      * @param index - index of the tile to check
      */
     fun flagIsCorrect(index: FieldIndex): Boolean {
-        if (!gameCreated) return false
-
-        return gameField.isMine(index)
+        return if (gameCreated) gameField.isMine(index) else false
     }
 
     /**
      * Maybe end the game if all mines are flagged
      */
     private fun maybeEndGame() {
-        if (Config.feature_end_game_on_last_flag && gameField.flaggedAllMines()) {
-            if (gameOver) return
+        if (Config.feature_end_game_on_last_flag && gameField.flaggedAllMines() && !gameOver) {
             gameOver = true
-            if (gameField.allFlagsCorrect()) {
-                eventPublisher.publish(GameEvent.GameWon(timer.time))
+
+            val event = if (gameField.allFlagsCorrect()) {
+                GameEvent.GameWon(timer.time)
             } else {
-                eventPublisher.publish(GameEvent.GameLost)
+                GameEvent.GameLost
             }
+
+            eventPublisher.publish(event)
             clearEverything()
         }
     }
@@ -181,7 +175,7 @@ class GameController @Inject constructor(
      * @return Collection<Coordinate> - collection of adjacent coordinates
      */
     private fun getAdjacent(index: FieldIndex): Collection<FieldIndex> {
-        return gameField.adjacentFieldIndexes(index)
+        return if (gameCreated) gameField.adjacentFieldIndexes(index) else emptyList()
     }
 
     /**
@@ -218,16 +212,13 @@ class GameController @Inject constructor(
      * @return Boolean - true if the tile should be cleared
      */
     private fun handleSafeCleared(index: FieldIndex) {
-        val adjacent = getAdjacent(index).filter {
-            gameField.isMine(it)
-        }.size
-        eventPublisher.publish(GameEvent.PositionCleared(index, adjacent))
-        if (adjacent == 0) {
-            clearAdjacentTiles(index)
-        }
-        if (gameField.allClear()) {
-            handleGameWon()
-        }
+        val adjacentMines = getAdjacent(index).count { gameField.isMine(it) }
+
+        eventPublisher.publish(GameEvent.PositionCleared(index, adjacentMines))
+
+        if (adjacentMines == 0) clearAdjacentTiles(index)
+
+        if (gameField.allClear()) handleGameWon()
     }
 
     /**

@@ -19,7 +19,7 @@ import javax.inject.Inject
  * @constructor Creates a new GameEventPublisher
  */
 class GameEventPublisher @Inject constructor(
-    val publisherScope: CoroutineScope,
+    private val publisherScope: CoroutineScope,
 ) : EventPublisher, EventProvider {
     private val _events = MutableSharedFlow<Event>()
     override val events = _events.asSharedFlow()
@@ -32,8 +32,8 @@ class GameEventPublisher @Inject constructor(
      * @param event The event to publish
      */
     override fun publish(event: Event) {
-        // block so the events are published in order received
-        runBlocking<Unit> {
+        // Block to ensure events are published in the order received
+        runBlocking {
             publisherScope.launch {
                 val gameEvent = event as GameEvent
                 if (gameEvent is GameEvent.GameCreated) {

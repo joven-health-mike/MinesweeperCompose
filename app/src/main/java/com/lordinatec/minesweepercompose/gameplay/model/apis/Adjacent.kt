@@ -26,6 +26,6 @@ class Adjacent(val index: FieldIndex, val width: Int, val height: Int) : Iterabl
     private val indices =
         listOf(top, bottom, left, right, topLeft, topRight, bottomLeft, bottomRight)
 
-    override fun iterator(): Iterator<Int> = indices.filter { it != -1 }
+    override fun iterator(): Iterator<Int> = indices.filterNot { it == -1 }
         .iterator()
 }

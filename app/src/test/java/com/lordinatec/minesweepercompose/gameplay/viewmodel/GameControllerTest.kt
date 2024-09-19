@@ -61,6 +61,8 @@ class GameControllerTest {
         every { field.clear(any()) } answers { false }
         every { field.flag(any()) } answers { false }
         every { field.flaggedAllMines() } answers { false }
+        every { field.fieldIndexRange() } answers { 0 until Config.width * Config.height }
+        every { field.fieldSize() } answers { Config.width * Config.height }
         every { field.configuration } answers { configuration }
         every { configuration.numRows } answers { Config.width }
         every { configuration.numCols } answers { Config.height }
@@ -68,8 +70,6 @@ class GameControllerTest {
         every { configuration.numRows = any() } just Runs
         every { configuration.numCols = any() } just Runs
         every { configuration.numMines = any() } just Runs
-        every { configuration.fieldIndexRange() } answers { 0 until Config.width * Config.height }
-        every { configuration.fieldSize() } answers { Config.width * Config.height }
         every { eventPublisher.publish(any()) } just Runs
         clearedList.clear()
         gameController = GameController(field, timer, eventPublisher)

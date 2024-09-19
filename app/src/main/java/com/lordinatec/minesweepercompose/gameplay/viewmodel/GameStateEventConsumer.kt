@@ -96,12 +96,12 @@ class GameStateEventConsumer @Inject constructor(
      */
     private fun updatePosition(index: Int, tileState: TileState, tileValue: TileValue) {
         _uiState.update { state ->
-            var newMinesValue = state.minesRemaining
-            if (tileState == TileState.FLAGGED) {
-                newMinesValue--
-            } else if (tileState == TileState.COVERED) {
-                newMinesValue++
+            val newMinesValue = when (tileState) {
+                TileState.FLAGGED -> state.minesRemaining - 1
+                TileState.COVERED -> state.minesRemaining + 1
+                else -> state.minesRemaining
             }
+
             state.copy(
                 tileStates = state.tileStates.toMutableList().apply { this[index] = tileState },
                 tileValues = state.tileValues.toMutableList().apply { this[index] = tileValue },

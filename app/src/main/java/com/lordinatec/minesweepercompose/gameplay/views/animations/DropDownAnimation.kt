@@ -45,5 +45,5 @@ fun rememberDropDownAnimation(startPosition: Float): DropDownAnimation {
  * Modifier extension function that applies the y translation to the view.
  */
 fun Modifier.dropDown(dropDownAnimation: DropDownAnimation): Modifier {
-    return then(graphicsLayer(translationY = dropDownAnimation.yPosition.value))
+    return graphicsLayer(translationY = dropDownAnimation.yPosition.value)
 }

@@ -5,122 +5,42 @@
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.lordinatec.minesweepercompose.gameplay.GameController
-import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
-import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
-import com.lordinatec.minesweepercompose.gameplay.views.TileState
-import com.lordinatec.minesweepercompose.gameplay.views.TileValue
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import com.lordinatec.minesweepercompose.config.Config
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 /**
  * ViewModel for the Game screen.
  *
- * @param gameController The GameController to use.
- * @param gameEvents The GameEventPublisher to use.
+ * @param gameController The controller for the game.
+ * @param gameStateEventConsumer The consumer for game state events.
  *
  * @return A ViewModel for the Game screen.
  */
-class GameViewModel(
+@HiltViewModel
+class GameViewModel @Inject constructor(
     private val gameController: GameController,
-    private val gameEvents: EventPublisher
+    private val gameStateEventConsumer: GameStateEventConsumer
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(GameState())
-    val uiState: StateFlow<GameState> = _uiState.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            gameEvents.events.collect { event ->
-                when (event) {
-                    is GameEvent.TimeUpdate ->
-                        _uiState.update { state ->
-                            state.copy(
-                                timeValue = event.newTime
-                            )
-                        }
-
-                    is GameEvent.PositionCleared -> updatePosition(
-                        event.index,
-                        TileState.CLEARED,
-                        TileValue.fromValue(event.adjacentMines)
-                    )
-
-                    is GameEvent.PositionExploded -> updatePosition(
-                        event.index,
-                        TileState.EXPLODED,
-                        TileValue.MINE
-                    )
-
-                    is GameEvent.PositionFlagged -> updatePosition(
-                        event.index,
-                        TileState.FLAGGED,
-                        TileValue.FLAG
-                    )
-
-                    is GameEvent.PositionUnflagged -> updatePosition(
-                        event.index,
-                        TileState.COVERED,
-                        TileValue.UNKNOWN
-                    )
-
-                    is GameEvent.GameWon -> gameWon()
-                    is GameEvent.GameLost -> gameLost()
-                    is GameEvent.GameCreated -> {
-                        gameController.startTimer()
-                        _uiState.update { state ->
-                            state.copy(
-                                newGame = false
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Update the game state when the game is won.
-     *
-     * This will clear the entire field and stop the timer.
-     */
-    private val gameWon: () -> Unit = {
-        gameController.clearEverything()
-        gameController.stopTimer()
-        _uiState.update { state ->
-            state.copy(
-                gameOver = true,
-                winner = true,
-            )
-        }
-    }
-
-    /**
-     * Update the game state when the game is lost.
-     *
-     * This will clear the entire field and stop the timer.
-     */
-    private val gameLost: () -> Unit = {
-        gameController.clearEverything()
-        gameController.stopTimer()
-        _uiState.update { state ->
-            state.copy(
-                gameOver = true,
-                winner = false,
-            )
-        }
-    }
+    val uiState = gameStateEventConsumer.uiState
 
     /* PUBLIC APIS */
     /**
      * Clear the game state and reset the game.
      */
     fun resetGame() {
-        _uiState.update { GameState() }
         gameController.resetGame()
+    }
+
+    /**
+     * Update the size of the game.
+     */
+    fun updateSize() {
+        if (uiState.value.tileStates.size != Config.width * Config.height) {
+            gameController.resetGame()
+            gameStateEventConsumer.updateSize()
+        }
     }
 
     /**
@@ -141,7 +61,9 @@ class GameViewModel(
      */
     fun clear(index: Int) {
         // lazily create the game when the user makes their first move
-        gameController.maybeCreateGame(index)
+        if (gameController.maybeCreateGame(index)) {
+            updateSize()
+        }
         gameController.clear(index)
     }
 
@@ -151,7 +73,10 @@ class GameViewModel(
      * @param index The index of the tile to toggle the flag.
      */
     fun toggleFlag(index: Int) {
-        // TODO: what should happen if the user flags a tile before the game has been created?
+        // lazily create the game when the user makes their first move
+        if (gameController.maybeCreateGame()) {
+            updateSize()
+        }
         gameController.toggleFlag(index)
     }
 
@@ -173,44 +98,5 @@ class GameViewModel(
      */
     fun getAdjacentFlags(index: Int): Int {
         return gameController.countAdjacentFlags(index)
-    }
-
-    /**
-     * Pauses the timer.
-     */
-    fun pauseTimer() {
-        gameController.pauseTimer()
-    }
-
-    /**
-     * Resumes the timer.
-     */
-    fun resumeTimer() {
-        if (uiState.value.gameOver) return
-        gameController.resumeTimer()
-    }
-
-    /* PRIVATE FUNCTIONS */
-    /**
-     * Updates the position at the given index.
-     *
-     * @param index The index of the tile to update.
-     * @param tileState The new state of the tile.
-     * @param tileValue The new value of the tile.
-     */
-    private fun updatePosition(index: Int, tileState: TileState, tileValue: TileValue) {
-        _uiState.update { state ->
-            var newMinesValue = state.minesRemaining
-            if (tileState == TileState.FLAGGED) {
-                newMinesValue--
-            } else if (tileState == TileState.COVERED) {
-                newMinesValue++
-            }
-            state.copy(
-                tileStates = state.tileStates.toMutableList().apply { this[index] = tileState },
-                tileValues = state.tileValues.toMutableList().apply { this[index] = tileValue },
-                minesRemaining = newMinesValue
-            )
-        }
     }
 }

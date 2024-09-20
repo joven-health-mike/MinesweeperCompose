@@ -5,15 +5,17 @@
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
+import javax.inject.Inject
 
 /**
  * Handles click events on the tile views.
  *
  * @param gameViewModel the view model for the game
  */
-class TileViewClickListener(
+class TileViewClickListener @Inject constructor(
     private val gameViewModel: GameViewModel
 ) {
+
     /**
      * Handles a click event on a tile.
      *
@@ -27,18 +29,18 @@ class TileViewClickListener(
      */
     fun onClick(index: Int) {
         val gameUiState = gameViewModel.uiState.value
-        // any clicks after game over should reset the game
+
+        // Reset the game if it's over
         if (gameUiState.gameOver) {
             gameViewModel.resetGame()
             return
         }
 
-        if (gameUiState.tileStates[index] == TileState.COVERED) {
-            //   If the tile is covered, clear it.
-            gameViewModel.clear(index)
-        } else if (gameUiState.tileStates[index] == TileState.CLEARED) {
-            //   If the tile is cleared, try to clear adjacent tiles.
-            tryToClearAdjacentTiles(index)
+        // Clear the tile or attempt to clear adjacent tiles based on its state
+        when (gameUiState.tileStates[index]) {
+            TileState.COVERED -> gameViewModel.clear(index)
+            TileState.CLEARED -> tryToClearAdjacentTiles(index)
+            else -> return
         }
     }
 
@@ -51,16 +53,15 @@ class TileViewClickListener(
      */
     fun onLongClick(index: Int) {
         val gameUiState = gameViewModel.uiState.value
-        // any clicks after game over should reset the game
+
+        // Reset the game if it's over
         if (gameUiState.gameOver) {
             gameViewModel.resetGame()
             return
         }
 
-        // if the tile is covered or flagged, toggle the flag
-        if (gameUiState.tileStates[index] == TileState.COVERED
-            || gameUiState.tileStates[index] == TileState.FLAGGED
-        ) {
+        // Toggle the flag if the tile is covered or flagged
+        if (gameUiState.tileStates[index] in listOf(TileState.COVERED, TileState.FLAGGED)) {
             gameViewModel.toggleFlag(index)
         }
     }
@@ -73,13 +74,11 @@ class TileViewClickListener(
     private fun tryToClearAdjacentTiles(index: Int) {
         val gameUiState = gameViewModel.uiState.value
         val adjacentFlags = gameViewModel.getAdjacentFlags(index)
-        try {
-            // if the number of adjacent flags is equal to the value of the tile, clear all adjacent tiles
-            if (adjacentFlags == gameUiState.tileValues[index].value.toInt()) {
-                gameViewModel.clearAdjacentTiles(index)
-            }
-        } catch (e: NumberFormatException) {
-            // value is nan - do nothing
+
+        val tileValue = gameUiState.tileValues[index].value.toIntOrNull()
+
+        if (tileValue != null && adjacentFlags == tileValue) {
+            gameViewModel.clearAdjacentTiles(index)
         }
     }
 }

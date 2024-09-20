@@ -6,6 +6,7 @@
 
 package com.lordinatec.minesweepercompose.gameplay.events
 
+import io.mockk.MockKAnnotations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -18,18 +19,20 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class GameEventPublisherTest {
+
     private lateinit var gameEventPublisher: GameEventPublisher
 
     @BeforeTest
-    fun setUp() = runTest {
+    fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
+        MockKAnnotations.init(this)
         gameEventPublisher = GameEventPublisher(TestScope())
     }
 
     @Test
     fun testTimeUpdate() = runTest {
         val newTime = 100L
-        gameEventPublisher.timeUpdate(newTime)
+        gameEventPublisher.publish(GameEvent.TimeUpdate(newTime))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.TimeUpdate)
             assertEquals(newTime, (it as GameEvent.TimeUpdate).newTime)
@@ -39,10 +42,8 @@ class GameEventPublisherTest {
     @Test
     fun testPositionCleared() = runTest {
         val index = 0
-        val x = 0
-        val y = 0
         val adjacentMines = 1
-        gameEventPublisher.positionCleared(x, y, adjacentMines)
+        gameEventPublisher.publish(GameEvent.PositionCleared(index, adjacentMines))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.PositionCleared)
             assertEquals(index, (it as GameEvent.PositionCleared).index)
@@ -53,9 +54,7 @@ class GameEventPublisherTest {
     @Test
     fun testPositionExploded() = runTest {
         val index = 0
-        val x = 0
-        val y = 0
-        gameEventPublisher.positionExploded(x, y)
+        gameEventPublisher.publish(GameEvent.PositionExploded(index))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.PositionExploded)
             assertEquals(index, (it as GameEvent.PositionExploded).index)
@@ -65,9 +64,7 @@ class GameEventPublisherTest {
     @Test
     fun testPositionFlagged() = runTest {
         val index = 0
-        val x = 0
-        val y = 0
-        gameEventPublisher.positionFlagged(x, y)
+        gameEventPublisher.publish(GameEvent.PositionFlagged(index))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.PositionFlagged)
             assertEquals(index, (it as GameEvent.PositionFlagged).index)
@@ -77,9 +74,7 @@ class GameEventPublisherTest {
     @Test
     fun testPositionUnflagged() = runTest {
         val index = 0
-        val x = 0
-        val y = 0
-        gameEventPublisher.positionUnflagged(x, y)
+        gameEventPublisher.publish(GameEvent.PositionUnflagged(index))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.PositionUnflagged)
             assertEquals(index, (it as GameEvent.PositionUnflagged).index)
@@ -88,15 +83,17 @@ class GameEventPublisherTest {
 
     @Test
     fun testGameWon() = runTest {
-        gameEventPublisher.gameWon()
+        val winTime = 100L
+        gameEventPublisher.publish(GameEvent.GameWon(winTime))
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.GameWon)
+            assertEquals(winTime, (it as GameEvent.GameWon).endTime)
         }
     }
 
     @Test
     fun testGameLost() = runTest {
-        gameEventPublisher.gameLost()
+        gameEventPublisher.publish(GameEvent.GameLost)
         gameEventPublisher.events.first().let {
             assert(it is GameEvent.GameLost)
         }

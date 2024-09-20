@@ -6,12 +6,6 @@
 
 package com.lordinatec.minesweepercompose.gameplay.viewmodel
 
-import android.app.Application
-import com.lordinatec.minesweepercompose.gameplay.GameController
-import com.lordinatec.minesweepercompose.gameplay.events.Event
-import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
-import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
-import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every
@@ -20,46 +14,41 @@ import io.mockk.just
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class GameViewModelTest {
     @MockK
     private lateinit var gameController: GameController
 
     @MockK
-    private lateinit var eventPublisher: EventPublisher
-
-    private lateinit var testFlow: MutableSharedFlow<Event>
+    private lateinit var gameStateEventConsumer: GameStateEventConsumer
 
     private lateinit var gameViewModel: GameViewModel
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
-        testFlow = MutableSharedFlow()
         MockKAnnotations.init(this)
-        every { gameController.maybeCreateGame(any()) } just Runs
-        every { gameController.startTimer(any()) } just Runs
+        every { gameController.maybeCreateGame() } answers { true }
+        every { gameController.maybeCreateGame(any()) } answers { true }
         every { gameController.clear(any()) } just Runs
         every { gameController.resetGame() } just Runs
         every { gameController.flagIsCorrect(any()) } answers { false }
         every { gameController.toggleFlag(any()) } just Runs
-        every { gameController.pauseTimer() } just Runs
-        every { gameController.resumeTimer() } just Runs
-        every { gameController.stopTimer() } just Runs
         every { gameController.clearEverything() } just Runs
-        every { eventPublisher.events } answers { testFlow.asSharedFlow() }
-        gameViewModel = GameViewModel(gameController, eventPublisher)
+        every { gameStateEventConsumer.uiState } answers { MutableStateFlow(GameState()).asStateFlow() }
+        gameViewModel = GameViewModel(
+            gameController,
+            gameStateEventConsumer
+        ).apply {
+            updateSize()
+        }
     }
 
     @Test
@@ -81,18 +70,6 @@ class GameViewModelTest {
     }
 
     @Test
-    fun testPauseTimer() = runTest {
-        gameViewModel.pauseTimer()
-        verify { gameController.pauseTimer() }
-    }
-
-    @Test
-    fun testResumeTimer() = runTest {
-        gameViewModel.resumeTimer()
-        verify { gameController.resumeTimer() }
-    }
-
-    @Test
     fun testFlagIsCorrect() = runTest {
         gameViewModel.flagIsCorrect(0)
         verify { gameController.flagIsCorrect(0) }
@@ -102,82 +79,5 @@ class GameViewModelTest {
     fun testResetGame() = runTest {
         gameViewModel.resetGame()
         verify { gameController.resetGame() }
-    }
-
-    @Test
-    fun testTimeUpdate() = runTest {
-        val testTimeValue = 1000L
-        testFlow.emit(GameEvent.TimeUpdate(testTimeValue))
-        gameViewModel.uiState.first().let {
-            assertEquals(testTimeValue, it.timeValue)
-        }
-    }
-
-    @Test
-    fun testPositionCleared() = runTest {
-        val testIndex = 1
-        val testAdjacent = 2
-        testFlow.emit(GameEvent.PositionCleared(testIndex, testAdjacent))
-        gameViewModel.uiState.first().let {
-            assertEquals(TileState.CLEARED, it.tileStates[testIndex])
-            assertEquals(testAdjacent.toString(), it.tileValues[testIndex].value)
-        }
-    }
-
-    @Test
-    fun testPositionExploded() = runTest {
-        val testIndex = 1
-        testFlow.emit(GameEvent.PositionExploded(testIndex))
-        gameViewModel.uiState.first().let {
-            assertEquals(TileState.EXPLODED, it.tileStates[testIndex])
-            assertEquals("*", it.tileValues[testIndex].value)
-        }
-    }
-
-    @Test
-    fun testPositionFlagged() = runTest {
-        val testIndex = 1
-        testFlow.emit(GameEvent.PositionFlagged(testIndex))
-        gameViewModel.uiState.first().let {
-            assertEquals(TileState.FLAGGED, it.tileStates[testIndex])
-            assertEquals("F", it.tileValues[testIndex].value)
-        }
-    }
-
-    @Test
-    fun testPositionUnflagged() = runTest {
-        val testIndex = 1
-        testFlow.emit(GameEvent.PositionUnflagged(testIndex))
-        gameViewModel.uiState.first().let {
-            assertEquals(TileState.COVERED, it.tileStates[testIndex])
-            assertEquals("", it.tileValues[testIndex].value)
-        }
-    }
-
-    @Test
-    fun testGameWon() = runTest {
-        gameViewModel.resetGame()
-        testFlow.emit(GameEvent.GameWon(1000L))
-        gameViewModel.uiState.first().let {
-            assertTrue(it.gameOver)
-            assertTrue(it.winner)
-        }
-    }
-
-    @Test
-    fun testGameLost() = runTest {
-        testFlow.emit(GameEvent.GameLost)
-        gameViewModel.uiState.first().let {
-            assertTrue(it.gameOver)
-            assertFalse(it.winner)
-        }
-    }
-
-    @Test
-    fun testGameCreated() = runTest {
-        testFlow.emit(GameEvent.GameCreated)
-        gameViewModel.uiState.first().let {
-            assertFalse(it.newGame)
-        }
     }
 }

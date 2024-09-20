@@ -46,11 +46,12 @@ The model design consists of the following classes:
   generating mines).
 - `AndroidField.kt`: Implementation of the `Field` interface that handles basic functionality of the
   game.
-- `Coordinate.kt`: Represents a coordinate on the game field.
-- `CoordinateTranslator.kt`: Translates XY coordinates to indices based on the field size.
-- `GameController.kt`: Manages interactions with the field and publishes game events.
+- `FieldIndex.kt`: Represents an index on the game field.
+- `Configuration.kt`: The configuration of the field.
+- `Adjacent.kt`: Represents the adjacent tiles of a tile.
 - `Timer.kt`: Represents a timer that can be started, stopped, and reset.
 - `TimerLifecycleObserver.kt`: Listens for lifecycle events and starts/stops the timer accordingly.
+- `TimerEventConsumer.kt`: Listens for timer events and updates the UI state accordingly.
 
 ## View Model
 
@@ -58,6 +59,7 @@ The view model design consists of the following classes:
 
 - `GameViewModel.kt`: Manages interactions with the `GameController.kt`.
 - `GameState.kt`: Represents the UI state of the game.
+- `GameController.kt`: Manages interactions with the field and publishes game events.
 - `GameStateEventConsumer.kt`: Listens for game events and updates the UI state accordingly.
 - `TileViewClickListener.kt`: Handles functionality for clicks and long-clicks on the game field,
   and dispatches those actions to the view model.

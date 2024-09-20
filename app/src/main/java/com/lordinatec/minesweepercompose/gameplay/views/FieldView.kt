@@ -64,6 +64,7 @@ private fun Field(gameViewModel: GameViewModel, clickListener: TileViewClickList
         if (portraitMode) tileSizeInDp.times(Config.width) else tileSizeInDp.times(Config.height)
     val height =
         if (portraitMode) tileSizeInDp.times(Config.height) else tileSizeInDp.times(Config.width)
+
     Box(
         modifier = Modifier
             .shakeable(shakeable)
@@ -139,7 +140,9 @@ private fun GameOverOverlay(color: Color, text: String) {
  */
 @Composable
 private fun FieldTileArray(
-    viewModel: GameViewModel, transposed: Boolean, tileViewFactory: TileViewFactory
+    viewModel: GameViewModel,
+    transposed: Boolean,
+    tileViewFactory: TileViewFactory
 ) {
     TileArray(
         viewModel,

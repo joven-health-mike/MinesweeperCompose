@@ -4,96 +4,72 @@
 
 package com.lordinatec.minesweepercompose.gameplay.model
 
-import com.mikeburke106.mines.api.model.Field
-import com.mikeburke106.mines.api.model.Position
+import javax.inject.Inject
 
 /**
  * Android implementation of the Field interface.
  *
  * @param configuration the configuration of the field
  */
-class AndroidField(private val configuration: Field.Configuration) : Field {
-    private val mines = mutableSetOf<Position>()
-    private val flags = mutableSetOf<Position>()
+class AndroidField @Inject constructor(
+    override var configuration: Configuration
+) : Field {
+    private val _mines = mutableSetOf<FieldIndex>()
+    private val _flags = mutableSetOf<FieldIndex>()
+    private val _cleared = mutableSetOf<FieldIndex>()
 
-    /**
-     * Create the mines for the field.
-     */
-    fun createMines() {
-        mines.clear()
+    override val mines: Collection<FieldIndex>
+        get() = _mines.toSet()
+    override val flags: Collection<FieldIndex>
+        get() = _flags.toSet()
+    override val cleared: Collection<FieldIndex>
+        get() = _cleared.toSet()
 
-        for (position in configuration.positionPool()) {
-            mines.add(position)
-            if (mines.size == configuration.numMines()) {
-                break
+    override fun reset(configuration: Configuration) {
+        clearCollections()
+        updateConfiguration(configuration)
+    }
+
+    override fun createMines(safeIndex: FieldIndex) {
+        clearCollections()
+
+        val shuffledIndexes = fieldIndexRange().filterNot { it == safeIndex }.shuffled()
+
+        _mines.addAll(shuffledIndexes.take(configuration.numMines))
+    }
+
+    override fun clear(clearIndex: FieldIndex): Boolean {
+        _cleared.add(clearIndex)
+        return _mines.contains(clearIndex)
+    }
+
+    override fun flag(flagIndex: FieldIndex): Boolean {
+        return isFlag(flagIndex).let { isFlag ->
+            if (isFlag) {
+                _flags.remove(flagIndex)
+            } else {
+                _flags.add(flagIndex)
             }
+            isFlag
         }
     }
 
-    /**
-     * Create the mines for the field.
-     *
-     * The initial coordinates are guaranteed to NOT be a mine.
-     *
-     * @param initX the initial x position
-     * @param initY the initial y position
-     */
-    fun createMines(initX: Int, initY: Int) {
-        mines.clear()
-
-        for (position in configuration.positionPool()) {
-            if (position.x() != initX || position.y() != initY) {
-                mines.add(position)
-            }
-            if (mines.size == configuration.numMines()) {
-                break
-            }
-        }
+    override fun isFlag(index: FieldIndex): Boolean {
+        return _flags.contains(index)
     }
 
-    /**
-     * Get the number of mines placed.
-     *
-     * @return the number of mines placed
-     */
-    fun minesPlaced(): Int {
-        return mines.size
+    override fun isMine(index: FieldIndex): Boolean {
+        return _mines.contains(index)
     }
 
-    /**
-     * Get the number of flags placed.
-     *
-     * @return the number of flags placed
-     */
-    fun flagsPlaced(): Int {
-        return flags.size
+    private fun updateConfiguration(configuration: Configuration) {
+        if (this.configuration == configuration) return
+        this.configuration = configuration
     }
 
-    override fun configuration(): Field.Configuration {
-        return configuration
-    }
-
-    override fun clear(position: Position?): Boolean {
-        return mines.contains(position)
-    }
-
-    override fun flag(position: Position?): Boolean {
-        val result = isFlag(position)
-
-        if (result) {
-            flags.remove(position)
-        } else {
-            flags.add(position!!)
-        }
-
-        return result
-    }
-
-    override fun isFlag(position: Position?): Boolean {
-        return flags.contains(position)
-    }
-
-    override fun isMine(position: Position?): Boolean {
-        return mines.contains(position)
+    private fun clearCollections() {
+        _mines.clear()
+        _flags.clear()
+        _cleared.clear()
     }
 }

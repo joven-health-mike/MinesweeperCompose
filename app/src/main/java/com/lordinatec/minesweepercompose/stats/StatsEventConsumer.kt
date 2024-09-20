@@ -4,21 +4,25 @@
 
 package com.lordinatec.minesweepercompose.stats
 
-import com.lordinatec.minesweepercompose.gameplay.events.EventPublisher
+import com.lordinatec.minesweepercompose.gameplay.events.EventProvider
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
+import javax.inject.Inject
 
 /**
  * Consumes game events and updates the stats.
+ *
+ * @param eventProvider The event provider.
+ * @param statsProvider The stats provider.
  */
-class StatsEventConsumer(
-    private val eventPublisher: EventPublisher,
+class StatsEventConsumer @Inject constructor(
+    private val eventProvider: EventProvider,
     private val statsProvider: StatsProvider
 ) {
     /**
      * Consumes game events and updates the stats.
      */
     suspend fun consume() {
-        eventPublisher.events.collect { event ->
+        eventProvider.eventFlow.collect { event ->
             when (event) {
                 is GameEvent.GameWon -> {
                     statsProvider.setWins(statsProvider.getWins() + 1)

@@ -60,5 +60,5 @@ fun rememberShakeable(): ShakeableAnimation {
  * Modifier extension function that applies the x translation to the view.
  */
 fun Modifier.shakeable(shakeable: ShakeableAnimation): Modifier {
-    return then(graphicsLayer(translationX = shakeable.xPosition.value))
+    return graphicsLayer(translationX = shakeable.xPosition.value)
 }

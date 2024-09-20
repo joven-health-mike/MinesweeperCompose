@@ -13,11 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.lordinatec.minesweepercompose.config.XYIndexTranslator
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import kotlinx.coroutines.delay
-
-private val xyIndexTranslator = XYIndexTranslator()
 
 /**
  * A 2D array of tiles.
@@ -49,25 +46,11 @@ fun TileArray(
 private fun TransposedTileArray(
     viewModel: GameViewModel, width: Int, height: Int, tileViewFactory: TileViewFactory
 ) {
-    val gameState by viewModel.uiState.collectAsState()
     Row {
         for (currHeight in 0 until height) {
             Column {
                 for (currWidth in 0 until width) {
-                    val currIndex = xyIndexTranslator.xyToIndex(currWidth, currHeight)
-                    var visible by remember { mutableStateOf(true) }
-                    if (gameState.newGame) {
-                        LaunchedEffect(Unit) {
-                            visible = false
-                            delay(100L * currIndex)
-                            visible = true
-                        }
-                    } else if (!visible) {
-                        visible = true
-                    }
-                    if (visible) {
-                        tileViewFactory.CreateTileView(currIndex = currIndex)
-                    }
+                    MaybeShowTile(currHeight * width + currWidth, viewModel, tileViewFactory)
                 }
             }
         }
@@ -81,28 +64,34 @@ private fun TransposedTileArray(
 private fun RegularTileArray(
     viewModel: GameViewModel, width: Int, height: Int, tileViewFactory: TileViewFactory
 ) {
-    val gameState by viewModel.uiState.collectAsState()
     Column {
         for (currHeight in 0 until height) {
             Row {
                 for (currWidth in 0 until width) {
-                    // TODO: simplify
-                    val currIndex = xyIndexTranslator.xyToIndex(currWidth, currHeight)
-                    var visible by remember { mutableStateOf(true) }
-                    if (gameState.newGame) {
-                        LaunchedEffect(Unit) {
-                            visible = false
-                            delay(50L * currIndex)
-                            visible = true
-                        }
-                    } else if (!visible) {
-                        visible = true
-                    }
-                    if (visible) {
-                        tileViewFactory.CreateTileView(currIndex = currIndex)
-                    }
+                    MaybeShowTile(currHeight * width + currWidth, viewModel, tileViewFactory)
                 }
             }
         }
+    }
+}
+
+/**
+ * Animate the tile view if it is visible.
+ */
+@Composable
+private fun MaybeShowTile(index: Int, viewModel: GameViewModel, tileViewFactory: TileViewFactory) {
+    val gameState by viewModel.uiState.collectAsState()
+    var visible by remember { mutableStateOf(true) }
+    if (gameState.newGame) {
+        LaunchedEffect(Unit) {
+            visible = false
+            delay(50L * index)
+            visible = true
+        }
+    } else if (!visible) {
+        visible = true
+    }
+    if (visible) {
+        tileViewFactory.CreateTileView(currIndex = index)
     }
 }

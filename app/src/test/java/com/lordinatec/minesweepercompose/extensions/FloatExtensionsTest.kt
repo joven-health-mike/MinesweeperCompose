@@ -2,9 +2,8 @@
  * Copyright Lordinatec LLC 2024
  */
 
-package com.lordinatec.minesweepercompose.gameplay.extensions
+package com.lordinatec.minesweepercompose.extensions
 
-import com.lordinatec.minesweepercompose.extensions.formatString
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import kotlin.test.Test

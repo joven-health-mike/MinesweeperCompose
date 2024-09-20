@@ -15,56 +15,43 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat.startActivity
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.lordinatec.minesweepercompose.R
 import com.lordinatec.minesweepercompose.android.sharedPreferences
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
-import com.lordinatec.minesweepercompose.gameplay.timer.TimeProvider
-import com.lordinatec.minesweepercompose.gameplay.timer.TimerFactory
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
-import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModelFactory
 import com.lordinatec.minesweepercompose.gameplay.views.GameView
-import com.lordinatec.minesweepercompose.stats.StatsEventConsumer
-import com.lordinatec.minesweepercompose.stats.StatsUpdater
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlin.math.floor
 
 /**
  * The main activity for gameplay.
  */
+@AndroidEntryPoint
 class GameActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var timerLifecycleObserver: TimerLifecycleObserver
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val isPortraitMode =
             resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-        loadConfigFromPrefs()
-        if (Config.feature_adjust_field_to_screen_size) {
-            determineFieldSize(isPortraitMode)
-        }
         setContent {
-            val gameEvents = GameEventPublisher(MainScope())
-            val gameController = GameController.Factory(GameFactory(), TimerFactory())
-                .createGameController(gameEvents)
-            gameEvents.timeProvider = TimeProvider { gameController.timerValue }
-            val viewModel: GameViewModel = createCustomViewModel(gameController, gameEvents)
-            val statsEventConsumer = StatsEventConsumer(gameEvents, StatsUpdater(this))
-            lifecycle.addObserver(TimerLifecycleObserver(viewModel))
+            val viewModel: GameViewModel = hiltViewModel()
+            lifecycle.addObserver(timerLifecycleObserver)
+            loadConfigFromPrefs()
+            if (Config.feature_adjust_field_to_screen_size) {
+                determineFieldSize(viewModel, isPortraitMode)
+            }
             MinesweeperComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LaunchedEffect(Unit) {
-                        lifecycleScope.launch {
-                            statsEventConsumer.consume()
-                        }
-                    }
                     Modifier.padding(innerPadding)
                     GameView(viewModel)
                 }
@@ -74,18 +61,16 @@ class GameActivity : ComponentActivity() {
 
     private fun loadConfigFromPrefs() {
         val adjustFieldSizeToScreenSize by sharedPreferences(
-            "adjustToScreenSize",
-            Config.feature_adjust_field_to_screen_size.toString()
+            "adjustToScreenSize", Config.feature_adjust_field_to_screen_size.toString()
         )
         Config.feature_adjust_field_to_screen_size = adjustFieldSizeToScreenSize.toBoolean()
         val endGameOnLastFlag by sharedPreferences(
-            "endGameOnLastFlag",
-            Config.feature_end_game_on_last_flag.toString()
+            "endGameOnLastFlag", Config.feature_end_game_on_last_flag.toString()
         )
         Config.feature_end_game_on_last_flag = endGameOnLastFlag.toBoolean()
     }
 
-    private fun determineFieldSize(isPortraitMode: Boolean) {
+    private fun determineFieldSize(viewModel: GameViewModel, isPortraitMode: Boolean) {
         val screenWidth = resources.displayMetrics.widthPixels
         val screenHeight = resources.displayMetrics.heightPixels
         val tileSize = resources.getDimension(R.dimen.tile_view_size)
@@ -96,15 +81,7 @@ class GameActivity : ComponentActivity() {
         Config.width = if (isPortraitMode) desiredFieldWidth else desiredFieldHeight
         Config.height = if (isPortraitMode) desiredFieldHeight else desiredFieldWidth
         Config.mines = desiredFieldWidth * desiredFieldHeight / 6
-    }
-
-    private fun createCustomViewModel(
-        gameController: GameController,
-        gameEvents: GameEventPublisher
-    ): GameViewModel {
-        return ViewModelProvider(
-            this, GameViewModelFactory(gameController, gameEvents)
-        )[GameViewModel::class.java]
+        viewModel.updateSize()
     }
 
     companion object {

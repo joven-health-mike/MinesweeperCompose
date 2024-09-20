@@ -39,7 +39,7 @@ class GameActivityTest {
     }
 
     @Test
-    fun testLoadsCustomtSettingsOnCreate() {
+    fun testLoadsCustomSettingsOnCreate() {
         assertEquals(true, Config.feature_adjust_field_to_screen_size)
         assertEquals(true, Config.feature_end_game_on_last_flag)
         context.getSharedPreferences("MinesweeperComposePrefs", Context.MODE_PRIVATE).edit()

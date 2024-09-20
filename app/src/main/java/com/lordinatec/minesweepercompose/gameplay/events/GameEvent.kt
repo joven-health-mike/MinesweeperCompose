@@ -26,6 +26,11 @@ interface GameEvent : Event {
     object GameLost : GameEvent
 
     /**
+     * Event for when the field is reset.
+     */
+    object FieldReset : GameEvent
+
+    /**
      * Event for when the time is updated.
      *
      * @param newTime The new time.

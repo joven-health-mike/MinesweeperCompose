@@ -5,7 +5,6 @@
 package com.lordinatec.minesweepercompose.gameplay.timer
 
 import androidx.lifecycle.LifecycleOwner
-import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.every
@@ -25,7 +24,7 @@ class TimerLifecycleObserverTest {
     private lateinit var lifecycleOwner: LifecycleOwner
 
     @MockK
-    private lateinit var viewModel: GameViewModel
+    private lateinit var timer: Timer
 
     private lateinit var timerLifecycleObserver: TimerLifecycleObserver
 
@@ -33,20 +32,27 @@ class TimerLifecycleObserverTest {
     fun setUp() {
         Dispatchers.setMain(StandardTestDispatcher())
         MockKAnnotations.init(this)
-        every { viewModel.resumeTimer() } just Runs
-        every { viewModel.pauseTimer() } just Runs
-        timerLifecycleObserver = TimerLifecycleObserver(viewModel)
+        every { timer.resume() } just Runs
+        every { timer.pause() } just Runs
+        every { timer.stop() } just Runs
+        timerLifecycleObserver = TimerLifecycleObserver(timer)
     }
 
     @Test
     fun testOnResume() {
         timerLifecycleObserver.onResume(lifecycleOwner)
-        verify { viewModel.resumeTimer() }
+        verify { timer.resume() }
     }
 
     @Test
     fun testOnPause() {
         timerLifecycleObserver.onPause(lifecycleOwner)
-        verify { viewModel.pauseTimer() }
+        verify { timer.pause() }
+    }
+
+    @Test
+    fun testOnDestroy() {
+        timerLifecycleObserver.onDestroy(lifecycleOwner)
+        verify { timer.stop() }
     }
 }

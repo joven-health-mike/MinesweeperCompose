@@ -38,6 +38,9 @@ import com.lordinatec.minesweepercompose.ui.theme.Typography
 import com.lordinatec.minesweepercompose.views.TopBar
 import com.lordinatec.minesweepercompose.views.topBarPadding
 
+/**
+ * The settings activity for the Minesweeper app.
+ */
 class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

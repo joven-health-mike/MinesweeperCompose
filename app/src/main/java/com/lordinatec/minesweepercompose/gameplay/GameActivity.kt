@@ -15,23 +15,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.lifecycleScope
 import com.lordinatec.minesweepercompose.R
 import com.lordinatec.minesweepercompose.android.sharedPreferences
 import com.lordinatec.minesweepercompose.config.Config
-import com.lordinatec.minesweepercompose.gameplay.timer.TimerEventConsumer
 import com.lordinatec.minesweepercompose.gameplay.timer.TimerLifecycleObserver
-import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameStateEventConsumer
 import com.lordinatec.minesweepercompose.gameplay.viewmodel.GameViewModel
 import com.lordinatec.minesweepercompose.gameplay.views.GameView
-import com.lordinatec.minesweepercompose.stats.StatsEventConsumer
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.floor
 

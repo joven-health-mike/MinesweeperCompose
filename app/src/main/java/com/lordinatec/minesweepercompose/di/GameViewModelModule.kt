@@ -82,15 +82,10 @@ class GameViewModelModule {
 
     @Provides
     @Singleton
-    fun provideTimerInterval(): Long = 10L
-
-    @Provides
-    @Singleton
     fun provideCoroutineTimer(
-        interval: Long,
         scope: CoroutineScope,
         eventPublisher: GameEventPublisher
-    ): CoroutineTimer = CoroutineTimer(interval, scope, eventPublisher)
+    ): CoroutineTimer = CoroutineTimer(100L, scope, eventPublisher)
 
     @Provides
     @Singleton

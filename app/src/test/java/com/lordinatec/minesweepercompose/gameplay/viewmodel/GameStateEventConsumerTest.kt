@@ -9,7 +9,6 @@ package com.lordinatec.minesweepercompose.gameplay.viewmodel
 import com.lordinatec.minesweepercompose.gameplay.events.Event
 import com.lordinatec.minesweepercompose.gameplay.events.EventProvider
 import com.lordinatec.minesweepercompose.gameplay.events.GameEvent
-import com.lordinatec.minesweepercompose.gameplay.events.GameEventPublisher
 import com.lordinatec.minesweepercompose.gameplay.views.TileState
 import io.mockk.MockKAnnotations
 import io.mockk.every

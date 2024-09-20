@@ -36,9 +36,7 @@ class GameController @Inject constructor(
      *
      * @return Boolean - true if the game was created
      */
-    fun maybeCreateGame(): Boolean {
-        return maybeCreateGame(gameField.fieldIndexRange().random())
-    }
+    fun maybeCreateGame() = maybeCreateGame(gameField.fieldIndexRange().random())
 
     /**
      * Create a game. Mine will never occur at the given index.
@@ -85,9 +83,8 @@ class GameController @Inject constructor(
      *
      * @param index - index of the tile to count adjacent flags
      */
-    fun countAdjacentFlags(index: FieldIndex): Int {
-        return if (!gameCreated) -1 else getAdjacent(index).count { gameField.isFlag(it) }
-    }
+    fun countAdjacentFlags(index: FieldIndex) =
+        if (!gameCreated) -1 else getAdjacent(index).count { gameField.isFlag(it) }
 
     /**
      * Reset the game
@@ -102,11 +99,9 @@ class GameController @Inject constructor(
     /**
      * Clear all non-mines
      */
-    fun clearNonMines() {
-        gameField.fieldIndexRange()
-            .filterNot { gameField.isMine(it) }
-            .forEach { clear(it) }
-    }
+    fun clearNonMines() = gameField.fieldIndexRange()
+        .filterNot { gameField.isMine(it) }
+        .forEach { clear(it) }
 
     /**
      * Clears tile at given index
@@ -145,9 +140,7 @@ class GameController @Inject constructor(
      *
      * @param index - index of the tile to check
      */
-    fun flagIsCorrect(index: FieldIndex): Boolean {
-        return if (gameCreated) gameField.isMine(index) else false
-    }
+    fun flagIsCorrect(index: FieldIndex) = gameCreated && gameField.isMine(index)
 
     /**
      * Maybe end the game if all mines are flagged
@@ -174,9 +167,8 @@ class GameController @Inject constructor(
      *
      * @return Collection<Coordinate> - collection of adjacent coordinates
      */
-    private fun getAdjacent(index: FieldIndex): Collection<FieldIndex> {
-        return if (gameCreated) gameField.adjacentFieldIndexes(index) else emptyList()
-    }
+    private fun getAdjacent(index: FieldIndex): Collection<FieldIndex> =
+        if (gameCreated) gameField.adjacentFieldIndexes(index) else emptyList()
 
     /**
      * Check if the tile at the given index should be cleared

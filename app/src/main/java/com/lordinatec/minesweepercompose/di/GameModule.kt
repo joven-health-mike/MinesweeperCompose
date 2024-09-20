@@ -15,7 +15,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -34,31 +33,12 @@ class GameModule {
 
     @Provides
     @Singleton
-    fun provideDefaultConfiguration(
-        @Named("numRows") numRows: Int,
-        @Named("numCols") numCols: Int,
-        @Named("numMines") numMines: Int
-    ): DefaultConfiguration = DefaultConfiguration(numRows, numCols, numMines)
+    fun provideDefaultConfiguration(): DefaultConfiguration = DefaultConfiguration(0, 0, 0)
 
     @Provides
     @Singleton
     fun provideTimerLifecycleObserver(timer: Timer): TimerLifecycleObserver =
         TimerLifecycleObserver(timer)
-
-    @Provides
-    @Singleton
-    @Named("numRows")
-    fun provideNumRows(): Int = 0
-
-    @Provides
-    @Singleton
-    @Named("numCols")
-    fun provideNumCols(): Int = 0
-
-    @Provides
-    @Singleton
-    @Named("numMines")
-    fun provideNumMines(): Int = 0
 
 }
 

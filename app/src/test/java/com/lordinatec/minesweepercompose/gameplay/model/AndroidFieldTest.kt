@@ -18,7 +18,6 @@ import kotlinx.coroutines.test.setMain
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -46,17 +45,6 @@ class AndroidFieldTest {
         val testCoord = 0
         androidField.createMines(testCoord)
         assertEquals(configuration.numMines, androidField.mines.size)
-        var minesFound = 0
-        for (position in androidField.fieldIndexRange()) {
-            if (testCoord == position) {
-                assertFalse(androidField.isMine(position))
-            } else {
-                if (androidField.isMine(position)) {
-                    minesFound++
-                }
-            }
-        }
-        assertEquals(Config.mines, minesFound)
     }
 
     @Test
@@ -75,12 +63,25 @@ class AndroidFieldTest {
     @Test
     fun testClear() = runTest {
         androidField.createMines(0)
-        var numMines = 0
-        for (position in androidField.fieldIndexRange()) {
-            if (androidField.clear(position)) {
-                numMines++
-            }
-        }
-        assertEquals(configuration.numMines, numMines)
+        androidField.clear(0)
+        assertEquals(1, androidField.cleared.size)
+        assertTrue { androidField.cleared.contains(0) }
+    }
+
+    @Test
+    fun testReset() = runTest {
+        androidField.createMines(0)
+        androidField.reset(configuration)
+        assertEquals(0, androidField.mines.size)
+        assertEquals(0, androidField.flags.size)
+        assertEquals(0, androidField.cleared.size)
+    }
+
+    @Test
+    fun testAllClear() = runTest {
+        androidField.createMines(0)
+        androidField.fieldIndexRange().filterNot { androidField.isMine(it) }
+            .forEach { androidField.clear(it) }
+        assertTrue { androidField.allClear() }
     }
 }

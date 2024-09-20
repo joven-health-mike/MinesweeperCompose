@@ -65,7 +65,6 @@ class AndroidField @Inject constructor(
     private fun updateConfiguration(configuration: Configuration) {
         if (this.configuration == configuration) return
         this.configuration = configuration
-        clearCollections()
     }
 
     private fun clearCollections() {

@@ -108,8 +108,7 @@ interface Field {
      */
     fun adjacentFieldIndexes(index: FieldIndex): Collection<FieldIndex> =
         mutableListOf<FieldIndex>().apply {
-            for (adjacent in Adjacent(index, configuration.numRows, configuration.numCols))
-                add(adjacent)
+            addAll(Adjacent(index, configuration.numRows, configuration.numCols))
         }.toList()
 
     /**

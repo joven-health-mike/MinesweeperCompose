@@ -92,7 +92,7 @@ class StatsActivity : ComponentActivity() {
         fun launch(context: Context) {
             val intent = Intent(context, StatsActivity::class.java)
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK)
-            startActivity(context, intent, null)
+            context.startActivity(intent, null)
         }
     }
 }

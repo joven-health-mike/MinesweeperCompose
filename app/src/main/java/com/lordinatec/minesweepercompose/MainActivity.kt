@@ -44,7 +44,6 @@ import com.lordinatec.minesweepercompose.stats.StatsActivity
 import com.lordinatec.minesweepercompose.stats.StatsEventConsumer
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.lordinatec.minesweepercompose.views.AppIcon
-import com.lordinatec.minesweepercompose.views.TopBar
 import com.lordinatec.minesweepercompose.views.topBarPadding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -73,10 +72,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MinesweeperComposeTheme {
-                Scaffold(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    topBar = { TopBar(resources.getString(R.string.app_name)) }) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Modifier.padding(innerPadding)
                     val isPortraitMode =
                         LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
@@ -151,7 +147,8 @@ class MainActivity : ComponentActivity() {
         Column(
             modifier = Modifier.width(buttonWidth)
         ) {
-            Button(modifier = Modifier.fillMaxWidth(),
+            Button(
+                modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     GameActivity.launch(applicationContext)
                     viewModel.resetGame()
@@ -159,11 +156,13 @@ class MainActivity : ComponentActivity() {
                 Text("New Game")
             }
             // TODO: make stats activity a NavHost destination instead of new activity
-            Button(modifier = Modifier.fillMaxWidth(),
+            Button(
+                modifier = Modifier.fillMaxWidth(),
                 onClick = { StatsActivity.launch(applicationContext) }) {
                 Text("Stats")
             }
-            Button(modifier = Modifier.fillMaxWidth(),
+            Button(
+                modifier = Modifier.fillMaxWidth(),
                 onClick = { SettingsActivity.launch(applicationContext) }) {
                 Text("Settings")
             }

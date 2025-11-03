@@ -23,11 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.startActivity
 import com.lordinatec.minesweepercompose.extensions.formatString
 import com.lordinatec.minesweepercompose.ui.theme.MinesweeperComposeTheme
 import com.lordinatec.minesweepercompose.ui.theme.Typography
-import com.lordinatec.minesweepercompose.views.TopBar
 import com.lordinatec.minesweepercompose.views.topBarPadding
 
 /**
@@ -39,9 +37,7 @@ class StatsActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MinesweeperComposeTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = { TopBar("Stats") }) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Modifier.padding(innerPadding)
                     val systemBarBottom = WindowInsets.systemBars.getBottom(Density(this)).dp
                     Column(
